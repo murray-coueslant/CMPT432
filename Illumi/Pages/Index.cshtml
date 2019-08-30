@@ -1,10 +1,25 @@
 ﻿@page
 @model IndexModel
 @{
-    ViewData["Title"] = "Home page";
+    ViewData["Title"] = "Illumi";
 }
 
 <div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+    <h1 class="display-4">Welcome to the Illumi Compiler</h1>
 </div>
+
+<form>
+    <div class="form-group container">
+        <div class = "row h-100">
+            <div class="col-8" id="programInputColumn">
+                <label for="programInput">Program:</label>
+                <textarea class="form-control rounded-0" id="programInput" rows="10" placeholder="Enter your program here."></textarea>
+            </div>
+
+            <div class="col-4" id="lexerOutputColumn">
+            
+            </div>
+        </div>
+    </div>
+</form>
+
