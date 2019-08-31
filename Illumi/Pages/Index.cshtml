@@ -10,14 +10,21 @@
 
 <form>
     <div class="form-group container">
-        <div class = "row h-100">
+        <div class = "row">
             <div class="col-8" id="programInputColumn">
                 <label for="programInput">Program:</label>
                 <textarea class="form-control rounded-0" id="programInput" rows="10" placeholder="Enter your program here."></textarea>
             </div>
 
             <div class="col-4" id="lexerOutputColumn">
-            
+                <label for="lexerOutput">Lexer Output:</label>
+                <textarea class="form-control rounded-0" id="lexerOutput" rows="10"></textarea>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-12">
+                <input type="submit" value="Compile!" class="btn btn-primary mt-4"></input>
             </div>
         </div>
     </div>

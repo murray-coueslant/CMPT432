@@ -11,7 +11,7 @@ namespace Illumi.Pages
     {
         public void OnGet()
         {
-
+            System.Console.WriteLine("Hello!");
         }
     }
 }
