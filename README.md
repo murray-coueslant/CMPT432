@@ -4,19 +4,20 @@ A repository which shall contain all of the wonderous adventures I have in CMPT4
 ## The Illumi Compiler
 The Illumi compiler is written in C# and uses the ASP.NET framework.
 
-## Building the Project
+## Building and Running Illumi
 
 The project is created in ASP.NET, and is interacted with through a web based front end.
 
-To install ASP.NET, follow the instuctions given in [this guide](https://dotnet.microsoft.com/learn/aspnet/hello-world-tutorial/intro).
+To install the .NET core SDK (which includes ASP.NET) on Windows, follow the instructions given in [this guide](https://dotnet.microsoft.com/learn/aspnet/hello-world-tutorial/intro).
 
-To build the project, first you must clone the repository to your local machine. Once you have done that, the following steps should leave
-you with a running version of the compiler which can be accessed by visiting `localhost:5000` or `127.0.0.1:5000`.
+To install the .NET core on Linux, follow [this guide](https://dotnet.microsoft.com/download/linux-package-manager/ubuntu16-04/sdk-current). Use the drop down menu at the top to select the appropriate distro.
+
+To build the project, first you must clone this repository to your local machine. Once you have done that, the following steps should leave you with a running version of the compiler which can be accessed by visiting `localhost:5000` or `127.0.0.1:5000`.
 
 Build instructions:
-- Ensure that you have the latest version of ASP.NET installed
-- Navigate to the cloned version of this repository
+- Ensure that you have the at least version 2.2 of the .NET core SDK installed
+- Navigate to your clone of this repository, using `cd`
 - Execute `dotnet run` in the root project folder, for this project that folder is called `Illumi`
-- Take note of the address which the compiler is running at, it should be `localhost:5000` but it could be different
+- Take note of the address which the compiler is running at, it should be `localhost:5000`, but it could be different
 
-Once you have followed these steps, you should be able to interact with the compiler and its functions.
+Once you have followed these steps, you should be able to interact with the compiler and its functions by opening a web browser and navigating to the correct address.
