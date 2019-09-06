@@ -9,6 +9,8 @@ namespace Illumi_CLI
     {
         static int Main(string[] args)
         {
+            Console.WriteLine("Welcome to Illumi!");
+
             var lexCommand = new Command("lex") { };
 
             // var parseCommand = new Command { };
@@ -34,12 +36,15 @@ namespace Illumi_CLI
                 if (filePath != null)
                 {
                     Console.WriteLine("Lexing " + filePath.Name);
-                    string[] programs = IllumiFileReader.ReadFile(filePath);
+                    string text = IllumiFileReader.ReadFile(filePath);
 
-                    if(programs != null)
+                    if(text != String.Empty)
                     {
-                        IllumiLexer.Lex(programs);
+                        IllumiLexer.Lex(text);
                     }
+                } else
+                {
+                    IllumiErrorReporter.Send("IL001", "No file specified. Try again with the --file-path option.");
                 }
             });
 
