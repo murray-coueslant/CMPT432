@@ -22,6 +22,7 @@ _UpgradeReport_Files/
 ###############
 # Directories #
 ###############
+.vs/
 bin/
 obj/
 TestResults/
@@ -52,6 +53,7 @@ TestResults/
 ######################
 *.log
 *.sqlite
+*.lock
 # OS generated files #
 ######################
 .DS_Store?
