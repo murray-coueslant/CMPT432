@@ -3,7 +3,7 @@ using System.IO;
 
 namespace Illumi_CLI
 {
-    internal class illumiFileReader
+    internal class IllumiFileReader
     {
         internal static string[] ReadFile(FileInfo filePath)
         {
@@ -14,6 +14,7 @@ namespace Illumi_CLI
                 return programTexts;
             } else
             {
+                IllumiErrorReporter.Send("IL001", $"Could not find the specified file ({filePath.Name}), correct the path and try again.");
                 return null;
             }
         }

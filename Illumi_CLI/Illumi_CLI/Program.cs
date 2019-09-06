@@ -34,11 +34,11 @@ namespace Illumi_CLI
                 if (filePath != null)
                 {
                     Console.WriteLine("Lexing " + filePath.Name);
-                    string[] programs = illumiFileReader.ReadFile(filePath);
+                    string[] programs = IllumiFileReader.ReadFile(filePath);
 
                     if(programs != null)
                     {
-                        illumiLexer.Lex(programs);
+                        IllumiLexer.Lex(programs);
                     }
                 }
             });
