@@ -1,4 +1,5 @@
-﻿// this is an utter mess at the moment, I'm just throwing ideas at the screen to see what sticks. About to make the interface much nicer.
+﻿using System.Reflection.Emit;
+// this is an utter mess at the moment, I'm just throwing ideas at the screen to see what sticks. About to make the interface much nicer.
 
 // ideas:
 // - Digest all tokens into a token stream
@@ -39,9 +40,10 @@ namespace Illumi_CLI
 
             foreach (string program in programs)
             {
+                Lexer lexer = new Lexer(program);
                 Console.WriteLine($"Lexing program {programCount}");
-                warningsErrors = LexProgram(program);
-                Console.WriteLine($"Program {programCount} lex finished with {warningsErrors[0].Length} warnings and {warningsErrors[1].Length} errors.");
+                lexer.Lex(program);
+                Console.WriteLine($"Program {programCount} lex finished with {lexer.warningCount} warnings and {lexer.errorCount} errors.");
                 programCount++;
             }
         }
@@ -62,7 +64,7 @@ namespace Illumi_CLI
 
                 TextProgram program = new TextProgram(programText.Substring(start, position - start + 1));
 
-                // programs.Add(programText.Substring(start, position - start + 1));
+                programs.Add(programText.Substring(start, position - start + 1));
 
                 position++;
                 start = position;
@@ -102,12 +104,38 @@ namespace Illumi_CLI
     {
         private string _program;
         private int _position;
+        private int _lineNumber;
+        private int _warningCount;
+        private int _errorCount;
 
         public Lexer(string program)
         {
             _program = program;
         }
 
+        public int WarningCount
+        {
+            get
+            {
+                return _warningCount;
+            }
+        }
+
+        public int ErrorCount
+        {
+            get
+            {
+                return _errorCount;
+            }
+        }
+
+        public int LineNumber
+        {
+            get
+            {
+                return _lineNumber;
+            }
+        }
         private char Current
         {
             get
@@ -121,9 +149,14 @@ namespace Illumi_CLI
             }
         }
 
-        private void Next()
+        public void Next()
         {
             _position++;
+
+            if (Current == '\n')
+            {
+                _lineNumber++;
+            }
         }
 
         public Token GetNextToken()
@@ -214,11 +247,18 @@ namespace Illumi_CLI
     enum TokenKind
     {
         DigitToken,
-        ZeroTerminatorToken,
-        EndOfProgramToken,
+        IdentifierToken,
+        KeywordToken,
+        TypeToken,
+        BraceToken,
+        OperatorToken,
+        ArithmeticToken,
+        BooleanToken,
         WhitespaceToken,
         ParenthesisToken,
-        ParenthesizedExpressionToken
+        ParenthesizedExpressionToken,
+        ZeroTerminatorToken,
+        EndOfProgramToken
     }
 
     class Token
@@ -243,14 +283,14 @@ class TextProgram
     public TextProgram(string text)
     {
         Text = text;
-        generateLineNumbers();
-        foreach (List<int> line in Lines)
-        {
-            foreach (int number in line)
-            {
-                Console.WriteLine(number);
-            }
-        }
+        // generateLineNumbers();
+        // foreach (List<int> line in Lines)
+        // {
+        //     foreach (int number in line)
+        //     {
+        //         Console.WriteLine(number);
+        //     }
+        // }
     }
 
     public string Text { get; private set; }
