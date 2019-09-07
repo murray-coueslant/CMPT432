@@ -11,7 +11,7 @@ namespace Illumi_CLI
         static void Main(string[] args)
         {
             DiagnosticCollection diagnostics = new DiagnosticCollection();
-            
+
             Console.ForegroundColor = ConsoleColor.Green;
             Console.BackgroundColor = ConsoleColor.Black;
 
@@ -37,7 +37,9 @@ namespace Illumi_CLI
 
                         FileInfo file = new FileInfo(command[1]);
 
-                        string fileText = IllumiFileReader.ReadFile(file);
+                        string fileText = IllumiFileReader.ReadFile(file, diagnostics);
+
+                        diagnostics.DisplayDiagnostics();
 
                         IllumiLexer.Lex(fileText);
                         break;

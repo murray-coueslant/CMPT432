@@ -43,7 +43,7 @@ namespace Illumi_CLI
                 Lexer lexer = new Lexer(program);
                 Console.WriteLine($"Lexing program {programCount} ");
                 lexer.Lex();
-                Console.WriteLine($"Program {programCount} lex finished with {lexer.warningCount} warnings and {lexer.errorCount} errors.");
+                Console.WriteLine($"Program {programCount} lex finished with {lexer.WarningCount} warnings and {lexer.ErrorCount} errors.");
                 programCount++;
             }
         }
@@ -243,7 +243,7 @@ namespace Illumi_CLI
             return text;
         }
 
-        public List<Token> Lex()
+        public IList<Token> Lex()
         {
             IList<Token> tokenStream = new List<Token>();
 
