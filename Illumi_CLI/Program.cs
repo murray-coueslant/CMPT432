@@ -21,7 +21,7 @@ namespace Illumi_CLI
 
             while (commandLineEnded != true)
             {
-                string[] command = getCommand();
+                string[] command = getCommand(currentSession);
 
                 switch (command.FirstOrDefault().ToLower())
                 {
@@ -29,7 +29,7 @@ namespace Illumi_CLI
                         Console.WriteLine("Entering the Illumi lexer.");
                         if (command.Length != 2)
                         {
-                            Console.WriteLine("Please enter the command in the right form. Enter 'help' to see the help message.");
+                            Console.WriteLine("[Error] Please enter the command in the right form. Enter 'help' to see the help message.");
                             break;
                         }
 
@@ -42,7 +42,6 @@ namespace Illumi_CLI
                     case "options":
                     case "setup":
                         setupMode(currentSession);
-                        Console.WriteLine(currentSession.debugMode);
                         break;
 
                     case "help":
@@ -50,7 +49,9 @@ namespace Illumi_CLI
                     case "?":
                         Console.WriteLine("Currently, the commands for Illumi are:");
                         Console.WriteLine("\t- lex [file]");
-                        Console.WriteLine("\t\t- This command will invoke the Illumi lexer on the specified file. You can specify additional settings for the lexer in setup mode.");
+                        Console.WriteLine("\t  - This command will invoke the Illumi lexer on the specified file. You can specify additional settings for the lexer in setup mode.");
+                        Console.WriteLine("\t- settings, options, setup");
+                        Console.WriteLine("\t  - Enter into setup mode, to alter some settings for the compiler.");
                         Console.WriteLine("\t- help, h, or ?");
                         Console.WriteLine("\t- quit, end, exit, close");
                         break;
@@ -59,20 +60,30 @@ namespace Illumi_CLI
                     case "end":
                     case "exit":
                     case "close":
+                    case "q":
                         Console.WriteLine("Thanks for using Illumi!");
                         commandLineEnded = true;
                         break;
 
                     default:
-                        Console.WriteLine("Enter a valid command. Enter 'help' to see all the available commands.");
+                        Console.WriteLine("[Error] Enter a valid command. Enter 'help' to see all the available commands.");
                         break;
                 }
             }
         }
 
-        public static string[] getCommand()
+        public static string[] getCommand(Session session)
         {
-            Console.Write("> ");
+
+            if (session.setupMode)
+            {
+                Console.Write("(Setup) > ");
+            }
+            else
+            {
+                Console.Write("> ");
+            }
+
 
             string commandInput = Console.ReadLine();
 
@@ -85,13 +96,14 @@ namespace Illumi_CLI
         {
             Console.WriteLine("Entering setup mode.");
 
+            session.setupMode = true;
 
             bool setupModeEnded = false;
 
 
             while (setupModeEnded != true)
             {
-                string[] setupCommand = getCommand();
+                string[] setupCommand = getCommand(session);
 
                 switch (setupCommand.FirstOrDefault().ToLower())
                 {
@@ -103,19 +115,25 @@ namespace Illumi_CLI
                     case "exit":
                     case "return":
                     case "close":
+                    case "q":
                         Console.WriteLine("Leaving setup mode.");
+                        session.setupMode = false;
                         return;
 
                     default:
                         Console.WriteLine("Enter a valid setup command. Enter 'help' to see available setup commands.");
                         break;
                 }
+
+                session.setupMode = false;
             }
         }
     }
 
     class Session
     {
+        public bool setupMode;
+
         public Session() { }
 
         public bool debugMode { get; private set; }
