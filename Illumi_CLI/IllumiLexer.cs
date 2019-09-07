@@ -41,7 +41,7 @@ namespace Illumi_CLI
             {
                 Console.WriteLine($"Lexing program {programCount}");
                 warningsErrors = LexProgram(program);
-                Console.WriteLine($"Program {programCount} lex finished with {warningsErrors[0]} warnings and {warningsErrors[1]} errors.");
+                Console.WriteLine($"Program {programCount} lex finished with {warningsErrors[0].Length} warnings and {warningsErrors[1].Length} errors.");
                 programCount++;
             }
         }

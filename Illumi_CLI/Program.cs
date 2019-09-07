@@ -35,7 +35,9 @@ namespace Illumi_CLI
 
                         FileInfo file = new FileInfo(command[1]);
 
-                        IllumiLexer.Lex(IllumiFileReader.ReadFile(file));
+                        string fileText = IllumiFileReader.ReadFile(file);
+
+                        IllumiLexer.Lex(fileText);
                         break;
 
                     case "settings":
@@ -47,13 +49,7 @@ namespace Illumi_CLI
                     case "help":
                     case "h":
                     case "?":
-                        Console.WriteLine("Currently, the commands for Illumi are:");
-                        Console.WriteLine("\t- lex [file]");
-                        Console.WriteLine("\t  - This command will invoke the Illumi lexer on the specified file. You can specify additional settings for the lexer in setup mode.");
-                        Console.WriteLine("\t- settings, options, setup");
-                        Console.WriteLine("\t  - Enter into setup mode, to alter some settings for the compiler.");
-                        Console.WriteLine("\t- help, h, or ?");
-                        Console.WriteLine("\t- quit, end, exit, close");
+                        showHelp();
                         break;
 
                     case "quit":
@@ -90,6 +86,17 @@ namespace Illumi_CLI
             string[] splitCommandInput = commandInput.Split(' ');
 
             return splitCommandInput;
+        }
+
+        public static void showHelp()
+        {
+            Console.WriteLine("Currently, the commands for Illumi are:");
+            Console.WriteLine("\t- lex [file]");
+            Console.WriteLine("\t  - This command will invoke the Illumi lexer on the specified file. You can specify additional settings for the lexer in setup mode.");
+            Console.WriteLine("\t- settings, options, setup");
+            Console.WriteLine("\t  - Enter into setup mode, to alter some settings for the compiler.");
+            Console.WriteLine("\t- help, h, or ?");
+            Console.WriteLine("\t- quit, end, exit, close");
         }
 
         public static void setupMode(Session session)
