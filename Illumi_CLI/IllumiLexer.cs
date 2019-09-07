@@ -56,10 +56,9 @@ namespace Illumi_CLI
 
             Token token = lexer.GetNextToken();
 
-            while(token.Kind != TokenKind.NullToken)
+            while(token.Kind != TokenKind.ZeroTerminatorToken)
             {
                 Console.WriteLine(token.Kind);
-                Console.WriteLine(token.Value);
                 token = lexer.GetNextToken();
             }         
 
@@ -110,6 +109,11 @@ namespace Illumi_CLI
             // - Identifiers (single char, a-z)
             // - Digits (1 - 9)
             // - Parenthesis ((,))
+            // - End of Program ($)
+            // - Whitespace
+            //   - I decided that I should tokenize whitespace as it allows the compiler
+            //     to preserve position information, and it is easy to discard whitespace
+            //     tokens at parse time or at the end of lex
 
             // let's start by recognising the digits
             if (char.IsDigit(Current))
@@ -148,13 +152,15 @@ namespace Illumi_CLI
                 return new Token(TokenKind.WhitespaceToken, _position, text, null);
             }
 
-            return new Token(TokenKind.NullToken, 0, String.Empty, null);
+
+            return new Token(TokenKind.ZeroTerminatorToken, 0, String.Empty, null);
+            
         }
     }
 
     enum TokenKind {
         DigitToken,
-        NullToken,
+        ZeroTerminatorToken,
         EndOfProgramToken,
         WhitespaceToken
     }
