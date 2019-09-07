@@ -14,30 +14,35 @@ namespace Illumi_CLI
             Console.BackgroundColor = ConsoleColor.Black;
 
             Console.WriteLine("Welcome to Illumi!");
-            Console.Write("> ");
+
+            Session currentSession = new Session();
 
             bool commandLineEnded = false;
 
             while (commandLineEnded != true)
             {
-                string commandInput = Console.ReadLine();
+                string[] command = getCommand();
 
-                string[] splitCommandInput = commandInput.Split(' ');
-
-                switch (splitCommandInput.FirstOrDefault().ToLower())
+                switch (command.FirstOrDefault().ToLower())
                 {
                     case "lex":
                         Console.WriteLine("Entering the Illumi lexer.");
-                        if (splitCommandInput.Length != 2)
+                        if (command.Length != 2)
                         {
                             Console.WriteLine("Please enter the command in the right form. Enter 'help' to see the help message.");
                             break;
                         }
 
-                        FileInfo file = new FileInfo(splitCommandInput[1]);
+                        FileInfo file = new FileInfo(command[1]);
 
                         IllumiLexer.Lex(IllumiFileReader.ReadFile(file));
+                        break;
 
+                    case "settings":
+                    case "options":
+                    case "setup":
+                        setupMode(currentSession);
+                        Console.WriteLine(currentSession.debugMode);
                         break;
 
                     case "help":
@@ -55,54 +60,71 @@ namespace Illumi_CLI
                     case "exit":
                     case "close":
                         Console.WriteLine("Thanks for using Illumi!");
-                        return;
+                        commandLineEnded = true;
+                        break;
 
                     default:
                         Console.WriteLine("Enter a valid command. Enter 'help' to see all the available commands.");
                         break;
                 }
-
-                Console.Write("> ");
             }
+        }
 
-            // var lexCommand = new Command("lex") { };
+        public static string[] getCommand()
+        {
+            Console.Write("> ");
 
-            // // var parseCommand = new Command { };
+            string commandInput = Console.ReadLine();
 
-            // // var semanticAnalysisCommand = new Command { };
+            string[] splitCommandInput = commandInput.Split(' ');
 
-            // // var codeGenerationCommand = new Command { };
+            return splitCommandInput;
+        }
 
-            // var filePathOption = new Option(
-            //     "--file-path",
-            //     "Use this option to specify the path of the file you wish to invoke the compiler on."
-            // )
-            // {
-            //     Argument = new Argument<FileInfo>()
-            // };
+        public static void setupMode(Session session)
+        {
+            Console.WriteLine("Entering setup mode.");
 
-            // filePathOption.AddAlias("-fp");
 
-            // lexCommand.AddOption(filePathOption);
+            bool setupModeEnded = false;
 
-            // lexCommand.Handler = CommandHandler.Create<FileInfo>((filePath) =>
-            // {
-            //     if (filePath != null)
-            //     {
-            //         Console.WriteLine("Lexing " + filePath.Name);
-            //         string text = IllumiFileReader.ReadFile(filePath);
 
-            //         if(text != String.Empty)
-            //         {
-            //             IllumiLexer.Lex(text);
-            //         }
-            //     } else
-            //     {
-            //         IllumiErrorReporter.SendError("No file specified. Try again with the --file-path option.");
-            //     }
-            // });
+            while (setupModeEnded != true)
+            {
+                string[] setupCommand = getCommand();
 
-            // return lexCommand.InvokeAsync(args).Result;
+                switch (setupCommand.FirstOrDefault().ToLower())
+                {
+                    case "debug":
+                        session.setDebugMode();
+                        break;
+
+                    case "quit":
+                    case "exit":
+                    case "return":
+                    case "close":
+                        Console.WriteLine("Leaving setup mode.");
+                        return;
+
+                    default:
+                        Console.WriteLine("Enter a valid setup command. Enter 'help' to see available setup commands.");
+                        break;
+                }
+            }
         }
     }
+
+    class Session
+    {
+        public Session() { }
+
+        public bool debugMode { get; private set; }
+        internal void setDebugMode()
+        {
+            debugMode = !debugMode;
+
+            Console.WriteLine($"Debug mode changed from {(!debugMode).ToString().ToUpper()} to {debugMode.ToString().ToUpper()}.");
+        }
+    }
+
 }
