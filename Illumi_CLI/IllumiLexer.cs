@@ -1,4 +1,6 @@
-﻿// ideas:
+﻿// this is an utter mess at the moment, I'm just throwing ideas at the screen to see what sticks. About to make the interface much nicer.
+
+// ideas:
 // - Digest all tokens into a token stream
 //   - Keywords
 //   - Types
