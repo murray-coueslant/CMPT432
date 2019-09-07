@@ -10,6 +10,8 @@ namespace Illumi_CLI
     {
         static void Main(string[] args)
         {
+            DiagnosticCollection diagnostics = new DiagnosticCollection();
+            
             Console.ForegroundColor = ConsoleColor.Green;
             Console.BackgroundColor = ConsoleColor.Black;
 

@@ -16,7 +16,7 @@ Once you have installed .NET, follow these instructions to run Illumi on your co
 
 - Clone this repository
 - Navigate to the `Illumi_CLI` folder
-- Once inside `Illumi_CLI`, issue `dotnet run --file-path <path to your file>` to invoke Illumi on your code 
+- Once inside `Illumi_CLI`, issue `dotnet run` to invoke Illumi on your code 
 
 That's it! Easy as pie. Illumi has many more options though, to see them just issue `dotnet run -- -h` in the same place to see what else you can do with Illumi.
 

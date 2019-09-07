@@ -1,4 +1,5 @@
-﻿using System;
+﻿using System.Linq;
+using System;
 using System.IO;
 
 namespace Illumi_CLI
@@ -10,17 +11,20 @@ namespace Illumi_CLI
             if (filePath.Exists)
             {
                 string fullFileText = File.ReadAllText(filePath.FullName);
-                /*string[] programTexts = fullFileText.Split('$', StringSplitOptions.RemoveEmptyEntries);*/
-                if(fullFileText[fullFileText.Length - 1] != '$')
+
+                if (fullFileText[fullFileText.Length - 1] != '$')
                 {
-                    IllumiErrorReporter.SendWarning("Source file does not have a final '$' character. Inserting '$' at the end of the file.");
+                    TextSpan warningSpan = new TextSpan(fullFileText.Length - 1, 1);
+                    int lineNumber = fullFileText.Count(c => c == '\n');
+                    diagnostics.FileReader_ReportNoFinalEndOfProgramToken(span, lineNumber);
                     return fullFileText + "$";
                 }
                 return fullFileText;
-            } else
+            }
+            else
             {
-                IllumiErrorReporter.SendError($"Could not find the specified file ({filePath.Name}), correct the path and try again.");
-                return null;
+                // IllumiErrorReporter.SendError($"Could not find the specified file ({filePath.Name}), correct the path and try again.");
+                // return null;
             }
         }
     }

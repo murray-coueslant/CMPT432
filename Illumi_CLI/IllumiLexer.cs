@@ -17,7 +17,7 @@
 //   - Whitespace
 //     - See below for whitespace tokenization explanation
 // - Match parenthesis and brace tokens, ensure no hanging or erroneous braces
-// - Add line information to each token
+// - Add line / position information to each token
 //   - Could also create a 'lookup table' of sorts, with position ranges which correspond to line numbers
 //     which can be created when the program is first digested. This would allow the compiler to discard all
 //     whitespace etc... right at the beginning when the program is being read from the file
@@ -41,8 +41,8 @@ namespace Illumi_CLI
             foreach (string program in programs)
             {
                 Lexer lexer = new Lexer(program);
-                Console.WriteLine($"Lexing program {programCount}");
-                lexer.Lex(program);
+                Console.WriteLine($"Lexing program {programCount} ");
+                lexer.Lex();
                 Console.WriteLine($"Program {programCount} lex finished with {lexer.warningCount} warnings and {lexer.errorCount} errors.");
                 programCount++;
             }
@@ -242,6 +242,21 @@ namespace Illumi_CLI
 
             return text;
         }
+
+        public List<Token> Lex()
+        {
+            IList<Token> tokenStream = new List<Token>();
+
+            Token token = GetNextToken();
+
+            while (token.Kind != TokenKind.EndOfProgramToken && token.Kind != TokenKind.ZeroTerminatorToken)
+            {
+                tokenStream.Add(token);
+                token = GetNextToken();
+            }
+
+            return tokenStream;
+        }
     }
 
     enum TokenKind
@@ -257,6 +272,7 @@ namespace Illumi_CLI
         WhitespaceToken,
         ParenthesisToken,
         ParenthesizedExpressionToken,
+        CommentToken,
         ZeroTerminatorToken,
         EndOfProgramToken
     }
