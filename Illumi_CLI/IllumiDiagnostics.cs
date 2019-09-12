@@ -22,7 +22,7 @@ namespace Illumi_CLI
         public string Originated { get; }
         public int LineNumber { get; }
 
-        public override string ToString() => $"[{Type}] - [{Originated}] ({Span.Start}:{LineNumber}) : {Message}";
+        public override string ToString() => $"[{Type}] - [{Originated}] ({Span.Start}:{LineNumber}) -> {Message}";
     }
 
     internal class DiagnosticCollection : IEnumerable
@@ -39,6 +39,8 @@ namespace Illumi_CLI
             {
                 Console.WriteLine(diag.ToString());
             }
+
+            _diagnostics = new List<Diagnostic>();
         }
 
         public void AddMultiple(DiagnosticCollection diagnostics)

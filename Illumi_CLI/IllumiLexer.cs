@@ -1,10 +1,14 @@
+using System.Linq;
 using System;
 using System.Collections.Generic;
+using Microsoft.CodeAnalysis.Text;
 
 namespace Illumi_CLI
 {
     class IllumiLexer
     {
+        private const char programSeparator = '$';
+
         public static List<TokenStream> Lex(string fileText)
         {
             List<TokenStream> fileTokens = new List<TokenStream>();
@@ -17,6 +21,12 @@ namespace Illumi_CLI
             }
 
             return fileTokens;
+        }
+
+        public static List<string> extractPrograms(string text)
+        {
+            return text.Split(programSeparator)
+                       .ToList();
         }
     }
     class Lexer
@@ -31,7 +41,7 @@ namespace Illumi_CLI
         {
             get
             {
-                if (_position > Program.Length)
+                if (_position >= Program.Length)
                 {
                     return '\0';
                 }
@@ -44,10 +54,29 @@ namespace Illumi_CLI
         }
         private Token GetNextToken()
         {
+            // recognise and record whitespace, then create a token for it.
+            if (!char.IsWhiteSpace(Current))
+            {
+                Next();
+                return null;
+            }
+            else
+            {
+                int spanStart = _position;
 
+                Next();
+
+                while (char.IsWhiteSpace(Current))
+                {
+                    Next();
+                }
+
+                TextSpan span = new TextSpan(spanStart, _position - spanStart);
+
+                return new Token(TokenKind.WhitespaceToken, span);
+            }
         }
-
-        private TokenStream GetTokenStream()
+        public TokenStream GetTokenStream()
         {
             TokenStream programTokens = new TokenStream();
 
@@ -55,33 +84,39 @@ namespace Illumi_CLI
             {
                 programTokens.AddToken(GetNextToken());
             }
+
+            programTokens.AddToken(new Token(TokenKind.EndOfFileToken, new TextSpan(_position, 1)));
+
             return programTokens;
         }
     }
-
     class Token
     {
-        public Token(TokenKind type)
+        public Token(TokenKind type, TextSpan span)
         {
             Type = type;
+            Span = span;
         }
 
         public TokenKind Type { get; }
+        public TextSpan Span { get; }
     }
-
     class TokenStream
     {
         public List<Token> Tokens { get; }
-        public TokenStream() { }
+        public TokenStream()
+        {
+            Tokens = new List<Token>();
+        }
 
         public void AddToken(Token token)
         {
             Tokens.Add(token);
         }
     }
-
     public enum TokenKind
     {
-        EndOfFileToken
+        EndOfFileToken,
+        WhitespaceToken
     }
 }

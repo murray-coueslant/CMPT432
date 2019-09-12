@@ -1,10 +1,7 @@
+   a   $
+
 {}$
-{{{{{}}}}}$
-{{{{{{}}} /* comments are ignored */ }}}}$
-{ /* comments are still ignored */ int @}$
+
 {
-    int a
-    a = a
-    string b
-    a = b 
-}
+   int a = 1
+}$

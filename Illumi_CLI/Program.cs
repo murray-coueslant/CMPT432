@@ -1,7 +1,5 @@
 ﻿using System.Linq;
 using System;
-using System.CommandLine;
-using System.CommandLine.Invocation;
 using System.IO;
 
 namespace Illumi_CLI
@@ -70,6 +68,8 @@ namespace Illumi_CLI
                         break;
                 }
             }
+
+            Console.ForegroundColor = ConsoleColor.White;
         }
 
         public static string[] getCommand(Session session)
