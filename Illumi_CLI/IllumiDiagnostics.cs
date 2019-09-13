@@ -27,6 +27,10 @@ namespace Illumi_CLI
 
     internal class DiagnosticCollection : IEnumerable
     {
+        private const string Error = "ERROR";
+        private const string Warning = "WARNING";
+        private const string Lexer = "Lexer";
+        private const string FileReader = "File Reader";
         private List<Diagnostic> _diagnostics = new List<Diagnostic>();
 
         public IEnumerator GetEnumerator() => _diagnostics.GetEnumerator();
@@ -56,17 +60,33 @@ namespace Illumi_CLI
 
         public void Lexer_ReportInvalidIdentifier(TextSpan span, int lineNumber)
         {
-            string type = "ERROR";
-            string originated = "Lexer";
+            string type = Error;
+            string originated = Lexer;
             string message = "Invalid identifier. Identifiers may only be single characters, a - z.";
+            ReportDiagnostic(type, span, message, originated, lineNumber);
+        }
+
+        public void Lexer_ReportUnrecognisedToken(TextSpan span, int lineNumber)
+        {
+            string type = Error;
+            string originated = Lexer;
+            string message = "Unrecognised token found. You have used a character not included in the grammar.";
+            ReportDiagnostic(type, span, message, originated, lineNumber);
+        }
+
+        public void Lexer_ReportInvalidCharacter(TextSpan span, int lineNumber)
+        {
+            string type = Error;
+            string originated = Lexer;
+            string message = "Invalid character found in input. See the grammar sheet for alanC to view the permitted characters.";
             ReportDiagnostic(type, span, message, originated, lineNumber);
         }
 
         public void FileReader_ReportNoFinalEndOfProgramToken(TextSpan span, int lineNumber)
         {
-            string type = "WARNING";
-            string originated = "File Reader";
-            string message = "Did not find a final '$' character in file. Inserting one at the last position.";
+            string type = Warning;
+            string originated = FileReader;
+            string message = "Did not find a final '$' character in file. Inserting one at the last position in the file.";
             ReportDiagnostic(type, span, message, originated, lineNumber);
         }
     }
