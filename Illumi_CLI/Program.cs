@@ -39,7 +39,8 @@ namespace Illumi_CLI
 
                         diagnostics.DisplayDiagnostics();
 
-                        IllumiLexer.Lex(fileText);
+                        Lexer lexer = new Lexer(fileText, diagnostics);
+
                         break;
 
                     case "settings":
