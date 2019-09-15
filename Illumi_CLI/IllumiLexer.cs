@@ -66,9 +66,14 @@ namespace Illumi_CLI
     class Lexer
     {
         /*
-            The global variables required for treatment of comments, strings etc... as well as positions in the file
+            The variables required for treatment of comments, strings etc... as well as positions in the file
         */
         private int _position;
+        private int _lineNumber;
+        public string SourceText { get; }
+        public DiagnosticCollection Diagnostics { get; }
+        public IEnumerable<AcProgram> Programs { get; }
+        public Dictionary<TokenKind, Regex> TokenRegularExpressions { get; private set; }
 
         public Lexer(string sourceText, DiagnosticCollection diagnostics)
         {
@@ -113,65 +118,59 @@ namespace Illumi_CLI
 
             return regularExpressionDictionary;
         }
-
-        public string SourceText { get; }
-        public DiagnosticCollection Diagnostics { get; }
-        public IEnumerable<string> Programs { get; }
-        public Dictionary<TokenKind, Regex> TokenRegularExpressions { get; private set; }
-
-        public char Current
-        {
-            get
-            {
-                if (_position < SourceText.Length)
-                {
-
-                }
-                return SourceText[_position];
-            }
-        }
-
         public void Lex()
         {
-            foreach (string program in Programs)
+            foreach (AcProgram program in Programs)
             {
                 LexicalAnalysis(program);
             }
         }
 
-        private void LexicalAnalysis(string program)
+        private void LexicalAnalysis(AcProgram program)
         {
+            int programPosition = 0;
+            int sourcePosition = program.SourceFileStartPosition;
 
-            throw new NotImplementedException();
+            int programLineNumber = 0;
+
+            char currentChar = program.Text[programPosition];
+
+            while (currentChar != '$')
+            {
+                System.Console.WriteLine(currentChar);
+                programPosition++;
+                sourcePosition++;
+                currentChar = program.Text[programPosition];
+            }
         }
 
-        private IEnumerable<string> ExtractPrograms()
+        private IEnumerable<AcProgram> ExtractPrograms()
         {
-            IList<string> programs = new List<string>();
+            IList<AcProgram> programs = new List<AcProgram>();
 
             int currentPosition = 0;
             int programStartPosition = currentPosition;
+
             int length = 0;
 
             while (currentPosition < SourceText.Length)
             {
-
                 char currentChar = SourceText[currentPosition];
 
                 if (currentChar != '$')
                 {
                     length++;
-                    currentPosition++;
                 }
                 else
                 {
                     length++;
                     string programSubstring = SourceText.Substring(programStartPosition, length);
-                    System.Console.WriteLine(programSubstring);
-                    programs.Add(programSubstring);
+                    programs.Add(new AcProgram(programSubstring, programStartPosition, length));
                     length = 0;
-                    programStartPosition = currentPosition;
+                    programStartPosition = currentPosition + 1;
                 }
+
+                currentPosition++;
             }
 
             return programs;
