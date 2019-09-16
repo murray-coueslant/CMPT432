@@ -1,8 +1,14 @@
+/* Boolean Expression Printing */
+/* Prints falsefalsetruefalsetrue */
 {
-   while
-   int
-   bool
-   print
-   string
-   if
+	boolean a
+	a = false
+	print((a == true))
+	print((true == a))
+	print((a == false))
+	print(a)
+	if (a == false) {
+	    a = true
+	}
+	print(a)
 }$

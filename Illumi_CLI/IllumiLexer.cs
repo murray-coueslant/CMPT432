@@ -74,7 +74,14 @@ namespace Illumi_CLI
         UnrecognisedToken,
         WhileToken,
         PrintToken,
-        IfToken
+        IfToken,
+        DigitToken,
+        LeftParenthesisToken,
+        RightParenthesisToken,
+        AssignmentToken,
+        TrueToken,
+        FalseToken,
+        EquivalenceToken
     }
 
     class TokenRegularExpression
@@ -108,7 +115,6 @@ namespace Illumi_CLI
         public Session LexerSession { get; private set; }
         public IEnumerable<AcProgram> Programs { get; }
         public Dictionary<TokenKind, Regex> TokenRegularExpressions { get; private set; }
-
         public TokenStream LexerTokenStream = new TokenStream();
 
         public Lexer(string sourceText, Session currentSession)
@@ -122,8 +128,6 @@ namespace Illumi_CLI
             TokenRegularExpressions = GenerateRegularExpressions();
 
             Lex();
-
-            Console.ReadLine();
         }
 
         private Dictionary<TokenKind, Regex> GenerateRegularExpressions()
@@ -131,45 +135,63 @@ namespace Illumi_CLI
             Dictionary<TokenKind, Regex> regularExpressionDictionary = new Dictionary<TokenKind, Regex>();
 
             // whitespace expression
-            Regex whitespaceRegex = new Regex(@"\s");
-            regularExpressionDictionary.Add(TokenKind.WhitespaceToken, whitespaceRegex);
+            Regex whitespaceExpression = new Regex(@"\s");
+            regularExpressionDictionary.Add(TokenKind.WhitespaceToken, whitespaceExpression);
 
             // brace expressions
-            Regex leftBraceRegex = new Regex("{");
-            regularExpressionDictionary.Add(TokenKind.LeftBraceToken, leftBraceRegex);
-            Regex rightBraceRegex = new Regex("}");
-            regularExpressionDictionary.Add(TokenKind.RightBraceToken, rightBraceRegex);
+            Regex leftBraceExpression = new Regex("{");
+            regularExpressionDictionary.Add(TokenKind.LeftBraceToken, leftBraceExpression);
+            Regex rightBraceExpression = new Regex("}");
+            regularExpressionDictionary.Add(TokenKind.RightBraceToken, rightBraceExpression);
 
             // keyword expressions
             // type expressions
-            Regex intExpression = new Regex("int");
+            Regex intExpression = new Regex(@"\bint\b");
             regularExpressionDictionary.Add(TokenKind.Type_IntegerToken, intExpression);
-            Regex stringExpression = new Regex("string");
+            Regex stringExpression = new Regex(@"\bstring\b");
             regularExpressionDictionary.Add(TokenKind.Type_StringToken, stringExpression);
-            Regex boolExpression = new Regex("boolean");
+            Regex boolExpression = new Regex(@"\bboolean\b");
             regularExpressionDictionary.Add(TokenKind.Type_BooleanToken, boolExpression);
 
             // conditional expressions
-            Regex ifExpression = new Regex("if");
+            Regex ifExpression = new Regex(@"\bif\b");
             regularExpressionDictionary.Add(TokenKind.IfToken, ifExpression);
 
             // loop expressions
-            Regex whileExpression = new Regex("while");
+            Regex whileExpression = new Regex(@"\bwhile\b");
             regularExpressionDictionary.Add(TokenKind.WhileToken, whileExpression);
 
             // other expressions
-            Regex printExpression = new Regex("print");
+            Regex printExpression = new Regex(@"\bprint\b");
             regularExpressionDictionary.Add(TokenKind.PrintToken, printExpression);
 
             // id expression
-            Regex idExpression = new Regex("[a-z]");
+            Regex idExpression = new Regex(@"\b[a-z]\b");
             regularExpressionDictionary.Add(TokenKind.IdentifierToken, idExpression);
 
             // symbol expressions
+            Regex leftParenExpression = new Regex(@"[\(]");
+            regularExpressionDictionary.Add(TokenKind.LeftParenthesisToken, leftParenExpression);
+
+            Regex rightParenExpression = new Regex(@"[\)]");
+            regularExpressionDictionary.Add(TokenKind.RightParenthesisToken, rightParenExpression);
+
+            Regex assignmentExpression = new Regex("=");
+            regularExpressionDictionary.Add(TokenKind.AssignmentToken, assignmentExpression);
+
+            Regex equivalenceExpression = new Regex("==");
+            regularExpressionDictionary.Add(TokenKind.EquivalenceToken, equivalenceExpression);
 
             // digit expression
+            Regex digitExpression = new Regex(@"\b[1-9]\b");
+            regularExpressionDictionary.Add(TokenKind.DigitToken, digitExpression);
 
-            // character expression
+            //boolean expressions
+            Regex trueExpression = new Regex(@"true");
+            regularExpressionDictionary.Add(TokenKind.TrueToken, trueExpression);
+
+            Regex falseExpression = new Regex(@"false");
+            regularExpressionDictionary.Add(TokenKind.FalseToken, falseExpression);
 
             return regularExpressionDictionary;
         }
@@ -211,19 +233,19 @@ namespace Illumi_CLI
             if (char.IsWhiteSpace(sourceBuffer.ToString().LastOrDefault()))
             {
                 MatchBuffer(sourceBuffer.Remove(sourceBuffer.Length - 1, 1));
-            }
-            else
-            {
-                foreach (var RegularExpression in TokenRegularExpressions)
-                {
-                    if (RegularExpression.Value.Match(sourceBuffer.ToString().LastOrDefault().ToString()).Success)
-                    {
-                        Console.WriteLine($"Token found {RegularExpression.Key}");
-                        Token pushToken = new Token(RegularExpression.Key, sourceBuffer.ToString().LastOrDefault().ToString());
-                        LexerTokenStream.PushToken(pushToken);
-                    };
-                }
-            }
+            };
+            // else
+            // {
+            //     foreach (var RegularExpression in TokenRegularExpressions)
+            //     {
+            //         if (RegularExpression.Value.Match(sourceBuffer.ToString().LastOrDefault().ToString()).Success)
+            //         {
+            //             Console.WriteLine($"Token found {RegularExpression.Key}");
+            //             Token pushToken = new Token(RegularExpression.Key, sourceBuffer.ToString().LastOrDefault().ToString());
+            //             LexerTokenStream.PushToken(pushToken);
+            //         };
+            //     }
+            // }
         }
 
 
@@ -234,13 +256,13 @@ namespace Illumi_CLI
                 if (RegularExpression.Value.Match(sourceBuffer.ToString()).Success)
                 {
                     Console.WriteLine($"token found in buffer {RegularExpression.Key}");
-                    Console.WriteLine($"Removing {sourceBuffer.Length} tokens from the stream");
+                    // Console.WriteLine($"Removing {sourceBuffer.Length} tokens from the stream");
 
                     // here I need to handle the clearing of the stack of the tokens created in error (identifiers before keyword etc...)
-                    for (int i = 0; i < sourceBuffer.Length; i++)
-                    {
-                        LexerTokenStream.PopToken();
-                    }
+                    // for (int i = 0; i < sourceBuffer.Length; i++)
+                    // {
+                    //     LexerTokenStream.PopToken();
+                    // }
 
                     LexerTokenStream.PushToken(new Token(RegularExpression.Key, sourceBuffer.ToString()));
 
