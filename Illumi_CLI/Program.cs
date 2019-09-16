@@ -26,20 +26,19 @@ namespace Illumi_CLI
                 switch (command.FirstOrDefault().ToLower())
                 {
                     case "lex":
-                        Console.WriteLine("Entering the Illumi lexer.");
                         if (command.Length != 2)
                         {
-                            Console.WriteLine("[Error] Please enter the command in the right form. Enter 'help' to see the help message.");
+                            currentSession.Diagnostics.EntryPoint_MalformedCommand();
                             break;
                         }
 
                         FileInfo file = new FileInfo(command[1]);
 
-                        string fileText = IllumiFileReader.ReadFile(file, diagnostics);
+                        string fileText = IllumiFileReader.ReadFile(file, currentSession);
 
-                        diagnostics.DisplayDiagnostics();
+                        currentSession.Diagnostics.DisplayDiagnostics();
 
-                        Lexer lexer = new Lexer(fileText, diagnostics);
+                        Lexer lexer = new Lexer(fileText, currentSession);
 
                         break;
 
@@ -65,9 +64,11 @@ namespace Illumi_CLI
                         break;
 
                     default:
-                        Console.WriteLine("[Error] Enter a valid command. Enter 'help' to see all the available commands.");
+                        currentSession.Diagnostics.EntryPoint_ReportInvalidCommand();
                         break;
                 }
+
+                currentSession.Diagnostics.DisplayDiagnostics();
             }
 
             Console.ForegroundColor = ConsoleColor.White;
@@ -110,10 +111,7 @@ namespace Illumi_CLI
 
             session.setupMode = true;
 
-            bool setupModeEnded = false;
-
-
-            while (setupModeEnded != true)
+            while (true)
             {
                 string[] setupCommand = getCommand(session);
 
@@ -132,13 +130,22 @@ namespace Illumi_CLI
                         session.setupMode = false;
                         return;
 
+                    case "help":
+                    case "h":
+                    case "?":
+                        showSetupHelp();
+                        break;
+
                     default:
                         Console.WriteLine("Enter a valid setup command. Enter 'help' to see available setup commands.");
                         break;
                 }
-
-                session.setupMode = false;
             }
+        }
+
+        private static void showSetupHelp()
+        {
+            Console.WriteLine("Setup help message.");
         }
     }
 
@@ -146,9 +153,14 @@ namespace Illumi_CLI
     {
         public bool setupMode;
 
-        public Session() { }
+        public Session()
+        {
+            Diagnostics = new DiagnosticCollection();
+        }
 
         public bool debugMode { get; private set; }
+        public DiagnosticCollection Diagnostics { get; private set; }
+
         internal void setDebugMode()
         {
             debugMode = !debugMode;

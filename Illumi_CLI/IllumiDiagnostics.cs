@@ -7,6 +7,14 @@ namespace Illumi_CLI
 {
     internal class Diagnostic
     {
+        public Diagnostic(string type, string originated, string message)
+        {
+            Type = type;
+            Originated = originated;
+            Message = message;
+            shortDiagnostic = true;
+        }
+
         public Diagnostic(string type, TextSpan span, string message, string originated, int lineNumber)
         {
             Type = type;
@@ -14,21 +22,34 @@ namespace Illumi_CLI
             Message = message;
             Originated = originated;
             LineNumber = lineNumber;
+            shortDiagnostic = false;
         }
 
         public string Type { get; }
         public TextSpan Span { get; }
         public string Message { get; }
+        public bool shortDiagnostic { get; private set; }
         public string Originated { get; }
         public int LineNumber { get; }
 
-        public override string ToString() => $"[{Type}] - [{Originated}] ({Span.Start}:{LineNumber}) -> {Message}";
+        public override string ToString()
+        {
+            if (shortDiagnostic)
+            {
+                return $"[{Type}] - [{Originated}] -> {Message}";
+            }
+            else
+            {
+                return $"[{Type}] - [{Originated}] ({Span.Start}:{LineNumber}) -> {Message}";
+            }
+        }
     }
 
     internal class DiagnosticCollection : IEnumerable
     {
         private const string Error = "ERROR";
         private const string Warning = "WARNING";
+        private const string EntryPoint = "Entry Point";
         private const string Lexer = "Lexer";
         private const string FileReader = "File Reader";
         private List<Diagnostic> _diagnostics = new List<Diagnostic>();
@@ -58,12 +79,26 @@ namespace Illumi_CLI
             _diagnostics.Add(diagnostic);
         }
 
+        private void ReportDiagnostic(string type, string originated, string message)
+        {
+            Diagnostic diagnostic = new Diagnostic(type, originated, message);
+            _diagnostics.Add(diagnostic);
+        }
+
         public void Lexer_ReportInvalidIdentifier(TextSpan span, int lineNumber)
         {
             string type = Error;
             string originated = Lexer;
             string message = "Invalid identifier. Identifiers may only be single characters, a - z.";
             ReportDiagnostic(type, span, message, originated, lineNumber);
+        }
+
+        internal void EntryPoint_ReportInvalidCommand()
+        {
+            string type = Error;
+            string originated = EntryPoint;
+            string message = "Invalid command entered. Enter 'help' or '?' to see all the available commands.";
+            ReportDiagnostic(type, originated, message);
         }
 
         public void Lexer_ReportUnrecognisedToken(TextSpan span, int lineNumber)
@@ -88,6 +123,14 @@ namespace Illumi_CLI
             string originated = FileReader;
             string message = "Did not find a final '$' character in file. Inserting one at the last position in the file.";
             ReportDiagnostic(type, span, message, originated, lineNumber);
+        }
+
+        internal void EntryPoint_MalformedCommand()
+        {
+            string type = Error;
+            string originated = EntryPoint;
+            string message = "Malformed command entered. Run 'help' or '?' to see the syntax for Illumi's commands.";
+            ReportDiagnostic(type, originated, message);
         }
     }
 }

@@ -41,6 +41,26 @@ namespace Illumi_CLI
         public string Text { get; }
     }
 
+    class TokenStream
+    {
+        public TokenStream()
+        {
+            Tokens = new Stack<Token>();
+        }
+
+        public Stack<Token> Tokens { get; private set; }
+
+        public void PushToken(Token token)
+        {
+            Tokens.Push(token);
+        }
+
+        public Token PopToken(Token token)
+        {
+            return Tokens.Pop();
+        }
+    }
+
     public enum TokenKind
     {
         WhitespaceToken,
@@ -70,15 +90,26 @@ namespace Illumi_CLI
         */
         private int _position;
         private int _lineNumber;
+        private int _programNumber = 0;
+        private bool _insideComment;
+        private bool _insideString;
+
+        /*
+            More specific properties which are used by the lexer, such as diagnostics and the source text the lexer is provided
+        */
         public string SourceText { get; }
         public DiagnosticCollection Diagnostics { get; }
+        public Session LexerSession { get; private set; }
         public IEnumerable<AcProgram> Programs { get; }
         public Dictionary<TokenKind, Regex> TokenRegularExpressions { get; private set; }
 
-        public Lexer(string sourceText, DiagnosticCollection diagnostics)
+        public Lexer(string sourceText, Session currentSession)
         {
+            Console.WriteLine("Entering the Illumi lexer.");
+
             SourceText = sourceText;
-            Diagnostics = diagnostics;
+            Diagnostics = currentSession.Diagnostics;
+            LexerSession = currentSession;
             Programs = ExtractPrograms();
             TokenRegularExpressions = GenerateRegularExpressions();
 
@@ -131,12 +162,17 @@ namespace Illumi_CLI
             int programPosition = 0;
             int sourcePosition = program.SourceFileStartPosition;
 
+            StringBuilder sourceBuffer = new StringBuilder();
+
             int programLineNumber = 0;
 
             char currentChar = program.Text[programPosition];
 
+            sourceBuffer.Append(currentChar);
+
             while (currentChar != '$')
             {
+                MatchPatterns(sourceBuffer);
                 System.Console.WriteLine(currentChar);
                 programPosition++;
                 sourcePosition++;

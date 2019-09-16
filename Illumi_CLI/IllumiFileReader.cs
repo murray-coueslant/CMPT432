@@ -7,7 +7,7 @@ namespace Illumi_CLI
 {
     internal class IllumiFileReader
     {
-        internal static string ReadFile(FileInfo filePath, DiagnosticCollection diagnostics)
+        internal static string ReadFile(FileInfo filePath, Session currentSession)
         {
             if (filePath.Exists)
             {
@@ -17,7 +17,7 @@ namespace Illumi_CLI
                 {
                     TextSpan span = new TextSpan(fullFileText.Length - 1, 1);
                     int lineNumber = fullFileText.Count(c => c == '\n') + 1;
-                    diagnostics.FileReader_ReportNoFinalEndOfProgramToken(span, lineNumber);
+                    currentSession.Diagnostics.FileReader_ReportNoFinalEndOfProgramToken(span, lineNumber);
                     return fullFileText + "$";
                 }
                 return fullFileText;
