@@ -121,6 +121,11 @@ namespace Illumi_CLI
                         session.setDebugMode();
                         break;
 
+                    case "v":
+                    case "verbose":
+                        session.setVerboseMode();
+                        break;
+
                     case "quit":
                     case "exit":
                     case "return":
@@ -152,6 +157,7 @@ namespace Illumi_CLI
     class Session
     {
         public bool setupMode;
+        public bool verboseMode;
 
         public Session()
         {
@@ -166,6 +172,13 @@ namespace Illumi_CLI
             debugMode = !debugMode;
 
             Console.WriteLine($"Debug mode changed from {(!debugMode).ToString().ToUpper()} to {debugMode.ToString().ToUpper()}.");
+        }
+
+        internal void setVerboseMode()
+        {
+            verboseMode = !verboseMode;
+
+            Console.WriteLine($"Verbose output mode changed from {(!verboseMode).ToString().ToUpper()} to {verboseMode.ToString().ToUpper()}.");
         }
     }
 

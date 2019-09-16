@@ -76,6 +76,7 @@ namespace Illumi_CLI
         PrintToken,
         IfToken,
         DigitToken,
+        StringToken,
         LeftParenthesisToken,
         RightParenthesisToken,
         AssignmentToken,
@@ -216,12 +217,39 @@ namespace Illumi_CLI
 
             while (currentChar != '$')
             {
-                sourceBuffer.Append(currentChar);
-                MatchPatterns(sourceBuffer);
-                programPosition++;
-                sourcePosition++;
-                currentChar = program.Text[programPosition];
+                if (currentChar == '/' && program.Text[programPosition + 1] == '*')
+                {
+                    int commentLength = HandleComment(program, programPosition);
+                    programPosition += commentLength;
+                    sourcePosition += commentLength;
+                    currentChar = program.Text[programPosition];
+                }
+                else
+                {
+                    sourceBuffer.Append(currentChar);
+                    MatchPatterns(sourceBuffer);
+                    programPosition++;
+                    sourcePosition++;
+                    currentChar = program.Text[programPosition];
+                }
+
             }
+        }
+
+        private int HandleComment(AcProgram program, int programPosition)
+        {
+            int commentStartPosition = programPosition;
+            int bufferPosition = commentStartPosition;
+
+            while (program.Text.Substring(bufferPosition, 2) != "*/")
+            {
+                bufferPosition += 1;
+            }
+
+            System.Console.WriteLine($"Comment starting at {commentStartPosition} ends at {bufferPosition + 3}");
+            System.Console.WriteLine($"Comment text: {program.Text.Substring(commentStartPosition + 2, bufferPosition - commentStartPosition - 2).Trim()}");
+
+            return bufferPosition - commentStartPosition + 2; // calculates the length of the comment span
         }
 
         private void MatchPatterns(StringBuilder sourceBuffer)
@@ -233,19 +261,19 @@ namespace Illumi_CLI
             if (char.IsWhiteSpace(sourceBuffer.ToString().LastOrDefault()))
             {
                 MatchBuffer(sourceBuffer.Remove(sourceBuffer.Length - 1, 1));
-            };
-            // else
-            // {
-            //     foreach (var RegularExpression in TokenRegularExpressions)
-            //     {
-            //         if (RegularExpression.Value.Match(sourceBuffer.ToString().LastOrDefault().ToString()).Success)
-            //         {
-            //             Console.WriteLine($"Token found {RegularExpression.Key}");
-            //             Token pushToken = new Token(RegularExpression.Key, sourceBuffer.ToString().LastOrDefault().ToString());
-            //             LexerTokenStream.PushToken(pushToken);
-            //         };
-            //     }
-            // }
+            }
+            else
+            {
+                foreach (var RegularExpression in TokenRegularExpressions)
+                {
+                    if (RegularExpression.Value.Match(sourceBuffer.ToString().LastOrDefault().ToString()).Success)
+                    {
+                        Console.WriteLine($"Token found {RegularExpression.Key}");
+                        Token pushToken = new Token(RegularExpression.Key, sourceBuffer.ToString().LastOrDefault().ToString());
+                        LexerTokenStream.PushToken(pushToken);
+                    };
+                }
+            }
         }
 
 
@@ -256,13 +284,13 @@ namespace Illumi_CLI
                 if (RegularExpression.Value.Match(sourceBuffer.ToString()).Success)
                 {
                     Console.WriteLine($"token found in buffer {RegularExpression.Key}");
-                    // Console.WriteLine($"Removing {sourceBuffer.Length} tokens from the stream");
+                    Console.WriteLine($"Removing {sourceBuffer.Length} tokens from the stream");
 
                     // here I need to handle the clearing of the stack of the tokens created in error (identifiers before keyword etc...)
-                    // for (int i = 0; i < sourceBuffer.Length; i++)
-                    // {
-                    //     LexerTokenStream.PopToken();
-                    // }
+                    for (int i = 0; i < sourceBuffer.Length; i++)
+                    {
+                        LexerTokenStream.PopToken();
+                    }
 
                     LexerTokenStream.PushToken(new Token(RegularExpression.Key, sourceBuffer.ToString()));
 
@@ -295,7 +323,7 @@ namespace Illumi_CLI
                 {
                     length++;
                     string programSubstring = SourceText.Substring(programStartPosition, length);
-                    programs.Add(new AcProgram(programSubstring, programStartPosition, length));
+                    programs.Add(new AcProgram(programSubstring, programStartPosition, programSubstring.Length));
                     length = 0;
                     programStartPosition = currentPosition + 1;
                 }
