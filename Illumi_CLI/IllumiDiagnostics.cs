@@ -132,5 +132,14 @@ namespace Illumi_CLI
             string message = "Malformed command entered. Run 'help' or '?' to see the syntax for Illumi's commands.";
             ReportDiagnostic(type, originated, message);
         }
+
+        internal void Lexer_ReportUnclosedComment(int startPosition, int lineNumber)
+        {
+            string type = Error;
+            string originated = Lexer;
+            string message = "The end of program ('$') character was encountered whilst the lexer was within a comment. Try closing the comment" +
+                             $" starting at column {startPosition} on line {lineNumber}.";
+            ReportDiagnostic(type, originated, message);
+        }
     }
 }

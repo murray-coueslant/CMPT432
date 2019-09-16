@@ -103,7 +103,8 @@ namespace Illumi_CLI
             The variables required for treatment of comments, strings etc... as well as positions in the file
         */
         private int _position;
-        private int _lineNumber;
+        private int _sourceLineNumber;
+        private int _programLineNumber;
         private int _programNumber = 0;
         private bool _insideComment;
         private bool _insideString;
@@ -211,18 +212,25 @@ namespace Illumi_CLI
 
             StringBuilder sourceBuffer = new StringBuilder();
 
-            int programLineNumber = 0;
-
             char currentChar = program.Text[programPosition];
 
             while (currentChar != '$')
             {
                 if (currentChar == '/' && program.Text[programPosition + 1] == '*')
                 {
+                    _insideComment = true;
                     int commentLength = HandleComment(program, programPosition);
-                    programPosition += commentLength;
-                    sourcePosition += commentLength;
-                    currentChar = program.Text[programPosition];
+                    if (commentLength == -1)
+                    {
+                        Diagnostics.DisplayDiagnostics();
+                        break;
+                    }
+                    else
+                    {
+                        programPosition += commentLength;
+                        sourcePosition += commentLength;
+                        currentChar = program.Text[programPosition];
+                    }
                 }
                 else
                 {
@@ -243,8 +251,15 @@ namespace Illumi_CLI
 
             while (program.Text.Substring(bufferPosition, 2) != "*/")
             {
-                bufferPosition += 1;
+                if (program.Text.Substring(bufferPosition, 2).Contains('$'))
+                {
+                    Diagnostics.Lexer_ReportUnclosedComment(commentStartPosition, _programLineNumber);
+                    return -1;
+                }
+
+                bufferPosition++;
             }
+
 
             System.Console.WriteLine($"Comment starting at {commentStartPosition} ends at {bufferPosition + 3}");
             System.Console.WriteLine($"Comment text: {program.Text.Substring(commentStartPosition + 2, bufferPosition - commentStartPosition - 2).Trim()}");
