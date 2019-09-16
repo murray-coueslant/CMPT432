@@ -141,5 +141,13 @@ namespace Illumi_CLI
                              $" starting at column {startPosition} on line {lineNumber}.";
             ReportDiagnostic(type, originated, message);
         }
+
+        internal void FileReader_ReportNoFileFound(string fileName)
+        {
+            string type = Error;
+            string originated = FileReader;
+            string message = $"No file found with the name {fileName}. Try typing a different name or correcting any mistakes.";
+            ReportDiagnostic(type, originated, message);
+        }
     }
 }

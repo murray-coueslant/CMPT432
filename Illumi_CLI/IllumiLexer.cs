@@ -8,101 +8,14 @@ using System.Text.RegularExpressions;
 
 namespace Illumi_CLI
 {
-    /*
-        The lexer for the Illumi compiler.
-
-        A lexer takes raw text that it assumes to be source code, and attempts to create a stream of tokens from it. The tokens
-        which a lexer creates must be perfect according to the grammar of a language. Once the lex phase is complete the tokens are
-        then consumed by the semantic analysis phase.
-
-        Currently, the illumi compiler recognises patterns in the source and associcates them with their tokens using regular expressions.
-    */
-    class AcProgram
-    {
-        public AcProgram(string text, int sourceFileStartPosition, int length)
-        {
-            Text = text;
-            SourceFileStartPosition = sourceFileStartPosition;
-            Length = length;
-        }
-
-        public string Text { get; }
-        public int SourceFileStartPosition { get; }
-        public int Length { get; }
-    }
-    class Token
-    {
-        public Token(TokenKind kind, string text)
-        {
-            Kind = kind;
-            Text = text;
-        }
-
-        public TokenKind Kind { get; }
-        public string Text { get; }
-    }
-
-    class TokenStream
-    {
-        public TokenStream()
-        {
-            Tokens = new Stack<Token>();
-        }
-
-        public static Stack<Token> Tokens { get; private set; }
-
-        public void PushToken(Token token)
-        {
-            Tokens.Push(token);
-        }
-
-        public Token PopToken()
-        {
-            return Tokens.Pop();
-        }
-    }
-
-    public enum TokenKind
-    {
-        WhitespaceToken,
-        LeftBraceToken,
-        RightBraceToken,
-        Type_IntegerToken,
-        Type_StringToken,
-        Type_BooleanToken,
-        IdentifierToken,
-        UnrecognisedToken,
-        WhileToken,
-        PrintToken,
-        IfToken,
-        DigitToken,
-        StringToken,
-        LeftParenthesisToken,
-        RightParenthesisToken,
-        AssignmentToken,
-        TrueToken,
-        FalseToken,
-        EquivalenceToken
-    }
-
-    class TokenRegularExpression
-    {
-        public TokenRegularExpression(string pattern, TokenKind kind)
-        {
-            Pattern = pattern;
-            Kind = kind;
-        }
-
-        public string Pattern { get; }
-        public TokenKind Kind { get; }
-    }
 
     class Lexer
     {
         /*
             The variables required for treatment of comments, strings etc... as well as positions in the file
         */
-        private int _position;
+        private int _sourcePosition;
+        private int _programPosition;
         private int _sourceLineNumber;
         private int _programLineNumber;
         private int _programNumber = 0;
@@ -117,7 +30,8 @@ namespace Illumi_CLI
         public Session LexerSession { get; private set; }
         public IEnumerable<AcProgram> Programs { get; }
         public Dictionary<TokenKind, Regex> TokenRegularExpressions { get; private set; }
-        public TokenStream LexerTokenStream = new TokenStream();
+        public Regex SymbolRegex { get; private set; }
+        public IList<TokenStream> LexerTokenStreams = new List<TokenStream>();
 
         public Lexer(string sourceText, Session currentSession)
         {
@@ -195,52 +109,67 @@ namespace Illumi_CLI
             Regex falseExpression = new Regex(@"false");
             regularExpressionDictionary.Add(TokenKind.FalseToken, falseExpression);
 
+            // symbol matching expression, not added to dictionary but used
+            SymbolRegex = new Regex(@"[{}\(\)+]");
+
             return regularExpressionDictionary;
         }
         public void Lex()
         {
             foreach (AcProgram program in Programs)
             {
-                LexicalAnalysis(program);
+                Console.WriteLine($"Lexing program {_programNumber} from source.");
+                TokenStream programTokenStream = LexicalAnalysis(program);
+                LexerTokenStreams.Add(programTokenStream);
+                Console.WriteLine($"Finished lexing program {_programNumber}.");
+                _programNumber++;
+                _sourcePosition += program.Text.Length;
             }
         }
 
-        private void LexicalAnalysis(AcProgram program)
+        private TokenStream LexicalAnalysis(AcProgram program)
         {
-            int programPosition = 0;
-            int sourcePosition = program.SourceFileStartPosition;
+            TokenStream programTokenStream = new TokenStream();
+
+            _programPosition = 0;
 
             StringBuilder sourceBuffer = new StringBuilder();
 
-            char currentChar = program.Text[programPosition];
+            char currentChar = program.Text[_programPosition];
+            char nextChar = program.Text[_programPosition + 1];
 
             while (currentChar != '$')
             {
-                if (currentChar == '/' && program.Text[programPosition + 1] == '*')
+                if (currentChar != '/')
                 {
-                    _insideComment = true;
-                    int commentLength = HandleComment(program, programPosition);
-                    if (commentLength == -1)
-                    {
-                        Diagnostics.DisplayDiagnostics();
-                        break;
-                    }
-                    else
-                    {
-                        programPosition += commentLength;
-                        sourcePosition += commentLength;
-                        currentChar = program.Text[programPosition];
-                    }
-                }
-                else
-                {
-                    sourceBuffer.Append(currentChar);
-                    MatchPatterns(sourceBuffer);
-                    programPosition++;
-                    sourcePosition++;
-                    currentChar = program.Text[programPosition];
-                }
 
+                }
+                // if (currentChar == '/' && program.Text[_programPosition + 1] == '*')
+                // {
+                //     _insideComment = true;
+                //     int commentLength = HandleComment(program, _programPosition);
+                //     if (commentLength == -1)
+                //     {
+                //         // if there is a problem with the comment that was found, show the diagnostics
+                //         // and break out of lex for this program
+                //         Diagnostics.DisplayDiagnostics();
+                //         break;
+                //     }
+                //     else
+                //     {
+                //         _programPosition += commentLength;
+                //         currentChar = program.Text[_programPosition];
+                //         sourceBuffer.Append(currentChar);
+                //     }
+                //     _insideComment = false;
+                // }
+                // else
+                // {
+                //     sourceBuffer.Append(currentChar);
+                //     MatchPatterns(sourceBuffer);
+                //     _programPosition++;
+                //     currentChar = program.Text[_programPosition];
+                // }
             }
         }
 
@@ -273,9 +202,10 @@ namespace Illumi_CLI
             // tokens which allow us to make choices
             // - whitespace
             // - symbols
-            if (char.IsWhiteSpace(sourceBuffer.ToString().LastOrDefault()))
+            if (char.IsWhiteSpace(sourceBuffer.ToString().LastOrDefault()) || SymbolRegex.Match(sourceBuffer.ToString().LastOrDefault().ToString()).Success)
             {
                 MatchBuffer(sourceBuffer.Remove(sourceBuffer.Length - 1, 1));
+                sourceBuffer.Append(sourceBuffer.ToString().LastOrDefault());
             }
             else
             {
@@ -301,11 +231,11 @@ namespace Illumi_CLI
                     Console.WriteLine($"token found in buffer {RegularExpression.Key}");
                     Console.WriteLine($"Removing {sourceBuffer.Length} tokens from the stream");
 
-                    // here I need to handle the clearing of the stack of the tokens created in error (identifiers before keyword etc...)
-                    for (int i = 0; i < sourceBuffer.Length; i++)
-                    {
-                        LexerTokenStream.PopToken();
-                    }
+                    // here I need to handle the clearing of the stack of the tokens created too early (identifiers before keyword etc...)
+                    // for (int i = 0; i < sourceBuffer.Length; i++)
+                    // {
+                    //     LexerTokenStream.PopToken();
+                    // }
 
                     LexerTokenStream.PushToken(new Token(RegularExpression.Key, sourceBuffer.ToString()));
 
@@ -337,7 +267,7 @@ namespace Illumi_CLI
                 else
                 {
                     length++;
-                    string programSubstring = SourceText.Substring(programStartPosition, length);
+                    string programSubstring = SourceText.Substring(programStartPosition, length).Trim();
                     programs.Add(new AcProgram(programSubstring, programStartPosition, programSubstring.Length));
                     length = 0;
                     programStartPosition = currentPosition + 1;

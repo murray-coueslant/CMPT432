@@ -24,8 +24,9 @@ namespace Illumi_CLI
             }
             else
             {
-                // IllumiErrorReporter.SendError($"Could not find the specified file ({filePath.Name}), correct the path and try again.");
-                return null;
+
+                currentSession.Diagnostics.FileReader_ReportNoFileFound(filePath.Name);
+                return string.Empty;
             }
         }
     }

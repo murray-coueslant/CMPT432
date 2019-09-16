@@ -38,8 +38,10 @@ namespace Illumi_CLI
 
                         currentSession.Diagnostics.DisplayDiagnostics();
 
-                        Lexer lexer = new Lexer(fileText, currentSession);
-
+                        if (fileText != string.Empty)
+                        {
+                            Lexer lexer = new Lexer(fileText, currentSession);
+                        }
                         break;
 
                     case "settings":
