@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using System.Text;
 using System.Collections.ObjectModel;
 using System;
@@ -64,11 +65,13 @@ namespace Illumi_CLI
     public enum TokenKind
     {
         WhitespaceToken,
-        LeftBrace,
-        RightBrace,
-        Type_Integer,
-        Type_String,
-        Type_Boolean
+        LeftBraceToken,
+        RightBraceToken,
+        Type_IntegerToken,
+        Type_StringToken,
+        Type_BooleanToken,
+        IdentifierToken,
+        UnrecognisedToken
     }
 
     class TokenRegularExpression
@@ -126,20 +129,22 @@ namespace Illumi_CLI
 
             // brace expressions
             Regex leftBraceRegex = new Regex("{");
-            regularExpressionDictionary.Add(TokenKind.LeftBrace, leftBraceRegex);
+            regularExpressionDictionary.Add(TokenKind.LeftBraceToken, leftBraceRegex);
             Regex rightBraceRegex = new Regex("}");
-            regularExpressionDictionary.Add(TokenKind.RightBrace, rightBraceRegex);
+            regularExpressionDictionary.Add(TokenKind.RightBraceToken, rightBraceRegex);
 
             // keyword expressions
             // type expressions
             Regex intExpression = new Regex("int");
-            regularExpressionDictionary.Add(TokenKind.Type_Integer, intExpression);
+            regularExpressionDictionary.Add(TokenKind.Type_IntegerToken, intExpression);
             Regex stringExpression = new Regex("string");
-            regularExpressionDictionary.Add(TokenKind.Type_String, stringExpression);
+            regularExpressionDictionary.Add(TokenKind.Type_StringToken, stringExpression);
             Regex boolExpression = new Regex("boolean");
-            regularExpressionDictionary.Add(TokenKind.Type_Boolean, boolExpression);
+            regularExpressionDictionary.Add(TokenKind.Type_BooleanToken, boolExpression);
 
             // id expression
+            Regex idExpression = new Regex("[a-z]");
+            regularExpressionDictionary.Add(TokenKind.IdentifierToken, idExpression);
 
             // symbol expressions
 
@@ -168,16 +173,66 @@ namespace Illumi_CLI
 
             char currentChar = program.Text[programPosition];
 
-            sourceBuffer.Append(currentChar);
-
             while (currentChar != '$')
             {
+                sourceBuffer.Append(currentChar);
                 MatchPatterns(sourceBuffer);
-                System.Console.WriteLine(currentChar);
                 programPosition++;
                 sourcePosition++;
                 currentChar = program.Text[programPosition];
             }
+        }
+
+        private TokenKind MatchRegexCollection(string stringToMatch)
+        {
+            foreach (var RegularExpression in TokenRegularExpressions)
+            {
+                if (RegularExpression.Value.Match(stringToMatch).Success)
+                {
+                    return RegularExpression.Key;
+                }
+            }
+            return TokenKind.UnrecognisedToken;
+        }
+        private void MatchPatterns(StringBuilder sourceBuffer)
+        {
+            foreach (var RegularExpression in TokenRegularExpressions)
+            {
+                if (RegularExpression.Value.Match(sourceBuffer.ToString()).Success)
+                {
+                    // if the token found allows us to make a decision, go back through the source buffer and check for matches
+                    // tokens which allow us to make choices
+                    // - whitespace
+                    // - symbols
+                    if (char.IsWhiteSpace(sourceBuffer.ToString().Last()))
+                    {
+                        MatchBuffer(sourceBuffer);
+                    }
+                    else
+                    {
+                        Console.WriteLine($"token found {RegularExpression.Key}");
+                    };
+                };
+            }
+        }
+
+
+        private bool MatchBuffer(StringBuilder sourceBuffer)
+        {
+            foreach (var RegularExpression in TokenRegularExpressions)
+            {
+                if (RegularExpression.Value.Match(sourceBuffer.ToString()).Success)
+                {
+                    Console.WriteLine($"token found in buffer {RegularExpression.Key}");
+
+                    // here I need to handle the clearing of the stack of the tokens created in error (identifiers before keyword etc...)
+
+                    sourceBuffer.Clear();
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         private IEnumerable<AcProgram> ExtractPrograms()
