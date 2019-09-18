@@ -49,6 +49,7 @@ namespace Illumi_CLI
     {
         private const string Error = "ERROR";
         private const string Warning = "WARNING";
+        private const string Debug = "Debug";
         private const string EntryPoint = "Entry Point";
         private const string Lexer = "Lexer";
         private const string FileReader = "File Reader";
@@ -147,6 +148,15 @@ namespace Illumi_CLI
             string originated = FileReader;
             string message = $"No file found with the name {fileName}. Try typing a different name or correcting any mistakes.";
             ReportDiagnostic(type, originated, message);
+        }
+
+        internal void Lexer_ReportToken(TokenKind kind, string text, int tokenStart, int lineNumber)
+        {
+            // DEBUG Lexer - R_BRACE [ } ] found at (1:2)
+            string type = Debug;
+            string originated = Lexer;
+            string message = $"Token {kind.ToString()} [ {text} ] found.";
+            Console.WriteLine($"[{type}] - [{originated}] ({tokenStart}:{lineNumber}) -> {message}");
         }
 
         internal void Lexer_ReportUnterminatedString(TextSpan span, int lineNumber)

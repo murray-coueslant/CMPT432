@@ -7,17 +7,20 @@ namespace Illumi_CLI
     class Lexer
     {
         private DiagnosticCollection _diagnostics = new DiagnosticCollection();
+        private Session _lexerSession;
         private string _text;
         private int _position;
         private int _lineNumber;
+        private int _linePosition;
         private int _tokenStart;
         private TokenKind _kind;
         private object _value;
         private TokenStream _tokens;
 
-        public Lexer(string text)
+        public Lexer(string text, Session session)
         {
             _text = text;
+            _lexerSession = session;
         }
 
         public DiagnosticCollection Diagnostics => _diagnostics;
@@ -40,6 +43,7 @@ namespace Illumi_CLI
         private void Next()
         {
             _position++;
+            _linePosition++;
         }
 
         public Token Lex()
@@ -174,6 +178,11 @@ namespace Illumi_CLI
             int tokenLength = _position - _tokenStart;
             string text = _text.Substring(_tokenStart, tokenLength);
 
+            if (_lexerSession.debugMode)
+            {
+                _diagnostics.Lexer_ReportToken(_kind, text, _linePosition - tokenLength, _lineNumber);
+            }
+
             return new Token(_kind, text);
         }
 
@@ -201,6 +210,10 @@ namespace Illumi_CLI
             _kind = MatchKeywordKind(text);
         }
 
+        /*
+            Match a given text to the selection of possible keywords, if it does not match then
+            assume it is an identifier.
+        */
         private TokenKind MatchKeywordKind(string text)
         {
             switch (text)
@@ -233,6 +246,7 @@ namespace Illumi_CLI
                 if (CurrentChar == '\n')
                 {
                     _lineNumber++;
+                    _linePosition = 0;
                 }
                 Next();
             }
@@ -261,7 +275,7 @@ namespace Illumi_CLI
                     case '$':
                         _diagnostics.Lexer_ReportMalformedComment(_tokenStart, _lineNumber);
                         finishedComment = true;
-                        break;
+                        return;
 
                     case '*':
                         if (LookaheadChar == '/')
@@ -286,6 +300,7 @@ namespace Illumi_CLI
                             erroneousSpan = new TextSpan(_tokenStart, 1);
                             _diagnostics.Lexer_ReportInvalidCharacterInComment(erroneousSpan, _lineNumber, CurrentChar);
                             finishedComment = true;
+                            return;
                         }
                         break;
                 }
@@ -318,7 +333,7 @@ namespace Illumi_CLI
                         erroneousSpan = new TextSpan(_tokenStart, 1);
                         _diagnostics.Lexer_ReportUnterminatedString(erroneousSpan, _lineNumber);
                         finishedString = true;
-                        break;
+                        return;
 
                     // handle the ending case, where we find another quote character
                     case '"':
@@ -354,6 +369,7 @@ namespace Illumi_CLI
                             erroneousSpan = new TextSpan(_tokenStart, 1);
                             _diagnostics.Lexer_ReportInvalidCharacterInString(erroneousSpan, _lineNumber, CurrentChar);
                             finishedString = true;
+                            return;
                         }
                         break;
                 }
