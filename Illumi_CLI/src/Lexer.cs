@@ -42,7 +42,7 @@ namespace Illumi_CLI
             _position++;
         }
 
-        public token Lex()
+        public Token Lex()
         {
             /*
                 Initialise the variables about the token to be found to describe a bad
@@ -108,6 +108,7 @@ namespace Illumi_CLI
                     if (CurrentChar == '=')
                     {
                         _kind = TokenKind.NotEqualToken;
+                        Next();
                     }
                     break;
 
@@ -238,6 +239,12 @@ namespace Illumi_CLI
                             Next();
                             finishedString = true;
                         }
+                        break;
+
+                    // handle the case of the string containing spaces
+                    case ' ':
+                        stringText.Append(CurrentChar);
+                        Next();
                         break;
 
                     // the default case, where we continue to add to the string,

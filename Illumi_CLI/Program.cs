@@ -41,7 +41,14 @@ namespace Illumi_CLI
                         if (fileText != string.Empty)
                         {
                             Lexer lexer = new Lexer(fileText);
-                            while(lexer.Lex())
+                            Token token = lexer.Lex();
+
+                            while (token.Kind != TokenKind.EndOfProgramToken)
+                            {
+                                Console.WriteLine(token.Kind);
+                                Console.WriteLine(token.Text);
+                                token = lexer.Lex();
+                            }
                         }
                         break;
 
