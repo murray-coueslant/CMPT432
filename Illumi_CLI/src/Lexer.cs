@@ -179,7 +179,35 @@ namespace Illumi_CLI
 
         private void HandleKeywordOrIdentifier()
         {
-            throw new NotImplementedException();
+            while (char.IsLetter(CurrentChar))
+            {
+                Next();
+            }
+
+            int length = _position - _tokenStart;
+            string text = _text.Substring(_tokenStart, length);
+            _kind = MatchKeywordKind(text);
+        }
+
+        private TokenKind MatchKeywordKind(string text)
+        {
+            switch (text)
+            {
+                case "while":
+                    return TokenKind.WhileToken;
+                case "print":
+                    return TokenKind.PrintToken;
+                case "if":
+                    return TokenKind.IfToken;
+                case "boolean":
+                    return TokenKind.Type_BooleanToken;
+                case "string":
+                    return TokenKind.Type_StringToken;
+                case "int":
+                    return TokenKind.Type_IntegerToken;
+                default:
+                    return TokenKind.IdentifierToken;
+            }
         }
 
         /*
