@@ -32,7 +32,6 @@ namespace Illumi_CLI
         public Dictionary<TokenKind, Regex> TokenRegularExpressions { get; private set; }
         public Regex SymbolRegex { get; private set; }
         public IList<TokenStream> LexerTokenStreams = new List<TokenStream>();
-
         public Lexer(string sourceText, Session currentSession)
         {
             Console.WriteLine("Entering the Illumi lexer.");
@@ -46,6 +45,17 @@ namespace Illumi_CLI
             Lex();
         }
 
+        public TokenKind MatchRegexes(char current)
+        {
+            foreach (var regex in TokenRegularExpressions)
+            {
+                if (regex.Value.IsMatch(current.ToString()))
+                {
+                    return regex.Key;
+                }
+            }
+            return TokenKind.UnrecognisedToken;
+        }
         private Dictionary<TokenKind, Regex> GenerateRegularExpressions()
         {
             Dictionary<TokenKind, Regex> regularExpressionDictionary = new Dictionary<TokenKind, Regex>();
@@ -140,10 +150,11 @@ namespace Illumi_CLI
 
             while (currentChar != '$')
             {
-                if (currentChar != '/')
-                {
+                Console.WriteLine(MatchRegexes(currentChar));
 
-                }
+                _programPosition++;
+                currentChar = nextChar;
+                nextChar = program.Text[_programPosition + 1];
                 // if (currentChar == '/' && program.Text[_programPosition + 1] == '*')
                 // {
                 //     _insideComment = true;
@@ -171,81 +182,83 @@ namespace Illumi_CLI
                 //     currentChar = program.Text[_programPosition];
                 // }
             }
+            
+            return programTokenStream;
         }
 
-        private int HandleComment(AcProgram program, int programPosition)
-        {
-            int commentStartPosition = programPosition;
-            int bufferPosition = commentStartPosition;
+        // private int HandleComment(AcProgram program, int programPosition)
+        // {
+        //     int commentStartPosition = programPosition;
+        //     int bufferPosition = commentStartPosition;
 
-            while (program.Text.Substring(bufferPosition, 2) != "*/")
-            {
-                if (program.Text.Substring(bufferPosition, 2).Contains('$'))
-                {
-                    Diagnostics.Lexer_ReportUnclosedComment(commentStartPosition, _programLineNumber);
-                    return -1;
-                }
+        //     while (program.Text.Substring(bufferPosition, 2) != "*/")
+        //     {
+        //         if (program.Text.Substring(bufferPosition, 2).Contains('$'))
+        //         {
+        //             Diagnostics.Lexer_ReportUnclosedComment(commentStartPosition, _programLineNumber);
+        //             return -1;
+        //         }
 
-                bufferPosition++;
-            }
-
-
-            System.Console.WriteLine($"Comment starting at {commentStartPosition} ends at {bufferPosition + 3}");
-            System.Console.WriteLine($"Comment text: {program.Text.Substring(commentStartPosition + 2, bufferPosition - commentStartPosition - 2).Trim()}");
-
-            return bufferPosition - commentStartPosition + 2; // calculates the length of the comment span
-        }
-
-        private void MatchPatterns(StringBuilder sourceBuffer)
-        {
-            // if the token found allows us to make a decision, go back through the source buffer and check for matches
-            // tokens which allow us to make choices
-            // - whitespace
-            // - symbols
-            if (char.IsWhiteSpace(sourceBuffer.ToString().LastOrDefault()) || SymbolRegex.Match(sourceBuffer.ToString().LastOrDefault().ToString()).Success)
-            {
-                MatchBuffer(sourceBuffer.Remove(sourceBuffer.Length - 1, 1));
-                sourceBuffer.Append(sourceBuffer.ToString().LastOrDefault());
-            }
-            else
-            {
-                foreach (var RegularExpression in TokenRegularExpressions)
-                {
-                    if (RegularExpression.Value.Match(sourceBuffer.ToString().LastOrDefault().ToString()).Success)
-                    {
-                        Console.WriteLine($"Token found {RegularExpression.Key}");
-                        Token pushToken = new Token(RegularExpression.Key, sourceBuffer.ToString().LastOrDefault().ToString());
-                        LexerTokenStream.PushToken(pushToken);
-                    };
-                }
-            }
-        }
+        //         bufferPosition++;
+        //     }
 
 
-        private bool MatchBuffer(StringBuilder sourceBuffer)
-        {
-            foreach (var RegularExpression in TokenRegularExpressions)
-            {
-                if (RegularExpression.Value.Match(sourceBuffer.ToString()).Success)
-                {
-                    Console.WriteLine($"token found in buffer {RegularExpression.Key}");
-                    Console.WriteLine($"Removing {sourceBuffer.Length} tokens from the stream");
+        //     System.Console.WriteLine($"Comment starting at {commentStartPosition} ends at {bufferPosition + 3}");
+        //     System.Console.WriteLine($"Comment text: {program.Text.Substring(commentStartPosition + 2, bufferPosition - commentStartPosition - 2).Trim()}");
 
-                    // here I need to handle the clearing of the stack of the tokens created too early (identifiers before keyword etc...)
-                    // for (int i = 0; i < sourceBuffer.Length; i++)
-                    // {
-                    //     LexerTokenStream.PopToken();
-                    // }
+        //     return bufferPosition - commentStartPosition + 2; // calculates the length of the comment span
+        // }
 
-                    LexerTokenStream.PushToken(new Token(RegularExpression.Key, sourceBuffer.ToString()));
+        // private void MatchPatterns(StringBuilder sourceBuffer)
+        // {
+        //     // if the token found allows us to make a decision, go back through the source buffer and check for matches
+        //     // tokens which allow us to make choices
+        //     // - whitespace
+        //     // - symbols
+        //     if (char.IsWhiteSpace(sourceBuffer.ToString().LastOrDefault()) || SymbolRegex.Match(sourceBuffer.ToString().LastOrDefault().ToString()).Success)
+        //     {
+        //         MatchBuffer(sourceBuffer.Remove(sourceBuffer.Length - 1, 1));
+        //         sourceBuffer.Append(sourceBuffer.ToString().LastOrDefault());
+        //     }
+        //     else
+        //     {
+        //         foreach (var RegularExpression in TokenRegularExpressions)
+        //         {
+        //             if (RegularExpression.Value.Match(sourceBuffer.ToString().LastOrDefault().ToString()).Success)
+        //             {
+        //                 Console.WriteLine($"Token found {RegularExpression.Key}");
+        //                 Token pushToken = new Token(RegularExpression.Key, sourceBuffer.ToString().LastOrDefault().ToString());
+        //                 LexerTokenStream.PushToken(pushToken);
+        //             };
+        //         }
+        //     }
+        // }
 
-                    sourceBuffer.Clear();
-                    return true;
-                }
-            }
 
-            return false;
-        }
+        // private bool MatchBuffer(StringBuilder sourceBuffer)
+        // {
+        //     foreach (var RegularExpression in TokenRegularExpressions)
+        //     {
+        //         if (RegularExpression.Value.Match(sourceBuffer.ToString()).Success)
+        //         {
+        //             Console.WriteLine($"token found in buffer {RegularExpression.Key}");
+        //             Console.WriteLine($"Removing {sourceBuffer.Length} tokens from the stream");
+
+        //             // here I need to handle the clearing of the stack of the tokens created too early (identifiers before keyword etc...)
+        //             // for (int i = 0; i < sourceBuffer.Length; i++)
+        //             // {
+        //             //     LexerTokenStream.PopToken();
+        //             // }
+
+        //             LexerTokenStream.PushToken(new Token(RegularExpression.Key, sourceBuffer.ToString()));
+
+        //             sourceBuffer.Clear();
+        //             return true;
+        //         }
+        //     }
+
+        //     return false;
+        // }
 
         private IEnumerable<AcProgram> ExtractPrograms()
         {

@@ -20,7 +20,13 @@ namespace Illumi_CLI
         AssignmentToken,
         TrueToken,
         FalseToken,
-        EquivalenceToken
+        EquivalenceToken,
+        SpaceToken,
+        QuoteToken,
+        AdditionToken,
+        StartCommentToken,
+        EndCommentToken,
+        SymbolToken
     }
 
     // /* Writing a custom regular expression type, because I want to label things. */
