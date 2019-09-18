@@ -127,6 +127,7 @@ namespace Illumi_CLI
                 case '8':
                 case '9':
                     _kind = TokenKind.DigitToken;
+                    Next();
                     break;
 
                 case '/':
@@ -182,16 +183,22 @@ namespace Illumi_CLI
 
             StringBuilder buffer = new StringBuilder();
 
-            
-
             while (char.IsLetter(CurrentChar))
             {
+                buffer.Append(CurrentChar);
                 Next();
+
+                if (MatchKeywordKind(buffer.ToString()) != TokenKind.IdentifierToken)
+                {
+                    _kind = MatchKeywordKind(buffer.ToString());
+                    buffer.Clear();
+                    break;
+                }
             }
 
             int length = _position - _tokenStart;
             string text = _text.Substring(_tokenStart, length);
-            _kind = MatchKeywordKind(text);
+            // _kind = MatchKeywordKind(text);
         }
 
         private TokenKind MatchKeywordKind(string text)
