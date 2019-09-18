@@ -26,7 +26,9 @@ namespace Illumi_CLI
         AdditionToken,
         StartCommentToken,
         EndCommentToken,
-        SymbolToken
+        SymbolToken,
+        EndOfProgramToken,
+        NotEqualToken
     }
 
     // /* Writing a custom regular expression type, because I want to label things. */

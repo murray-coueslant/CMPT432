@@ -149,5 +149,21 @@ namespace Illumi_CLI
             string message = $"No file found with the name {fileName}. Try typing a different name or correcting any mistakes.";
             ReportDiagnostic(type, originated, message);
         }
+
+        internal void Lexer_ReportUnterminatedString(TextSpan span, int lineNumber)
+        {
+            string type = Error;
+            string originated = Lexer;
+            string message = "An unterminated string was encountered. Try terminating the string.";
+            ReportDiagnostic(type, span, message, originated, lineNumber);
+        }
+
+        internal void Lexer_ReportInvalidCharacterInString(TextSpan span, int lineNumber)
+        {
+            string type = Error;
+            string originated = Lexer;
+            string message = "An invalid character was encountered in a string. Strings may only contain letters.";
+            ReportDiagnostic(type, span, message, originated, lineNumber);
+        }
     }
 }

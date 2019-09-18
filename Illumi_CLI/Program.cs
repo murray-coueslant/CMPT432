@@ -40,7 +40,8 @@ namespace Illumi_CLI
 
                         if (fileText != string.Empty)
                         {
-                            Lexer lexer = new Lexer(fileText, currentSession);
+                            Lexer lexer = new Lexer(fileText);
+                            while(lexer.Lex())
                         }
                         break;
 
