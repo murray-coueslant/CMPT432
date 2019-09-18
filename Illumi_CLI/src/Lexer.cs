@@ -151,7 +151,8 @@ namespace Illumi_CLI
                     break;
 
                 // if none of the prior cases have handled the character, then
-                // we have either an identifier or a keyword, or a bad character
+                // we have either an identifier or a keyword, or a bad character,
+                // or more whitespace
                 default:
                     if (char.IsLetter(CurrentChar))
                     {
@@ -163,11 +164,13 @@ namespace Illumi_CLI
                     }
                     else
                     {
-                        _diagnostics.Lexer_ReportInvalidCharacter(new TextSpan(), _lineNumber);
+                        _diagnostics.Lexer_ReportInvalidCharacter(new TextSpan(_position, 1), _lineNumber);
                         Next();
                     }
                     break;
             }
+
+            _diagnostics.DisplayDiagnostics();
 
             // calculate the length of the token found, and then grab the
             // text of that token from the program text
@@ -218,6 +221,10 @@ namespace Illumi_CLI
         {
             while (char.IsWhiteSpace(CurrentChar))
             {
+                if (CurrentChar == '\n')
+                {
+                    _lineNumber++;
+                }
                 Next();
             }
 
@@ -226,7 +233,56 @@ namespace Illumi_CLI
 
         private void HandleComment()
         {
-            throw new NotImplementedException();
+            // to handle a comment, we will continure through the text updating positions until we find
+            // the terminator. similar to how we handle strings
+            Next();
+
+            bool finishedComment = false;
+
+            TextSpan erroneousSpan;
+
+            while (!finishedComment)
+            {
+                switch (CurrentChar)
+                {
+                    // handle the end cases (no multiline comments, unfinished comment etc...)
+                    case '\0':
+                    case '\r':
+                    case '\n':
+                    case '$':
+                        _diagnostics.Lexer_ReportUnclosedComment(_tokenStart, _lineNumber);
+                        finishedComment = true;
+                        break;
+
+                    case '*':
+                        if (LookaheadChar == '/')
+                        {
+                            Next();
+                            Next();
+                            finishedComment = true;
+                        }
+                        break;
+
+                    case ' ':
+                        Next();
+                        break;
+
+                    default:
+                        if (char.IsLetter(CurrentChar))
+                        {
+                            Next();
+                        }
+                        else
+                        {
+                            erroneousSpan = new TextSpan(_tokenStart, 1);
+                            _diagnostics.Lexer_ReportInvalidCharacterInComment(erroneousSpan, _lineNumber, CurrentChar);
+                            finishedComment = true;
+                        }
+                        break;
+                }
+            }
+
+            _kind = TokenKind.CommentToken;
         }
 
         // in the special case where we encounter a string, take anything between
@@ -249,6 +305,7 @@ namespace Illumi_CLI
                     case '\0':
                     case '\r':
                     case '\n':
+                    case '$':
                         erroneousSpan = new TextSpan(_tokenStart, 1);
                         _diagnostics.Lexer_ReportUnterminatedString(erroneousSpan, _lineNumber);
                         finishedString = true;
@@ -286,7 +343,7 @@ namespace Illumi_CLI
                         else
                         {
                             erroneousSpan = new TextSpan(_tokenStart, 1);
-                            _diagnostics.Lexer_ReportInvalidCharacterInString(erroneousSpan, _lineNumber);
+                            _diagnostics.Lexer_ReportInvalidCharacterInString(erroneousSpan, _lineNumber, CurrentChar);
                             finishedString = true;
                         }
                         break;

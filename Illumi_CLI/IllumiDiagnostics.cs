@@ -158,11 +158,19 @@ namespace Illumi_CLI
             ReportDiagnostic(type, span, message, originated, lineNumber);
         }
 
-        internal void Lexer_ReportInvalidCharacterInString(TextSpan span, int lineNumber)
+        internal void Lexer_ReportInvalidCharacterInString(TextSpan span, int lineNumber, char character)
         {
             string type = Error;
             string originated = Lexer;
-            string message = "An invalid character was encountered in a string. Strings may only contain letters.";
+            string message = $"An invalid character ({character}) was encountered in a string. Strings may only contain letters.";
+            ReportDiagnostic(type, span, message, originated, lineNumber);
+        }
+
+        internal void Lexer_ReportInvalidCharacterInComment(TextSpan span, int lineNumber, char character)
+        {
+            string type = Error;
+            string originated = Lexer;
+            string message = $"An invalid character ({character}) was encountered in a string. Strings may only contain letters.";
             ReportDiagnostic(type, span, message, originated, lineNumber);
         }
     }
