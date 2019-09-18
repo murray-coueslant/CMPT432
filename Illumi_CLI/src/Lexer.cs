@@ -53,6 +53,12 @@ namespace Illumi_CLI
             _linePosition++;
         }
 
+        private void Next(int offset)
+        {
+            _position += offset;
+            _linePosition += offset;
+        }
+
         public Token Lex()
         {
             /*
@@ -238,22 +244,39 @@ namespace Illumi_CLI
         {
             StringBuilder buffer = new StringBuilder();
 
-            switch (LookaheadChar)
+            int offset = 0;
+
+            _kind = TokenKind.IdentifierToken;
+
+            while (MatchKeywordKind(buffer.ToString()) == TokenKind.IdentifierToken || MatchKeywordKind(buffer.ToString()) == TokenKind.UnrecognisedToken)
             {
-                case 'h':
-                case 'n':
-                case 'f':
-                case 'r':
-                case 'o':
-                case 't':
-                    buffer.Append(CurrentChar);
-                    Next();
-                    break;
-                default:
-                    _kind = TokenKind.IdentifierToken;
-                    Next();
-                    break;
+                if (_position + offset < _text.Length)
+                {
+                    buffer.Append(_text[_position + offset]);
+                    offset++;
+                }
             }
+
+            _kind = MatchKeywordKind(buffer.ToString());
+            System.Console.WriteLine(buffer);
+            Next(offset);
+
+            // switch (LookaheadChar)
+            // {
+            //     case 'h':
+            //     case 'n':
+            //     case 'f':
+            //     case 'r':
+            //     case 'o':
+            //     case 't':
+            //         buffer.Append(CurrentChar);
+            //         Next();
+            //         break;
+            //     default:
+            //         _kind = TokenKind.IdentifierToken;
+            //         Next();
+            //         break;
+            // }
         }
 
         /*
