@@ -16,6 +16,8 @@ namespace Illumi_CLI
         private int _lineNumber;
         private int _linePosition;
         private int _tokenStart;
+        private int _tokenLength;
+        private string _tokenText;
         private TokenKind _kind;
         private object _value;
         private char[] allowableChars = { '-', ':', ';', ',', '.' };
@@ -59,7 +61,7 @@ namespace Illumi_CLI
             _linePosition += offset;
         }
 
-        public Token Lex()
+        public void Lex()
         {
             /*
                 Initialise the variables about the token to be found to describe a bad
@@ -72,39 +74,63 @@ namespace Illumi_CLI
             switch (CurrentChar)
             {
                 // deal with the 0 terminator character first, this tells us we
-                // have reached the end of our program
+                // have reached the end of our file
                 case '\0':
-                    _kind = TokenKind.EndOfProgramToken;
+                    _kind = TokenKind.EndOfFileToken;
                     break;
 
                 // now we can start handling some symbols
                 case '$':
                     _kind = TokenKind.EndOfProgramToken;
+                    // calculate the length of the token found, and then grab the
+                    // text of that token from the program text
+                    _tokenLength = _position - _tokenStart;
+                    _tokenText = _text.Substring(_tokenStart, _tokenLength);
                     break;
 
                 case '{':
                     _kind = TokenKind.LeftBraceToken;
                     Next();
+                    // calculate the length of the token found, and then grab the
+                    // text of that token from the program text
+                    _tokenLength = _position - _tokenStart;
+                    _tokenText = _text.Substring(_tokenStart, _tokenLength);
                     break;
 
                 case '}':
                     _kind = TokenKind.RightBraceToken;
                     Next();
+                    // calculate the length of the token found, and then grab the
+                    // text of that token from the program text
+                    _tokenLength = _position - _tokenStart;
+                    _tokenText = _text.Substring(_tokenStart, _tokenLength);
                     break;
 
                 case '(':
                     _kind = TokenKind.LeftParenthesisToken;
                     Next();
+                    // calculate the length of the token found, and then grab the
+                    // text of that token from the program text
+                    _tokenLength = _position - _tokenStart;
+                    _tokenText = _text.Substring(_tokenStart, _tokenLength);
                     break;
 
                 case ')':
                     _kind = TokenKind.RightParenthesisToken;
                     Next();
+                    // calculate the length of the token found, and then grab the
+                    // text of that token from the program text
+                    _tokenLength = _position - _tokenStart;
+                    _tokenText = _text.Substring(_tokenStart, _tokenLength);
                     break;
 
                 case '+':
                     _kind = TokenKind.AdditionToken;
                     Next();
+                    // calculate the length of the token found, and then grab the
+                    // text of that token from the program text
+                    _tokenLength = _position - _tokenStart;
+                    _tokenText = _text.Substring(_tokenStart, _tokenLength);
                     break;
 
                 case '=':
@@ -113,10 +139,18 @@ namespace Illumi_CLI
                     {
                         _kind = TokenKind.EquivalenceToken;
                         Next();
+                        // calculate the length of the token found, and then grab the
+                        // text of that token from the program text
+                        _tokenLength = _position - _tokenStart;
+                        _tokenText = _text.Substring(_tokenStart, _tokenLength);
                     }
                     else
                     {
                         _kind = TokenKind.AssignmentToken;
+                        // calculate the length of the token found, and then grab the
+                        // text of that token from the program text
+                        _tokenLength = _position - _tokenStart;
+                        _tokenText = _text.Substring(_tokenStart, _tokenLength);
                     }
                     break;
 
@@ -126,12 +160,16 @@ namespace Illumi_CLI
                     {
                         _kind = TokenKind.NotEqualToken;
                         Next();
+                        // calculate the length of the token found, and then grab the
+                        // text of that token from the program text
+                        _tokenLength = _position - _tokenStart;
+                        _tokenText = _text.Substring(_tokenStart, _tokenLength);
                     }
                     break;
 
                 case '"':
                     HandleString();
-                    break;
+                    return;
 
                 case '0':
                 case '1':
@@ -145,6 +183,10 @@ namespace Illumi_CLI
                 case '9':
                     _kind = TokenKind.DigitToken;
                     Next();
+                    // calculate the length of the token found, and then grab the
+                    // text of that token from the program text
+                    _tokenLength = _position - _tokenStart;
+                    _tokenText = _text.Substring(_tokenStart, _tokenLength);
                     break;
 
                 case '/':
@@ -153,7 +195,7 @@ namespace Illumi_CLI
                     {
                         HandleComment();
                     }
-                    break;
+                    return;
 
                 // now we look out for whitespace, newlines bump up
                 // the line number, spaces, tabs, and returns don't
@@ -162,7 +204,7 @@ namespace Illumi_CLI
                 case ' ':
                 case '\t':
                     HandleWhitespace();
-                    break;
+                    return;
 
                 // if none of the prior cases have handled the character, then
                 // we have either an identifier or a keyword, or a bad character,
@@ -181,27 +223,27 @@ namespace Illumi_CLI
                         _diagnostics.Lexer_ReportInvalidCharacter(new TextSpan(_position, 1), _lineNumber, CurrentChar);
                         _diagnostics.ErrorCount++;
                     }
-                    break;
+                    return;
             }
 
             _diagnostics.DisplayDiagnostics();
-
-            // calculate the length of the token found, and then grab the
-            // text of that token from the program text
-            int tokenLength = _position - _tokenStart;
-            string text = _text.Substring(_tokenStart, tokenLength);
 
             if (_lexerSession.debugMode)
             {
                 if (_kind != TokenKind.UnrecognisedToken)
                 {
-                    _diagnostics.Lexer_ReportToken(_kind, text, _linePosition - tokenLength, _lineNumber);
+                    _diagnostics.Lexer_ReportToken(_kind, _tokenText, _linePosition - _tokenLength, _lineNumber);
                 }
             }
 
-            Token token = new Token(_kind, text);
+            EmitToken(_kind, _tokenText);
+
+        }
+
+        private void EmitToken(TokenKind kind, string text)
+        {
+            Token token = new Token(kind, text);
             _tokens.Add(token);
-            return token;
         }
 
         internal void ClearTokens()
@@ -242,24 +284,44 @@ namespace Illumi_CLI
 
         private void HandleKeyword()
         {
-            StringBuilder buffer = new StringBuilder();
-
-            int offset = 0;
-
-            _kind = TokenKind.IdentifierToken;
-
-            while (MatchKeywordKind(buffer.ToString()) == TokenKind.IdentifierToken || MatchKeywordKind(buffer.ToString()) == TokenKind.UnrecognisedToken)
+            Stack<char> buffer = new Stack<char>();
+            switch (LookaheadChar)
             {
-                if (_position + offset < _text.Length)
-                {
-                    buffer.Append(_text[_position + offset]);
-                    offset++;
-                }
+                case 'h':
+                case 'n':
+                case 'f':
+                case 'r':
+                case 'o':
+                case 't':
+                    buffer.Push(CurrentChar);
+                    Next();
+                    break;
+                default:
+                    _kind = TokenKind.IdentifierToken;
+                    Next();
+                    break;
             }
+            // StringBuilder buffer = new StringBuilder();
 
-            _kind = MatchKeywordKind(buffer.ToString());
-            System.Console.WriteLine(buffer);
-            Next(offset);
+            // int offset = 0;
+
+            // _kind = TokenKind.IdentifierToken;
+
+            // while (MatchKeywordKind(buffer.ToString()) == TokenKind.IdentifierToken || MatchKeywordKind(buffer.ToString()) == TokenKind.UnrecognisedToken)
+            // {
+            //     if (_position + offset < _text.Length)
+            //     {
+            //         buffer.Append(_text[_position + offset]);
+            //         offset++;
+            //     }
+            //     else
+            //     {
+            //         break;
+            //     }
+            // }
+
+            // _kind = MatchKeywordKind(buffer.ToString());
+            // Next(offset);
 
             // switch (LookaheadChar)
             // {

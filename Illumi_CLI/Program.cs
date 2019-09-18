@@ -94,11 +94,11 @@ namespace Illumi_CLI
 
         private static void LexProgram(Lexer lexer)
         {
-            Token token = lexer.Lex();
+            lexer.Lex();
 
-            while (token.Kind != TokenKind.EndOfProgramToken && lexer.Diagnostics.ErrorCount == 0)
+            while (lexer.GetTokens().LastOrDefault().Kind != TokenKind.EndOfProgramToken && lexer.Diagnostics.ErrorCount == 0)
             {
-                token = lexer.Lex();
+                lexer.Lex();
             }
 
             if (lexer.Diagnostics.ErrorCount >= 1)

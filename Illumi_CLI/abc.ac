@@ -1,5 +1,5 @@
 {
-   string abc
+   string a
    a = "hello strings"
    print(a)
 }$
