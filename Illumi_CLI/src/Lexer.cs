@@ -1,3 +1,4 @@
+using System.Linq;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -17,6 +18,8 @@ namespace Illumi_CLI
         private int _tokenStart;
         private TokenKind _kind;
         private object _value;
+        private char[] allowableChars = { '-', ':', ';', ',', '.' };
+
         public Lexer(string text, Session session)
         {
             _text = text;
@@ -169,9 +172,8 @@ namespace Illumi_CLI
                     }
                     else
                     {
-                        _diagnostics.Lexer_ReportInvalidCharacter(new TextSpan(_position, 1), _lineNumber);
+                        _diagnostics.Lexer_ReportInvalidCharacter(new TextSpan(_position, 1), _lineNumber, CurrentChar);
                         _diagnostics.ErrorCount++;
-                        Next();
                     }
                     break;
             }
@@ -185,12 +187,20 @@ namespace Illumi_CLI
 
             if (_lexerSession.debugMode)
             {
-                _diagnostics.Lexer_ReportToken(_kind, text, _linePosition - tokenLength, _lineNumber);
+                if (_kind != TokenKind.UnrecognisedToken)
+                {
+                    _diagnostics.Lexer_ReportToken(_kind, text, _linePosition - tokenLength, _lineNumber);
+                }
             }
 
             Token token = new Token(_kind, text);
             _tokens.Add(token);
             return token;
+        }
+
+        internal void ClearTokens()
+        {
+            _tokens = new List<Token>();
         }
 
         internal List<Token> GetTokens()
@@ -267,7 +277,11 @@ namespace Illumi_CLI
                 case "int":
                     return TokenKind.Type_IntegerToken;
                 default:
-                    return TokenKind.IdentifierToken;
+                    if (text.Length == 1)
+                    {
+                        return TokenKind.IdentifierToken;
+                    }
+                    return TokenKind.UnrecognisedToken;
             }
         }
 
@@ -328,7 +342,7 @@ namespace Illumi_CLI
                         break;
 
                     default:
-                        if (char.IsLetter(CurrentChar))
+                        if (char.IsLetter(CurrentChar) || allowableChars.Contains(CurrentChar))
                         {
                             Next();
                         }

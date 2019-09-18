@@ -112,11 +112,11 @@ namespace Illumi_CLI
             ReportDiagnostic(type, span, message, originated, lineNumber);
         }
 
-        public void Lexer_ReportInvalidCharacter(TextSpan span, int lineNumber)
+        public void Lexer_ReportInvalidCharacter(TextSpan span, int lineNumber, char character)
         {
             string type = Error;
             string originated = Lexer;
-            string message = "Invalid character found in input. See the grammar sheet for alanC to view the permitted characters.";
+            string message = $"Invalid character [ {character} ] found in input. See the grammar sheet for alanC to view the permitted characters.";
             ReportDiagnostic(type, span, message, originated, lineNumber);
         }
 
@@ -183,7 +183,7 @@ namespace Illumi_CLI
         {
             string type = Error;
             string originated = Lexer;
-            string message = $"An invalid character ({character}) was encountered in a string. Strings may only contain letters.";
+            string message = $"An invalid character ({character}) was encountered in a comment. Comments may only contain letters, and certain punctuation marks.";
             ReportDiagnostic(type, span, message, originated, lineNumber);
         }
     }

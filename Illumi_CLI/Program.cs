@@ -100,6 +100,11 @@ namespace Illumi_CLI
             {
                 token = lexer.Lex();
             }
+
+            if (lexer.Diagnostics.ErrorCount >= 1)
+            {
+                lexer.ClearTokens();
+            }
         }
 
         public static string[] getCommand(Session session)
