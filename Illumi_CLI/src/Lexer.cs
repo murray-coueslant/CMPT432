@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Text;
 using Microsoft.CodeAnalysis.Text;
 
@@ -8,6 +9,7 @@ namespace Illumi_CLI
     {
         private DiagnosticCollection _diagnostics = new DiagnosticCollection();
         private Session _lexerSession;
+        private List<Token> _tokens;
         private string _text;
         private int _position;
         private int _lineNumber;
@@ -19,6 +21,7 @@ namespace Illumi_CLI
         {
             _text = text;
             _lexerSession = session;
+            _tokens = new List<Token>();
         }
 
         public DiagnosticCollection Diagnostics => _diagnostics;
@@ -27,6 +30,7 @@ namespace Illumi_CLI
         private char LookaheadChar => lookChar(1);
 
         public int ErrorCount { get; internal set; }
+        public object WarningCount { get; internal set; }
 
         private char lookChar(int offset)
         {
@@ -166,6 +170,7 @@ namespace Illumi_CLI
                     else
                     {
                         _diagnostics.Lexer_ReportInvalidCharacter(new TextSpan(_position, 1), _lineNumber);
+                        _diagnostics.ErrorCount++;
                         Next();
                     }
                     break;
@@ -183,7 +188,14 @@ namespace Illumi_CLI
                 _diagnostics.Lexer_ReportToken(_kind, text, _linePosition - tokenLength, _lineNumber);
             }
 
-            return new Token(_kind, text);
+            Token token = new Token(_kind, text);
+            _tokens.Add(token);
+            return token;
+        }
+
+        internal List<Token> GetTokens()
+        {
+            return _tokens;
         }
 
         private void HandleKeywordOrIdentifier()
@@ -199,20 +211,7 @@ namespace Illumi_CLI
                 case 'p':
                 case 'b':
                 case 's':
-                    while (char.IsLetter(CurrentChar))
-                    {
-                        buffer.Append(CurrentChar);
-                        Next();
-
-                        TokenKind checkKind = MatchKeywordKind(buffer.ToString());
-
-                        if (checkKind != TokenKind.IdentifierToken)
-                        {
-                            _kind = checkKind;
-                            buffer.Clear();
-                            break;
-                        }
-                    }
+                    HandleKeyword();
                     break;
                 default:
                     _kind = TokenKind.IdentifierToken;
@@ -223,6 +222,28 @@ namespace Illumi_CLI
 
             int length = _position - _tokenStart;
             string text = _text.Substring(_tokenStart, length);
+        }
+
+        private void HandleKeyword()
+        {
+            StringBuilder buffer = new StringBuilder();
+
+            switch (LookaheadChar)
+            {
+                case 'h':
+                case 'n':
+                case 'f':
+                case 'r':
+                case 'o':
+                case 't':
+                    buffer.Append(CurrentChar);
+                    Next();
+                    break;
+                default:
+                    _kind = TokenKind.IdentifierToken;
+                    Next();
+                    break;
+            }
         }
 
         /*
@@ -289,6 +310,7 @@ namespace Illumi_CLI
                     case '\n':
                     case '$':
                         _diagnostics.Lexer_ReportMalformedComment(_tokenStart, _lineNumber);
+                        _diagnostics.ErrorCount++;
                         finishedComment = true;
                         return;
 
@@ -314,6 +336,7 @@ namespace Illumi_CLI
                         {
                             erroneousSpan = new TextSpan(_tokenStart, 1);
                             _diagnostics.Lexer_ReportInvalidCharacterInComment(erroneousSpan, _lineNumber, CurrentChar);
+                            _diagnostics.ErrorCount++;
                             finishedComment = true;
                             return;
                         }
@@ -347,6 +370,7 @@ namespace Illumi_CLI
                     case '$':
                         erroneousSpan = new TextSpan(_tokenStart, 1);
                         _diagnostics.Lexer_ReportUnterminatedString(erroneousSpan, _lineNumber);
+                        _diagnostics.ErrorCount++;
                         finishedString = true;
                         return;
 
@@ -383,6 +407,7 @@ namespace Illumi_CLI
                         {
                             erroneousSpan = new TextSpan(_tokenStart, 1);
                             _diagnostics.Lexer_ReportInvalidCharacterInString(erroneousSpan, _lineNumber, CurrentChar);
+                            _diagnostics.ErrorCount++;
                             finishedString = true;
                             return;
                         }

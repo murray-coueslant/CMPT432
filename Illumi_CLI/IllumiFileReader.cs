@@ -19,6 +19,7 @@ namespace Illumi_CLI
                     TextSpan span = new TextSpan(fullFileText.Length - 1, 1);
                     int lineNumber = fullFileText.Count(c => c == '\n') + 1;
                     currentSession.Diagnostics.FileReader_ReportNoFinalEndOfProgramToken(span, lineNumber);
+                    currentSession.Diagnostics.WarningCount++;
                     fullFileText = fullFileText + "$";
                 }
 

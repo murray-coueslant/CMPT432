@@ -53,7 +53,7 @@ namespace Illumi_CLI
                             {
                                 Console.WriteLine($"Lexing program {programCounter}.");
                                 LexProgram(lexer);
-                                Console.WriteLine($"Finished lexing program {programCounter}.");
+                                Console.WriteLine(value: $"Finished lexing program {programCounter}. Lex ended with {lexer.Diagnostics.ErrorCount} errors and {diagnostics.WarningCount} warnings.");
                                 Console.WriteLine();
                                 programCounter++;
                             }
@@ -96,7 +96,7 @@ namespace Illumi_CLI
         {
             Token token = lexer.Lex();
 
-            while (token.Kind != TokenKind.EndOfProgramToken && lexer.ErrorCount == 0)
+            while (token.Kind != TokenKind.EndOfProgramToken && lexer.Diagnostics.ErrorCount == 0)
             {
                 token = lexer.Lex();
             }

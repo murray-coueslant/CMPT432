@@ -54,6 +54,8 @@ namespace Illumi_CLI
         private const string Lexer = "Lexer";
         private const string FileReader = "File Reader";
         private List<Diagnostic> _diagnostics = new List<Diagnostic>();
+        public int ErrorCount { get; internal set; }
+        public int WarningCount { get; internal set; }
 
         public IEnumerator GetEnumerator() => _diagnostics.GetEnumerator();
 
