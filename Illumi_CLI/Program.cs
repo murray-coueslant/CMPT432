@@ -1,6 +1,7 @@
 ﻿using System.Linq;
 using System;
 using System.IO;
+using System.Collections.Generic;
 
 namespace Illumi_CLI
 {
@@ -34,18 +35,27 @@ namespace Illumi_CLI
 
                         FileInfo file = new FileInfo(command[1]);
 
-                        string fileText = IllumiFileReader.ReadFile(file, currentSession);
+                        IList<string> filePrograms = IllumiFileReader.ReadFile(file, currentSession);
 
                         currentSession.Diagnostics.DisplayDiagnostics();
 
-                        if (fileText != string.Empty)
+                        if (filePrograms.Count >= 1)
                         {
-                            Lexer lexer = new Lexer(fileText, currentSession);
-                            Token token = lexer.Lex();
+                            IList<Lexer> lexers = new List<Lexer>();
+                            int programCounter = 0;
 
-                            while (token.Kind != TokenKind.EndOfProgramToken)
+                            foreach (string program in filePrograms)
                             {
-                                token = lexer.Lex();
+                                lexers.Add(new Lexer(program, currentSession));
+                            }
+
+                            foreach (Lexer lexer in lexers)
+                            {
+                                Console.WriteLine($"Lexing program {programCounter}.");
+                                LexProgram(lexer);
+                                Console.WriteLine($"Finished lexing program {programCounter}.");
+                                Console.WriteLine();
+                                programCounter++;
                             }
                         }
                         break;
@@ -80,6 +90,16 @@ namespace Illumi_CLI
             }
 
             Console.ForegroundColor = ConsoleColor.White;
+        }
+
+        private static void LexProgram(Lexer lexer)
+        {
+            Token token = lexer.Lex();
+
+            while (token.Kind != TokenKind.EndOfProgramToken && lexer.ErrorCount == 0)
+            {
+                token = lexer.Lex();
+            }
         }
 
         public static string[] getCommand(Session session)

@@ -260,38 +260,38 @@
 //         //     return false;
 //         // }
 
-//         private IEnumerable<AcProgram> ExtractPrograms()
+//     private IEnumerable<AcProgram> ExtractPrograms()
+//     {
+//         IList<AcProgram> programs = new List<AcProgram>();
+
+//         int currentPosition = 0;
+//         int programStartPosition = currentPosition;
+
+//         int length = 0;
+
+//         while (currentPosition < SourceText.Length)
 //         {
-//             IList<AcProgram> programs = new List<AcProgram>();
+//             char currentChar = SourceText[currentPosition];
 
-//             int currentPosition = 0;
-//             int programStartPosition = currentPosition;
-
-//             int length = 0;
-
-//             while (currentPosition < SourceText.Length)
+//             if (currentChar != '$')
 //             {
-//                 char currentChar = SourceText[currentPosition];
-
-//                 if (currentChar != '$')
-//                 {
-//                     length++;
-//                 }
-//                 else
-//                 {
-//                     length++;
-//                     string programSubstring = SourceText.Substring(programStartPosition, length).Trim();
-//                     programs.Add(new AcProgram(programSubstring, programStartPosition, programSubstring.Length));
-//                     length = 0;
-//                     programStartPosition = currentPosition + 1;
-//                 }
-
-//                 currentPosition++;
+//                 length++;
+//             }
+//             else
+//             {
+//                 length++;
+//                 string programSubstring = SourceText.Substring(programStartPosition, length).Trim();
+//                 programs.Add(new AcProgram(programSubstring, programStartPosition, programSubstring.Length));
+//                 length = 0;
+//                 programStartPosition = currentPosition + 1;
 //             }
 
-//             return programs;
+//             currentPosition++;
 //         }
+
+//         return programs;
 //     }
+// }
 
 //     // /* Writing a custom regular expression type, because I want to label things. */
 //     // class RegularExpression : Regex

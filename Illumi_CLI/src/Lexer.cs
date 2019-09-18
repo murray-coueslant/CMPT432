@@ -15,8 +15,6 @@ namespace Illumi_CLI
         private int _tokenStart;
         private TokenKind _kind;
         private object _value;
-        private TokenStream _tokens;
-
         public Lexer(string text, Session session)
         {
             _text = text;
@@ -27,6 +25,8 @@ namespace Illumi_CLI
 
         private char CurrentChar => lookChar(0);
         private char LookaheadChar => lookChar(1);
+
+        public int ErrorCount { get; internal set; }
 
         private char lookChar(int offset)
         {
@@ -192,22 +192,37 @@ namespace Illumi_CLI
 
             StringBuilder buffer = new StringBuilder();
 
-            while (char.IsLetter(CurrentChar))
+            switch (CurrentChar)
             {
-                buffer.Append(CurrentChar);
-                Next();
+                case 'w':
+                case 'i':
+                case 'p':
+                case 'b':
+                case 's':
+                    while (char.IsLetter(CurrentChar))
+                    {
+                        buffer.Append(CurrentChar);
+                        Next();
 
-                if (MatchKeywordKind(buffer.ToString()) != TokenKind.IdentifierToken)
-                {
-                    _kind = MatchKeywordKind(buffer.ToString());
-                    buffer.Clear();
+                        TokenKind checkKind = MatchKeywordKind(buffer.ToString());
+
+                        if (checkKind != TokenKind.IdentifierToken)
+                        {
+                            _kind = checkKind;
+                            buffer.Clear();
+                            break;
+                        }
+                    }
                     break;
-                }
+                default:
+                    _kind = TokenKind.IdentifierToken;
+                    Next();
+                    break;
+
             }
 
             int length = _position - _tokenStart;
             string text = _text.Substring(_tokenStart, length);
-            _kind = MatchKeywordKind(text);
         }
 
         /*

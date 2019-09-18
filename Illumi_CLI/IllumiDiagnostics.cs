@@ -152,11 +152,13 @@ namespace Illumi_CLI
 
         internal void Lexer_ReportToken(TokenKind kind, string text, int tokenStart, int lineNumber)
         {
-            // DEBUG Lexer - R_BRACE [ } ] found at (1:2)
-            string type = Debug;
-            string originated = Lexer;
-            string message = $"Token {kind.ToString()} [ {text} ] found.";
-            Console.WriteLine($"[{type}] - [{originated}] ({tokenStart}:{lineNumber}) -> {message}");
+            if (kind != TokenKind.WhitespaceToken)
+            {
+                string type = Debug;
+                string originated = Lexer;
+                string message = $"Token {kind.ToString()} [ {text} ] found.";
+                Console.WriteLine($"[{type}] - [{originated}] ({tokenStart}:{lineNumber}) -> {message}");
+            }
         }
 
         internal void Lexer_ReportUnterminatedString(TextSpan span, int lineNumber)
