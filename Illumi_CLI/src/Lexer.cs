@@ -137,14 +137,10 @@ namespace Illumi_CLI
                     }
                     break;
 
-                // now we look out for whitespace, newlines and returns bump up
-                // the line number, spaces and tabs don't
+                // now we look out for whitespace, newlines bump up
+                // the line number, spaces, tabs, and returns don't
                 case '\n':
                 case '\r':
-                    HandleWhitespace();
-                    _lineNumber++;
-                    break;
-
                 case ' ':
                 case '\t':
                     HandleWhitespace();
@@ -152,7 +148,7 @@ namespace Illumi_CLI
 
                 // if none of the prior cases have handled the character, then
                 // we have either an identifier or a keyword, or a bad character,
-                // or more whitespace
+                // or another form of whitespace
                 default:
                     if (char.IsLetter(CurrentChar))
                     {
@@ -182,6 +178,12 @@ namespace Illumi_CLI
 
         private void HandleKeywordOrIdentifier()
         {
+            int _bufferStartPosition = _position;
+
+            StringBuilder buffer = new StringBuilder();
+
+            
+
             while (char.IsLetter(CurrentChar))
             {
                 Next();
@@ -250,7 +252,7 @@ namespace Illumi_CLI
                     case '\r':
                     case '\n':
                     case '$':
-                        _diagnostics.Lexer_ReportUnclosedComment(_tokenStart, _lineNumber);
+                        _diagnostics.Lexer_ReportMalformedComment(_tokenStart, _lineNumber);
                         finishedComment = true;
                         break;
 

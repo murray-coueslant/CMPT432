@@ -133,12 +133,11 @@ namespace Illumi_CLI
             ReportDiagnostic(type, originated, message);
         }
 
-        internal void Lexer_ReportUnclosedComment(int startPosition, int lineNumber)
+        internal void Lexer_ReportMalformedComment(int startPosition, int lineNumber)
         {
             string type = Error;
             string originated = Lexer;
-            string message = "The end of program ('$') character was encountered whilst the lexer was within a comment. Try closing the comment" +
-                             $" starting at column {startPosition} on line {lineNumber}.";
+            string message = $"The lexer encountered a malformed comment. Try closing the comment on line {lineNumber + 1}.";
             ReportDiagnostic(type, originated, message);
         }
 
