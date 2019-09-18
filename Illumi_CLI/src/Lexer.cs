@@ -198,7 +198,7 @@ namespace Illumi_CLI
 
             int length = _position - _tokenStart;
             string text = _text.Substring(_tokenStart, length);
-            // _kind = MatchKeywordKind(text);
+            _kind = MatchKeywordKind(text);
         }
 
         private TokenKind MatchKeywordKind(string text)
