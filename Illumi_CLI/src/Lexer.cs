@@ -1,3 +1,4 @@
+using System.Threading.Tasks.Dataflow;
 using System.Linq;
 using System;
 using System.Collections.Generic;
@@ -171,6 +172,7 @@ namespace Illumi_CLI
                     HandleString();
                     return;
 
+                // now we handle digits
                 case '0':
                 case '1':
                 case '2':
@@ -189,11 +191,17 @@ namespace Illumi_CLI
                     _tokenText = _text.Substring(_tokenStart, _tokenLength);
                     break;
 
+                // comments are complex, and need their own handler function. but we can also report basic
+                // format errors here and avoid further complications
                 case '/':
                     Next();
                     if (CurrentChar == '*')
                     {
                         HandleComment();
+                    }
+                    else
+                    {
+                        _diagnostics.Lexer_ReportMalformedComment(_tokenStart, _lineNumber);
                     }
                     return;
 
@@ -221,47 +229,39 @@ namespace Illumi_CLI
                     else
                     {
                         _diagnostics.Lexer_ReportInvalidCharacter(new TextSpan(_position, 1), _lineNumber, CurrentChar);
-                        _diagnostics.ErrorCount++;
                     }
                     return;
             }
 
-            _diagnostics.DisplayDiagnostics();
-
-            if (_lexerSession.debugMode)
-            {
-                if (_kind != TokenKind.UnrecognisedToken)
-                {
-                    _diagnostics.Lexer_ReportToken(_kind, _tokenText, _linePosition - _tokenLength, _lineNumber);
-                }
-            }
-
             EmitToken(_kind, _tokenText);
-
         }
 
         private void EmitToken(TokenKind kind, string text)
         {
             Token token = new Token(kind, text);
             _tokens.Add(token);
+
+            if (_lexerSession.debugMode)
+            {
+                if (kind != TokenKind.UnrecognisedToken)
+                {
+                    _diagnostics.Lexer_ReportToken(kind, text, _linePosition - _tokenLength, _lineNumber);
+                }
+            }
         }
 
-        internal void ClearTokens()
+        public void ClearTokens()
         {
             _tokens = new List<Token>();
         }
 
-        internal List<Token> GetTokens()
+        public List<Token> GetTokens()
         {
             return _tokens;
         }
 
         private void HandleKeywordOrIdentifier()
         {
-            int _bufferStartPosition = _position;
-
-            StringBuilder buffer = new StringBuilder();
-
             switch (CurrentChar)
             {
                 case 'w':
@@ -270,7 +270,7 @@ namespace Illumi_CLI
                 case 'b':
                 case 's':
                     HandleKeyword();
-                    break;
+                    return;
                 default:
                     _kind = TokenKind.IdentifierToken;
                     Next();
@@ -278,67 +278,37 @@ namespace Illumi_CLI
 
             }
 
-            int length = _position - _tokenStart;
-            string text = _text.Substring(_tokenStart, length);
+            _tokenLength = _position - _tokenStart;
+            _tokenText = _text.Substring(_tokenStart, _tokenLength);
+
+            EmitToken(_kind, _tokenText);
         }
 
         private void HandleKeyword()
         {
-            Stack<char> buffer = new Stack<char>();
-            switch (LookaheadChar)
+            StringBuilder buffer = new StringBuilder();
+
+            buffer.Append(CurrentChar);
+
+            Next();
+
+            if (char.IsWhiteSpace(CurrentChar) || char.IsSymbol(CurrentChar))
             {
-                case 'h':
-                case 'n':
-                case 'f':
-                case 'r':
-                case 'o':
-                case 't':
-                    buffer.Push(CurrentChar);
-                    Next();
-                    break;
-                default:
-                    _kind = TokenKind.IdentifierToken;
-                    Next();
-                    break;
+                EmitToken(MatchKeywordKind(buffer.ToString()), buffer.ToString());
+                return;
             }
-            // StringBuilder buffer = new StringBuilder();
+            else
+            {
+                buffer.Append(CurrentChar);
 
-            // int offset = 0;
+                TokenKind matchKind = MatchKeywordKind(buffer.ToString());
 
-            // _kind = TokenKind.IdentifierToken;
-
-            // while (MatchKeywordKind(buffer.ToString()) == TokenKind.IdentifierToken || MatchKeywordKind(buffer.ToString()) == TokenKind.UnrecognisedToken)
-            // {
-            //     if (_position + offset < _text.Length)
-            //     {
-            //         buffer.Append(_text[_position + offset]);
-            //         offset++;
-            //     }
-            //     else
-            //     {
-            //         break;
-            //     }
-            // }
-
-            // _kind = MatchKeywordKind(buffer.ToString());
-            // Next(offset);
-
-            // switch (LookaheadChar)
-            // {
-            //     case 'h':
-            //     case 'n':
-            //     case 'f':
-            //     case 'r':
-            //     case 'o':
-            //     case 't':
-            //         buffer.Append(CurrentChar);
-            //         Next();
-            //         break;
-            //     default:
-            //         _kind = TokenKind.IdentifierToken;
-            //         Next();
-            //         break;
-            // }
+                if (matchKind != TokenKind.IdentifierToken
+                    && matchKind != TokenKind.UnrecognisedToken)
+                {
+                    EmitToken(matchKind, buffer.ToString());
+                }
+            }
         }
 
         /*
@@ -387,6 +357,9 @@ namespace Illumi_CLI
             }
 
             _kind = TokenKind.WhitespaceToken;
+            _tokenLength = _position - _tokenStart;
+            _tokenText = _text.Substring(_tokenStart, _tokenLength);
+            EmitToken(_kind, _tokenText);
         }
 
         private void HandleComment()
@@ -409,7 +382,6 @@ namespace Illumi_CLI
                     case '\n':
                     case '$':
                         _diagnostics.Lexer_ReportMalformedComment(_tokenStart, _lineNumber);
-                        _diagnostics.ErrorCount++;
                         finishedComment = true;
                         return;
 
@@ -435,7 +407,6 @@ namespace Illumi_CLI
                         {
                             erroneousSpan = new TextSpan(_tokenStart, 1);
                             _diagnostics.Lexer_ReportInvalidCharacterInComment(erroneousSpan, _lineNumber, CurrentChar);
-                            _diagnostics.ErrorCount++;
                             finishedComment = true;
                             return;
                         }
@@ -444,6 +415,9 @@ namespace Illumi_CLI
             }
 
             _kind = TokenKind.CommentToken;
+            _tokenLength = _position - _tokenStart;
+            _tokenText = _text.Substring(_tokenStart, _tokenLength);
+            EmitToken(_kind, _tokenText);
         }
 
         // in the special case where we encounter a string, take anything between
@@ -469,7 +443,6 @@ namespace Illumi_CLI
                     case '$':
                         erroneousSpan = new TextSpan(_tokenStart, 1);
                         _diagnostics.Lexer_ReportUnterminatedString(erroneousSpan, _lineNumber);
-                        _diagnostics.ErrorCount++;
                         finishedString = true;
                         return;
 
@@ -506,7 +479,6 @@ namespace Illumi_CLI
                         {
                             erroneousSpan = new TextSpan(_tokenStart, 1);
                             _diagnostics.Lexer_ReportInvalidCharacterInString(erroneousSpan, _lineNumber, CurrentChar);
-                            _diagnostics.ErrorCount++;
                             finishedString = true;
                             return;
                         }
@@ -515,7 +487,8 @@ namespace Illumi_CLI
             }
 
             _kind = TokenKind.StringToken;
-            _value = stringText.ToString();
+            _tokenText = stringText.ToString();
+            EmitToken(_kind, _tokenText);
         }
     }
 }

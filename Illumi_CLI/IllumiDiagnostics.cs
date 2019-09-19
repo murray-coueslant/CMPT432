@@ -91,6 +91,7 @@ namespace Illumi_CLI
         public void Lexer_ReportInvalidIdentifier(TextSpan span, int lineNumber)
         {
             string type = Error;
+            ErrorCount++;
             string originated = Lexer;
             string message = "Invalid identifier. Identifiers may only be single characters, a - z.";
             ReportDiagnostic(type, span, message, originated, lineNumber);
@@ -107,6 +108,7 @@ namespace Illumi_CLI
         public void Lexer_ReportUnrecognisedToken(TextSpan span, int lineNumber)
         {
             string type = Error;
+            ErrorCount++;
             string originated = Lexer;
             string message = "Unrecognised token found. You have used a character not included in the grammar.";
             ReportDiagnostic(type, span, message, originated, lineNumber);
@@ -115,6 +117,7 @@ namespace Illumi_CLI
         public void Lexer_ReportInvalidCharacter(TextSpan span, int lineNumber, char character)
         {
             string type = Error;
+            ErrorCount++;
             string originated = Lexer;
             string message = $"Invalid character [ {character} ] found in input. See the grammar sheet for alanC to view the permitted characters.";
             ReportDiagnostic(type, span, message, originated, lineNumber);
@@ -131,6 +134,7 @@ namespace Illumi_CLI
         internal void EntryPoint_MalformedCommand()
         {
             string type = Error;
+            ErrorCount++;
             string originated = EntryPoint;
             string message = "Malformed command entered. Run 'help' or '?' to see the syntax for Illumi's commands.";
             ReportDiagnostic(type, originated, message);
@@ -139,6 +143,7 @@ namespace Illumi_CLI
         internal void Lexer_ReportMalformedComment(int startPosition, int lineNumber)
         {
             string type = Error;
+            ErrorCount++;
             string originated = Lexer;
             string message = $"The lexer encountered a malformed comment. Try closing the comment on line {lineNumber + 1}.";
             ReportDiagnostic(type, originated, message);
@@ -166,6 +171,7 @@ namespace Illumi_CLI
         internal void Lexer_ReportUnterminatedString(TextSpan span, int lineNumber)
         {
             string type = Error;
+            ErrorCount++;
             string originated = Lexer;
             string message = "An unterminated string was encountered. Try terminating the string.";
             ReportDiagnostic(type, span, message, originated, lineNumber);
@@ -174,6 +180,7 @@ namespace Illumi_CLI
         internal void Lexer_ReportInvalidCharacterInString(TextSpan span, int lineNumber, char character)
         {
             string type = Error;
+            ErrorCount++;
             string originated = Lexer;
             string message = $"An invalid character ({character}) was encountered in a string. Strings may only contain letters.";
             ReportDiagnostic(type, span, message, originated, lineNumber);
@@ -182,6 +189,7 @@ namespace Illumi_CLI
         internal void Lexer_ReportInvalidCharacterInComment(TextSpan span, int lineNumber, char character)
         {
             string type = Error;
+            ErrorCount++;
             string originated = Lexer;
             string message = $"An invalid character ({character}) was encountered in a comment. Comments may only contain letters, and certain punctuation marks.";
             ReportDiagnostic(type, span, message, originated, lineNumber);

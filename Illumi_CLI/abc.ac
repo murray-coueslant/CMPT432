@@ -1,14 +1,20 @@
 {
+   9123243243421232
    string a
-   a = "hello strings"
+   a != "hello strings"
    print(a)
 }$
 {{{{{{}}}}}}$ 
 {{{{{{}}} /* comments are ignored */ }}}}$
-{ /* comments are still ignored, and can contain some specific symbols - ; : .  int @}$
+{ /* comments are still ignored, and can contain some specific symbols - ; : . */  int }$
 {
    int a
-   a = a
+   a = 9
    string b
    a = b
+   w
+   i
+   p
+   b
+   s
 }$

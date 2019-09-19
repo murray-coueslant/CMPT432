@@ -53,7 +53,7 @@ namespace Illumi_CLI
                             {
                                 Console.WriteLine($"Lexing program {programCounter}.");
                                 LexProgram(lexer);
-                                Console.WriteLine(value: $"Finished lexing program {programCounter}. Lex ended with {lexer.Diagnostics.ErrorCount} errors and {diagnostics.WarningCount} warnings.");
+                                Console.WriteLine(value: $"Finished lexing program {programCounter}. Lex ended with {lexer.Diagnostics.ErrorCount} error(s) and {diagnostics.WarningCount} warnings.");
                                 Console.WriteLine();
                                 programCounter++;
                             }
@@ -100,6 +100,8 @@ namespace Illumi_CLI
             {
                 lexer.Lex();
             }
+
+            lexer.Diagnostics.DisplayDiagnostics();
 
             if (lexer.Diagnostics.ErrorCount >= 1)
             {
