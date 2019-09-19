@@ -208,7 +208,6 @@ namespace Illumi_CLI
                 // now we look out for whitespace, newlines bump up
                 // the line number, spaces, tabs, and returns don't
                 case '\n':
-                case '\r':
                 case ' ':
                 case '\t':
                     HandleWhitespace();
@@ -287,28 +286,46 @@ namespace Illumi_CLI
         private void HandleKeyword()
         {
             StringBuilder buffer = new StringBuilder();
+            int offset = 0;
 
-            buffer.Append(CurrentChar);
+            buffer.Append(lookChar(offset));
 
-            Next();
-
-            if (char.IsWhiteSpace(CurrentChar) || char.IsSymbol(CurrentChar))
+            do
             {
-                EmitToken(MatchKeywordKind(buffer.ToString()), buffer.ToString());
-                return;
-            }
-            else
-            {
-                buffer.Append(CurrentChar);
-
                 TokenKind matchKind = MatchKeywordKind(buffer.ToString());
-
-                if (matchKind != TokenKind.IdentifierToken
-                    && matchKind != TokenKind.UnrecognisedToken)
+                if (matchKind != TokenKind.UnrecognisedToken)
                 {
-                    EmitToken(matchKind, buffer.ToString());
+                    _tokenLength = ++offset;
+                    _tokenText = _text.Substring(_tokenStart, _tokenLength);
+                    EmitToken(matchKind, _tokenText);
+                    for (int i = 0; i < offset; i++)
+                    {
+                        Next();
+                    }
+                    return;
                 }
-            }
+                else if (char.IsWhiteSpace(lookChar(offset + 1)) || char.IsPunctuation(lookChar(offset + 1)))
+                {
+                    foreach (char c in buffer.ToString())
+                    {
+                        
+                    }
+                    matchKind = MatchKeywordKind(buffer.ToString());
+                    if (matchKind == TokenKind.UnrecognisedToken)
+                    {
+                        foreach (char c in buffer.ToString())
+                        {
+                            EmitToken(TokenKind.IdentifierToken, c.ToString());
+                            Next();
+                        }
+                    }
+                }
+                else
+                {
+                    offset++;
+                    buffer.Append(lookChar(offset));
+                }
+            } while (!char.IsPunctuation(lookChar(offset)) && !char.IsWhiteSpace(lookChar(offset)) && _position + offset < _text.Length);
         }
 
         /*
@@ -332,10 +349,6 @@ namespace Illumi_CLI
                 case "int":
                     return TokenKind.Type_IntegerToken;
                 default:
-                    if (text.Length == 1)
-                    {
-                        return TokenKind.IdentifierToken;
-                    }
                     return TokenKind.UnrecognisedToken;
             }
         }
@@ -364,7 +377,7 @@ namespace Illumi_CLI
 
         private void HandleComment()
         {
-            // to handle a comment, we will continure through the text updating positions until we find
+            // to handle a comment, we will continue through the text updating positions until we find
             // the terminator. similar to how we handle strings
             Next();
 
@@ -378,7 +391,6 @@ namespace Illumi_CLI
                 {
                     // handle the end cases (no multiline comments, unfinished comment etc...)
                     case '\0':
-                    case '\r':
                     case '\n':
                     case '$':
                         _diagnostics.Lexer_ReportMalformedComment(_tokenStart, _lineNumber);

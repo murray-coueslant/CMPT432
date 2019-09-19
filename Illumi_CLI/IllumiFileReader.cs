@@ -23,7 +23,7 @@ namespace Illumi_CLI
                     fullFileText = fullFileText + "$";
                 }
 
-                return ExtractPrograms(fullFileText);
+                return ExtractPrograms(fullFileText.Replace("\r", string.Empty));
             }
             else
             {
