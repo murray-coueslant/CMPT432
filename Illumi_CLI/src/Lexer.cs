@@ -286,48 +286,58 @@ namespace Illumi_CLI
 
         private void HandleKeyword()
         {
-            StringBuilder buffer = new StringBuilder();
-            int offset = 0;
-
-            buffer.Append(lookChar(offset));
-
-            do
+            if (TestKeywords())
             {
-                TokenKind matchKind = MatchKeywordKind(buffer.ToString());
-                if (matchKind != TokenKind.UnrecognisedToken)
-                {
-                    _tokenLength = ++offset;
-                    _tokenText = _text.Substring(_tokenStart, _tokenLength);
-                    EmitToken(matchKind, _tokenText);
-                    for (int i = 0; i < offset; i++)
-                    {
-                        Next();
-                    }
-                    return;
-                }
-                else if (char.IsWhiteSpace(lookChar(offset + 1))
-                         || char.IsPunctuation(lookChar(offset + 1))
-                         || char.IsSymbol(lookChar(offset + 1))
-                         )
-                {
-                    if (_keywordFirstCharacters.Contains(buffer.ToString()[0]))
-                    {
-                        if (!TestKeywords())
-                        {
-                            EmitIdentifiers(buffer.ToString());
-                            buffer.Clear();
-                        }
-                    }
-                }
+                return;
+            }
+            else
+            {
+                EmitToken(TokenKind.IdentifierToken, CurrentChar.ToString());
+                Next();
+                return;
+            }
+            // StringBuilder buffer = new StringBuilder();
+            // int offset = 0;
 
-                else
-                {
-                    offset++;
-                    buffer.Append(lookChar(offset));
-                }
-            } while (!char.IsPunctuation(lookChar(offset))
-                         && !char.IsWhiteSpace(lookChar(offset))
-                         && _position + offset < _text.Length);
+            // buffer.Append(lookChar(offset));
+
+            // do
+            // {
+            //     TokenKind matchKind = MatchKeywordKind(buffer.ToString());
+            //     if (matchKind != TokenKind.UnrecognisedToken)
+            //     {
+            //         _tokenLength = ++offset;
+            //         _tokenText = _text.Substring(_tokenStart, _tokenLength);
+            //         EmitToken(matchKind, _tokenText);
+            //         for (int i = 0; i < offset; i++)
+            //         {
+            //             Next();
+            //         }
+            //         return;
+            //     }
+            //     else if (char.IsWhiteSpace(lookChar(offset + 1))
+            //              || char.IsPunctuation(lookChar(offset + 1))
+            //              || char.IsSymbol(lookChar(offset + 1))
+            //              )
+            //     {
+            //         if (_keywordFirstCharacters.Contains(buffer.ToString()[0]))
+            //         {
+            //             if (!TestKeywords())
+            //             {
+            //                 EmitIdentifiers(buffer.ToString());
+            //                 buffer.Clear();
+            //             }
+            //         }
+            //     }
+
+            //     else
+            //     {
+            //         offset++;
+            //         buffer.Append(lookChar(offset));
+            //     }
+            // } while (!char.IsPunctuation(lookChar(offset))
+            //              && !char.IsWhiteSpace(lookChar(offset))
+            //              && _position + offset < _text.Length);
         }
 
         private void EmitIdentifiers(string buffer)
@@ -360,6 +370,10 @@ namespace Illumi_CLI
                 if (_text.Substring(_position, entry.Value.Length) == entry.Value)
                 {
                     EmitToken(entry.Key, entry.Value);
+                    for (int i = 0; i < entry.Value.Length; i++)
+                    {
+                        Next();
+                    }
                     return true;
                 }
             }
