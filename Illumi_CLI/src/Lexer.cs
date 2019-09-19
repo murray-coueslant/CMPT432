@@ -308,32 +308,64 @@ namespace Illumi_CLI
                 else if (char.IsWhiteSpace(lookChar(offset + 1))
                          || char.IsPunctuation(lookChar(offset + 1))
                          || char.IsSymbol(lookChar(offset + 1))
-                         || _keywordFirstCharacters.Contains(lookChar(offset + 1)))
+                         )
                 {
-
-                    // foreach (char c in buffer.ToString())
-                    // {
-
-                    // }
-                    matchKind = MatchKeywordKind(buffer.ToString());
-                    if (matchKind == TokenKind.UnrecognisedToken)
+                    if (_keywordFirstCharacters.Contains(buffer.ToString()[0]))
                     {
-                        foreach (char c in buffer.ToString())
+                        if (!TestKeywords())
                         {
-                            EmitToken(TokenKind.IdentifierToken, c.ToString());
-                            Next();
+                            EmitIdentifiers(buffer.ToString());
+                            buffer.Clear();
                         }
-                        return;
                     }
                 }
+
                 else
                 {
                     offset++;
                     buffer.Append(lookChar(offset));
                 }
             } while (!char.IsPunctuation(lookChar(offset))
-                     && !char.IsWhiteSpace(lookChar(offset))
-                     && _position + offset < _text.Length);
+                         && !char.IsWhiteSpace(lookChar(offset))
+                         && _position + offset < _text.Length);
+        }
+
+        private void EmitIdentifiers(string buffer)
+        {
+            foreach (char c in buffer)
+            {
+                EmitToken(TokenKind.IdentifierToken, c.ToString());
+                Next();
+            }
+            return;
+        }
+
+
+        private bool TestKeywords()
+        {
+            Dictionary<TokenKind, string> keywords = new Dictionary<TokenKind, string>()
+            {
+                {TokenKind.WhileToken, "while"},
+                {TokenKind.IfToken, "if"},
+                {TokenKind.PrintToken, "print"},
+                {TokenKind.Type_BooleanToken, "boolean"},
+                {TokenKind.Type_StringToken, "string"},
+                {TokenKind.Type_IntegerToken, "int"},
+                {TokenKind.TrueToken, "true"},
+                {TokenKind.FalseToken, "false"}
+            };
+
+            foreach (var entry in keywords)
+            {
+                if (_text.Substring(_position, entry.Value.Length) == entry.Value)
+                {
+                    EmitToken(entry.Key, entry.Value);
+                    return true;
+                }
+            }
+
+            return false;
+
         }
 
         /*
