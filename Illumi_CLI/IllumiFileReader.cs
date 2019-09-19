@@ -40,20 +40,13 @@ namespace Illumi_CLI
             int currentPosition = 0;
             int programStartPosition = currentPosition;
 
-            bool inQuotes = false;
-
             int length = 0;
 
             while (currentPosition < sourceText.Length)
             {
                 char currentChar = sourceText[currentPosition];
 
-                if (currentChar == '"')
-                {
-                    inQuotes = !inQuotes;
-                }
-
-                if (currentChar != '$' || (currentChar == '$' && inQuotes))
+                if (currentChar != '$')
                 {
                     length++;
                 }
@@ -68,9 +61,6 @@ namespace Illumi_CLI
 
                 currentPosition++;
             }
-
-            string programSubstring2 = sourceText.Substring(programStartPosition, length).Trim();
-            programs.Add(programSubstring2);
 
             return programs;
         }
