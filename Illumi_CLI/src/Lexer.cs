@@ -340,7 +340,8 @@ namespace Illumi_CLI
                 if (CurrentChar == '\n')
                 {
                     _lineNumber++;
-                    _linePosition = 0;
+                    _linePosition = -1;
+                    Next();
                 }
                 else
                 {
@@ -399,6 +400,7 @@ namespace Illumi_CLI
                             erroneousSpan = new TextSpan(_tokenStart, 1);
                             _diagnostics.Lexer_ReportInvalidCharacterInComment(erroneousSpan, _lineNumber, CurrentChar);
                             finishedComment = true;
+                            Next();
                             return;
                         }
                         break;

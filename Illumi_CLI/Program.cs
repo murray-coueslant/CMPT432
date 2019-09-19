@@ -170,6 +170,10 @@ namespace Illumi_CLI
                         session.setupMode = false;
                         return;
 
+                    case "config":
+                        showConfig(session);
+                        break;
+
                     case "help":
                     case "h":
                     case "?":
@@ -183,9 +187,19 @@ namespace Illumi_CLI
             }
         }
 
+        private static void showConfig(Session session)
+        {
+            Console.WriteLine("The current compiler configuration is:");
+            Console.WriteLine($"\t- debug = {session.debugMode.ToString().ToUpper()}");
+            Console.WriteLine($"\t- verbose = {session.verboseMode.ToString().ToUpper()}");
+        }
+
         private static void showSetupHelp()
         {
-            Console.WriteLine("Setup help message.");
+            Console.WriteLine("The current settings for Illumi are:");
+            Console.WriteLine("\t- debug -> output more specific information about what the compiler is doing");
+            Console.WriteLine("\t- verbose -> Sets the compiler to verbose mode, making it output more informative messages (including comments and whitespace in lex etc...). Not currently implemented.");
+            Console.WriteLine("\t- config -> display the current compiler configuration");
         }
     }
 
