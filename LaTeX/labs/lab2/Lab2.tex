@@ -1,0 +1,160 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% CMPT 432
+% Fall 2019
+% Lab Two
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Short Sectioned Assignment
+% LaTeX Template
+% Version 1.0 (5/5/12)
+%
+% This template has been downloaded from: http://www.LaTeXTemplates.com
+% Original author: % Frits Wenneker (http://www.howtotex.com)
+% License: CC BY-NC-SA 3.0 (http://creativecommons.org/licenses/by-nc-sa/3.0/)
+% Modified by Alan G. Labouseur  - alan@labouseur.com
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%----------------------------------------------------------------------------------------
+%	PACKAGES AND OTHER DOCUMENT CONFIGURATIONS
+%----------------------------------------------------------------------------------------
+
+\documentclass[letterpaper, 10pt,DIV=13]{scrartcl} 
+
+\usepackage[T1]{fontenc} % Use 8-bit encoding that has 256 glyphs
+\usepackage[english]{babel} % English language/hyphenation
+\usepackage{amsmath,amsfonts,amsthm,xfrac} % Math packages
+\usepackage{sectsty} % Allows customizing section commands
+\usepackage{graphicx}
+\usepackage[lined,linesnumbered,commentsnumbered]{algorithm2e}
+\usepackage{listings}
+\usepackage{parskip}
+\usepackage{lastpage}
+\usepackage{hyperref}
+\usepackage{tikz}
+\usetikzlibrary{automata, positioning, arrows, external}
+\tikzexternalize[prefix=tikz/]
+
+\allsectionsfont{\normalfont\scshape} % Make all section titles in default font and small caps.
+
+\usepackage{fancyhdr} % Custom headers and footers
+\pagestyle{fancyplain} % Makes all pages in the document conform to the custom headers and footers
+
+\fancyhead{} % No page header - if you want one, create it in the same way as the footers below
+\fancyfoot[L]{} % Empty left footer
+\fancyfoot[C]{} % Empty center footer
+\fancyfoot[R]{page \thepage\ of \pageref{LastPage}} % Page numbering for right footer
+
+\renewcommand{\headrulewidth}{0pt} % Remove header underlines
+\renewcommand{\footrulewidth}{0pt} % Remove footer underlines
+\setlength{\headheight}{13.6pt} % Customize the height of the header
+
+\numberwithin{equation}{section} % Number equations within sections (i.e. 1.1, 1.2, 2.1, 2.2 instead of 1, 2, 3, 4)
+\numberwithin{figure}{section} % Number figures within sections (i.e. 1.1, 1.2, 2.1, 2.2 instead of 1, 2, 3, 4)
+\numberwithin{table}{section} % Number tables within sections (i.e. 1.1, 1.2, 2.1, 2.2 instead of 1, 2, 3, 4)
+
+\setlength\parindent{0pt} % Removes all indentation from paragraphs.
+
+\binoppenalty=3000
+\relpenalty=3000
+
+\newtheorem{problem}{Problem}
+\newtheorem{solution}{Solution}
+
+%----------------------------------------------------------------------------------------
+%	TITLE SECTION
+%----------------------------------------------------------------------------------------
+
+\newcommand{\horrule}[1]{\rule{\linewidth}{#1}} % Create horizontal rule command with 1 argument of height
+
+\title{	
+   \normalfont \normalsize 
+   \textsc{CMPT 432 - Fall 2019 - Dr. Labouseur} \\[10pt] % Header stuff.
+   \horrule{0.5pt} \\[0.25cm] 	% Top horizontal rule
+   \huge Lab Two - More Token Making (Now With Finite Automata) \\     	    % Assignment title
+   \horrule{0.5pt} \\[0.25cm] 	% Bottom horizontal rule
+}
+
+\author{Murray Coueslant \\ \normalsize murray.coueslant1@marist.edu}
+
+\date{\normalsize\today} 	% Today's date.
+
+\begin{document}
+
+\maketitle % Print the title
+
+%----------------------------------------------------------------------------------------
+%   start DRAGON BOOK
+%----------------------------------------------------------------------------------------
+\section{The Dragon Book}
+
+\subsection{Problem 3.3.4}
+
+\subsubsection{Problem}
+Most languages are case sensitive, so keywords can be written
+only one way, and the regular expressions describing their lexeme is very simple.
+However, some languages, like SQL, are case insensitive, so a keyword can be
+written either in lowercase or in uppercase, or in any mixture of cases. Thus,
+the SQL keyword SELECT can also be written select, Select, or sElEcT, for
+instance. Show how to write a regular expression for a keyword in a case insensitive language. Illustrate the idea by writing the expression for "select" in SQL.
+
+\subsubsection{Solution}
+The way to express case insensitivity using pure regular expressions is to write an expression which includes each letter in the pattern in each case. So for the keyword "SELECT", the case insensitive expression would be:
+$$
+[sS][eE][lL][eE][cC][tT]
+$$
+
+Obviously, this would become grossly inefficient as the pattern grows larger or more complex. And so nowadays most regular expression engines allow the user to use a flag which instructs the engine to ignore case in the expression.
+\newpage
+%----------------------------------------------------------------------------------------
+%   end DRAGON BOOK
+%----------------------------------------------------------------------------------------
+
+%----------------------------------------------------------------------------------------
+%   start CRAFTING A COMPILER
+%----------------------------------------------------------------------------------------
+\section{Crafting A Compiler}
+
+\subsection{Problem 3.3}
+\subsubsection{Problem}
+Write regular expressions that define the strings recognized by the FAs
+in Figure 2.1.
+
+\begin{figure}[htp]
+    \centering
+    \includegraphics{lab2_FAs.png}
+    \caption{FAs for Problem 3.3.}
+    \label{fig:3.33}
+\end{figure}
+\label{Figure 3.33}
+
+\subsubsection{Solution}
+The regular expressions for the above FAs are as follows:
+\begin{itemize}
+    \item $(ab^*a|ba^*b)$
+    \item $(a(bcda|cda)^*)$
+    \item $\epsilon|ab^*c$
+\end{itemize}
+
+\subsection{Problem 3.4}
+\subsubsection{Problem}
+Write DFAs that recognize the tokens defined by the following regular expressions:
+\begin{itemize}
+    \item $(a | (bc)^* d)^+$
+    \item $((0 | 1) ^* (2 | 3)^+ ) | 0011$
+    \item $(a Not(a))^* aaa$
+\end{itemize}
+
+\subsubsection{Solution}
+See the folder named DFAs next to this PDF to view images of the DFAs for this question.
+
+ 
+
+%----------------------------------------------------------------------------------------
+%   end CRAFTING A COMPILER
+%----------------------------------------------------------------------------------------
+
+\end{document}
