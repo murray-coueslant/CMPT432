@@ -157,14 +157,14 @@ namespace Illumi_CLI
             ReportDiagnostic(type, originated, message);
         }
 
-        internal void Lexer_ReportToken(TokenKind kind, string text, int tokenStart, int lineNumber)
+        internal void Lexer_ReportToken(Token token)
         {
-            if (kind != TokenKind.WhitespaceToken)
+            if (token.Kind != TokenKind.WhitespaceToken && token.Kind != TokenKind.CommentToken)
             {
                 string type = Debug;
                 string originated = Lexer;
-                string message = $"Token {kind.ToString()} [ {text} ] found.";
-                Console.WriteLine($"[{type}] - [{originated}] ({tokenStart}:{lineNumber}) -> {message}");
+                string message = $"Token {token.Kind.ToString()} [ {token.Text} ] found.";
+                Console.WriteLine($"[{type}] - [{originated}] ({token.LinePosition}:{token.LineNumber}) -> {message}");
             }
         }
 

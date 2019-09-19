@@ -238,14 +238,14 @@ namespace Illumi_CLI
 
         private void EmitToken(TokenKind kind, string text)
         {
-            Token token = new Token(kind, text);
+            Token token = new Token(kind, text, _lineNumber, _linePosition);
             _tokens.Add(token);
 
             if (_lexerSession.debugMode)
             {
                 if (kind != TokenKind.UnrecognisedToken)
                 {
-                    _diagnostics.Lexer_ReportToken(kind, text, _linePosition - _tokenLength, _lineNumber);
+                    _diagnostics.Lexer_ReportToken(token);
                 }
             }
         }
@@ -296,60 +296,7 @@ namespace Illumi_CLI
                 Next();
                 return;
             }
-            // StringBuilder buffer = new StringBuilder();
-            // int offset = 0;
-
-            // buffer.Append(lookChar(offset));
-
-            // do
-            // {
-            //     TokenKind matchKind = MatchKeywordKind(buffer.ToString());
-            //     if (matchKind != TokenKind.UnrecognisedToken)
-            //     {
-            //         _tokenLength = ++offset;
-            //         _tokenText = _text.Substring(_tokenStart, _tokenLength);
-            //         EmitToken(matchKind, _tokenText);
-            //         for (int i = 0; i < offset; i++)
-            //         {
-            //             Next();
-            //         }
-            //         return;
-            //     }
-            //     else if (char.IsWhiteSpace(lookChar(offset + 1))
-            //              || char.IsPunctuation(lookChar(offset + 1))
-            //              || char.IsSymbol(lookChar(offset + 1))
-            //              )
-            //     {
-            //         if (_keywordFirstCharacters.Contains(buffer.ToString()[0]))
-            //         {
-            //             if (!TestKeywords())
-            //             {
-            //                 EmitIdentifiers(buffer.ToString());
-            //                 buffer.Clear();
-            //             }
-            //         }
-            //     }
-
-            //     else
-            //     {
-            //         offset++;
-            //         buffer.Append(lookChar(offset));
-            //     }
-            // } while (!char.IsPunctuation(lookChar(offset))
-            //              && !char.IsWhiteSpace(lookChar(offset))
-            //              && _position + offset < _text.Length);
         }
-
-        private void EmitIdentifiers(string buffer)
-        {
-            foreach (char c in buffer)
-            {
-                EmitToken(TokenKind.IdentifierToken, c.ToString());
-                Next();
-            }
-            return;
-        }
-
 
         private bool TestKeywords()
         {
@@ -383,31 +330,6 @@ namespace Illumi_CLI
         }
 
         /*
-            Match a given text to the selection of possible keywords, if it does not match then
-            assume it is an identifier.
-        */
-        private TokenKind MatchKeywordKind(string text)
-        {
-            switch (text)
-            {
-                case "while":
-                    return TokenKind.WhileToken;
-                case "print":
-                    return TokenKind.PrintToken;
-                case "if":
-                    return TokenKind.IfToken;
-                case "boolean":
-                    return TokenKind.Type_BooleanToken;
-                case "string":
-                    return TokenKind.Type_StringToken;
-                case "int":
-                    return TokenKind.Type_IntegerToken;
-                default:
-                    return TokenKind.UnrecognisedToken;
-            }
-        }
-
-        /*
             When we come across a whitespace character, simply continue onwards
             until we encounter the next non whitespace character
         */
@@ -420,7 +342,10 @@ namespace Illumi_CLI
                     _lineNumber++;
                     _linePosition = 0;
                 }
-                Next();
+                else
+                {
+                    Next();
+                }
             }
 
             _kind = TokenKind.WhitespaceToken;
@@ -490,9 +415,12 @@ namespace Illumi_CLI
         // the quotes 
         private void HandleString()
         {
+            StringBuilder stringText = new StringBuilder();
+
+            stringText.Append(CurrentChar);
+
             Next();
 
-            StringBuilder stringText = new StringBuilder();
             bool finishedString = false;
 
             TextSpan erroneousSpan;
@@ -514,17 +442,9 @@ namespace Illumi_CLI
 
                     // handle the ending case, where we find another quote character
                     case '"':
-                        if (LookaheadChar == '"')
-                        {
-                            stringText.Append(CurrentChar);
-                            Next();
-                            Next();
-                        }
-                        else
-                        {
-                            Next();
-                            finishedString = true;
-                        }
+                        stringText.Append(CurrentChar);
+                        Next();
+                        finishedString = true;
                         break;
 
                     // handle the case of the string containing spaces
