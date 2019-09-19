@@ -37,6 +37,11 @@ namespace Illumi_CLI
 
                         IList<string> filePrograms = IllumiFileReader.ReadFile(file, currentSession);
 
+                        foreach (string program in filePrograms)
+                        {
+                            Console.WriteLine(program);
+                        }
+
                         currentSession.Diagnostics.DisplayDiagnostics();
 
                         if (filePrograms.Count >= 1)

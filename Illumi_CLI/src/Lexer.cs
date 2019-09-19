@@ -341,6 +341,7 @@ namespace Illumi_CLI
                 {
                     _lineNumber++;
                     _linePosition = 0;
+                    Next();
                 }
                 else
                 {
