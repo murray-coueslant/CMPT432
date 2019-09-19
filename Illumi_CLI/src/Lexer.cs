@@ -21,7 +21,8 @@ namespace Illumi_CLI
         private string _tokenText;
         private TokenKind _kind;
         private object _value;
-        private char[] allowableChars = { '-', ':', ';', ',', '.' };
+        private char[] _allowablePunctuation = { '-', ':', ';', ',', '.' };
+        private char[] _keywordFirstCharacters = { 'i', 'w', 'b', 'p', 's' };
 
         public Lexer(string text, Session session)
         {
@@ -304,12 +305,16 @@ namespace Illumi_CLI
                     }
                     return;
                 }
-                else if (char.IsWhiteSpace(lookChar(offset + 1)) || char.IsPunctuation(lookChar(offset + 1)))
+                else if (char.IsWhiteSpace(lookChar(offset + 1))
+                         || char.IsPunctuation(lookChar(offset + 1))
+                         || char.IsSymbol(lookChar(offset + 1))
+                         || _keywordFirstCharacters.Contains(lookChar(offset + 1)))
                 {
-                    foreach (char c in buffer.ToString())
-                    {
-                        
-                    }
+
+                    // foreach (char c in buffer.ToString())
+                    // {
+
+                    // }
                     matchKind = MatchKeywordKind(buffer.ToString());
                     if (matchKind == TokenKind.UnrecognisedToken)
                     {
@@ -318,6 +323,7 @@ namespace Illumi_CLI
                             EmitToken(TokenKind.IdentifierToken, c.ToString());
                             Next();
                         }
+                        return;
                     }
                 }
                 else
@@ -325,7 +331,9 @@ namespace Illumi_CLI
                     offset++;
                     buffer.Append(lookChar(offset));
                 }
-            } while (!char.IsPunctuation(lookChar(offset)) && !char.IsWhiteSpace(lookChar(offset)) && _position + offset < _text.Length);
+            } while (!char.IsPunctuation(lookChar(offset))
+                     && !char.IsWhiteSpace(lookChar(offset))
+                     && _position + offset < _text.Length);
         }
 
         /*
@@ -411,7 +419,7 @@ namespace Illumi_CLI
                         break;
 
                     default:
-                        if (char.IsLetter(CurrentChar) || allowableChars.Contains(CurrentChar))
+                        if (char.IsLetter(CurrentChar) || _allowablePunctuation.Contains(CurrentChar))
                         {
                             Next();
                         }
