@@ -52,7 +52,7 @@ namespace Illumi_CLI
                             foreach (Lexer lexer in lexers)
                             {
                                 Console.WriteLine($"Lexing program {programCounter}.");
-                                LexProgram(lexer);
+                                LexProgram(lexer, currentSession);
                                 Console.WriteLine(value: $"Finished lexing program {programCounter}. Lex ended with {lexer.Diagnostics.ErrorCount} error(s) and {diagnostics.WarningCount} warnings.");
                                 Console.WriteLine();
                                 programCounter++;
@@ -92,13 +92,20 @@ namespace Illumi_CLI
             Console.ForegroundColor = ConsoleColor.White;
         }
 
-        private static void LexProgram(Lexer lexer)
+        private static void LexProgram(Lexer lexer, Session currentSession)
         {
             lexer.Lex();
 
-            while (lexer.GetTokens().LastOrDefault().Kind != TokenKind.EndOfProgramToken && lexer.Diagnostics.ErrorCount == 0)
+            try
             {
-                lexer.Lex();
+                while (lexer.GetTokens().LastOrDefault().Kind != TokenKind.EndOfProgramToken && lexer.Diagnostics.ErrorCount == 0)
+                {
+                    lexer.Lex();
+                }
+            }
+            catch
+            {
+                currentSession.Diagnostics.Lexer_LexerFindsNoTokens();
             }
 
             lexer.Diagnostics.DisplayDiagnostics();

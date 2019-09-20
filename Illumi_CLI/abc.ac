@@ -14,3 +14,14 @@
     string s
     s = "hey"
 }$
+/* Invalid Characters */
+{ int @}$
+/* Invalid Break Line in String */
+{
+	"two
+	lines"
+}$
+/* Invalid String */
+{
+	"this is good Not:`~!@#$%^&*()_+-=0987654321{}|[];'<>?,./"
+}$

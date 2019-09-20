@@ -9,7 +9,7 @@
       "type": "coreclr",
       "request": "launch",
       "preLaunchTask": "build",
-      "program": "${workspaceFolder}/bin/Debug/netcoreapp2.2/Illumi_CLI.dll",
+      "program": "${workspaceFolder}/bin/Debug/netcoreapp3.0/Illumi_CLI.dll",
       "args": [],
       "cwd": "${workspaceFolder}",
       "console": "integratedTerminal",

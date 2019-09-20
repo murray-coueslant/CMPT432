@@ -114,6 +114,15 @@ namespace Illumi_CLI
             ReportDiagnostic(type, span, message, originated, lineNumber);
         }
 
+        internal void Lexer_LexerFindsNoTokens()
+        {
+            string type = Error;
+            ErrorCount++;
+            string originated = Lexer;
+            string message = "No tokens found in stack. Ending lex.";
+            ReportDiagnostic(type, originated, message);
+        }
+
         public void Lexer_ReportInvalidCharacter(TextSpan span, int lineNumber, char character)
         {
             string type = Error;
