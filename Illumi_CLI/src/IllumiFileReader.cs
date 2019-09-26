@@ -40,13 +40,24 @@ namespace Illumi_CLI
             int currentPosition = 0;
             int programStartPosition = currentPosition;
 
+            Boolean inString = false;
+
             int length = 0;
 
             while (currentPosition < sourceText.Length)
             {
                 char currentChar = sourceText[currentPosition];
 
+                if (currentChar == '"')
+                {
+                    inString = !inString;
+                }
+
                 if (currentChar != '$')
+                {
+                    length++;
+                }
+                else if (currentChar == '$' && inString)
                 {
                     length++;
                 }

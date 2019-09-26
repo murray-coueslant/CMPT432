@@ -191,7 +191,7 @@ namespace Illumi_CLI
             string type = Error;
             ErrorCount++;
             string originated = Lexer;
-            string message = $"An invalid character ({character}) was encountered in a string. Strings may only contain letters.";
+            string message = $"An invalid character ({character}) was encountered in a string. Strings may only contain lower case letters.";
             ReportDiagnostic(type, span, message, originated, lineNumber);
         }
 
@@ -200,7 +200,7 @@ namespace Illumi_CLI
             string type = Error;
             ErrorCount++;
             string originated = Lexer;
-            string message = $"An invalid character ({character}) was encountered in a comment. Comments may only contain letters, and certain punctuation marks.";
+            string message = $"An invalid character ({character}) was encountered in a comment. Comments may only contain lower case letters, and certain punctuation marks.";
             ReportDiagnostic(type, span, message, originated, lineNumber);
         }
     }

@@ -209,33 +209,4 @@ namespace Illumi_CLI
             Console.WriteLine("\t- config -> display the current compiler configuration");
         }
     }
-
-    class Session
-    {
-        public bool setupMode;
-        public bool verboseMode;
-
-        public Session()
-        {
-            Diagnostics = new DiagnosticCollection();
-        }
-
-        public bool debugMode { get; private set; }
-        public DiagnosticCollection Diagnostics { get; private set; }
-
-        internal void setDebugMode()
-        {
-            debugMode = !debugMode;
-
-            Console.WriteLine($"Debug mode changed from {(!debugMode).ToString().ToUpper()} to {debugMode.ToString().ToUpper()}.");
-        }
-
-        internal void setVerboseMode()
-        {
-            verboseMode = !verboseMode;
-
-            Console.WriteLine($"Verbose output mode changed from {(!verboseMode).ToString().ToUpper()} to {verboseMode.ToString().ToUpper()}.");
-        }
-    }
-
 }

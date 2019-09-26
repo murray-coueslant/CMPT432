@@ -1,6 +1,5 @@
-using System.Threading.Tasks.Dataflow;
-using System.Linq;
 using System;
+using System.Linq;
 using System.Collections.Generic;
 using System.Text;
 using Microsoft.CodeAnalysis.Text;
@@ -20,7 +19,6 @@ namespace Illumi_CLI
         private int _tokenLength;
         private string _tokenText;
         private TokenKind _kind;
-        private object _value;
         private char[] _allowablePunctuation = { '-', ':', ';', ',', '.' };
         private char[] _keywordFirstCharacters = { 'i', 'w', 'b', 'p', 's' };
 
@@ -71,7 +69,6 @@ namespace Illumi_CLI
             */
             _tokenStart = _position;
             _kind = TokenKind.UnrecognisedToken;
-            _value = null;
 
             switch (CurrentChar)
             {
@@ -218,7 +215,7 @@ namespace Illumi_CLI
                 // we have either an identifier or a keyword, or a bad character,
                 // or another form of whitespace
                 default:
-                    if (char.IsLetter(CurrentChar))
+                    if (char.IsLower(CurrentChar))
                     {
                         HandleKeywordOrIdentifier();
                     }
@@ -391,7 +388,7 @@ namespace Illumi_CLI
                         break;
 
                     default:
-                        if (char.IsLetter(CurrentChar) || _allowablePunctuation.Contains(CurrentChar))
+                        if (char.IsLower(CurrentChar) || _allowablePunctuation.Contains(CurrentChar))
                         {
                             Next();
                         }
@@ -458,7 +455,7 @@ namespace Illumi_CLI
                     // the default case, where we continue to add to the string,
                     // so long as the character is allowable
                     default:
-                        if (char.IsLetter(CurrentChar))
+                        if (char.IsLower(CurrentChar))
                         {
                             stringText.Append(CurrentChar);
                             Next();
