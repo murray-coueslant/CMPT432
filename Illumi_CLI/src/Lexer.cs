@@ -1,3 +1,4 @@
+using System.Net.Http.Headers;
 using System;
 using System.Linq;
 using System.Collections.Generic;
@@ -266,6 +267,8 @@ namespace Illumi_CLI
                 case 'p':
                 case 'b':
                 case 's':
+                case 'f':
+                case 't':
                     HandleKeyword();
                     return;
                 default:
@@ -311,19 +314,20 @@ namespace Illumi_CLI
 
             foreach (var entry in keywords)
             {
-                if (_text.Substring(_position, entry.Value.Length) == entry.Value)
+                if (_position + entry.Value.Length < _text.Length)
                 {
-                    EmitToken(entry.Key, entry.Value);
-                    for (int i = 0; i < entry.Value.Length; i++)
+                    if (_text.Substring(_position, entry.Value.Length) == entry.Value)
                     {
-                        Next();
+                        EmitToken(entry.Key, entry.Value);
+                        for (int i = 0; i < entry.Value.Length; i++)
+                        {
+                            Next();
+                        }
+                        return true;
                     }
-                    return true;
                 }
             }
-
             return false;
-
         }
 
         /*
