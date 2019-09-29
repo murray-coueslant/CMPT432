@@ -38,5 +38,9 @@ namespace Illumi_CLI
         public void ParseBooleanExpression() { }
 
         public void ParseIdentifier() { }
+
+        public void Match() { }
+
+        public void ConsumeToken() { }
     }
 }
