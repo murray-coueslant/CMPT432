@@ -90,8 +90,16 @@ namespace Illumi_CLI
                                 Console.WriteLine($"Lexing program {programCounter}.");
                                 LexProgram(parser.Lexer, currentSession);
                                 Console.WriteLine($"Finished lexing program {programCounter}. Lex ended with {parser.Lexer.Diagnostics.ErrorCount} error(s) and {diagnostics.WarningCount} warnings.");
-                                Console.WriteLine($"Parsing program {programCounter}.");
-                                ParseProgram(parser, currentSession);
+                                if (parser.Lexer.Diagnostics.ErrorCount > 0)
+                                {
+                                    System.Console.WriteLine("Lex error, cannot parse. Exiting.");
+                                }
+                                else
+                                {
+                                    Console.WriteLine($"Parsing program {programCounter}.");
+                                    ParseProgram(parser, currentSession);
+                                }
+
                                 //Console.WriteLine($"Finished parsing program {programCounter}. Parse ended with {parser.Diagnostics.ErrorCount} error(s) and {diagnostics.WarningCount} warnings.");
                                 Console.WriteLine();
                                 programCounter++;
@@ -158,10 +166,11 @@ namespace Illumi_CLI
 
         private static void ParseProgram(Parser parser, Session currentSession)
         {
-            foreach (Token token in parser.Lexer.GetTokens())
-            {
-                System.Console.WriteLine(token.Kind);
-            }
+            parser.Parse();
+            // foreach (Token token in parser.Lexer.GetTokens())
+            // {
+            //     System.Console.WriteLine(token.Kind);
+            // }
         }
 
         public static string[] getCommand(Session session)

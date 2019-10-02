@@ -52,6 +52,7 @@ namespace Illumi_CLI
         private const string Debug = "Debug";
         private const string EntryPoint = "Entry Point";
         private const string Lexer = "Lexer";
+        private const string Parser = "Parser";
         private const string FileReader = "File Reader";
         private List<Diagnostic> _diagnostics = new List<Diagnostic>();
         public int ErrorCount { get; internal set; }
@@ -202,6 +203,16 @@ namespace Illumi_CLI
             string originated = Lexer;
             string message = $"An invalid character ({character}) was encountered in a comment. Comments may only contain lower case letters, and certain punctuation marks.";
             ReportDiagnostic(type, span, message, originated, lineNumber);
+        }
+
+        internal void Parser_ReportUnexpectedToken(Token foundToken, TokenKind expectedKind)
+        {
+            string type = Error;
+            ErrorCount++;
+            string originated = Parser;
+            TextSpan span = new TextSpan(foundToken.LinePosition, foundToken.Text.Length);
+            string message = $"Unexpected token found in parse stream. Expected a token of type {expectedKind}, but found {foundToken.Kind}";
+            ReportDiagnostic(type, span, message, originated, foundToken.LineNumber);
         }
     }
 }
