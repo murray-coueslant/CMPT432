@@ -92,6 +92,7 @@ namespace Illumi_CLI
                                 Console.WriteLine($"Finished lexing program {programCounter}. Lex ended with {parser.Lexer.Diagnostics.ErrorCount} error(s) and {diagnostics.WarningCount} warnings.");
                                 if (parser.Lexer.Diagnostics.ErrorCount > 0)
                                 {
+                                    //currentSession.Diagnostics.Parser_LexErrorCannotProceed();
                                     System.Console.WriteLine("Lex error, cannot parse. Exiting.");
                                 }
                                 else

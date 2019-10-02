@@ -1,4 +1,4 @@
-Program             ::== Block$ 
+Program             ::== Block $ 
 Block               ::== { StatementList } 
 StatementList       ::== Statement StatementList 
                     ::== ε

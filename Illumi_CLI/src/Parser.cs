@@ -12,30 +12,31 @@ namespace Illumi_CLI
 
         private DiagnosticCollection _diagnostics { get; }
 
-        public List<Token> TokenStream { get; }
+        public List<Token> TokenStream { get; set; }
 
-        public Token currentToken { get; }
+        public Token currentToken { get; set; }
 
         public Parser(Lexer lexer)
         {
             Lexer = lexer;
-            TokenStream = Lexer.GetParseTokens();
-            currentToken = TokenStream.First();
             _diagnostics = new DiagnosticCollection();
         }
 
         public void Parse()
         {
             System.Console.WriteLine("Beginning parse");
+            TokenStream = Lexer.GetTokens();
+            Console.WriteLine(TokenStream.Count);
             if (TokenStream.Count != 0)
             {
                 ParseProgram();
                 _diagnostics.DisplayDiagnostics();
+                DisplayCST();
                 return;
             }
             else
             {
-                _diagnostics.Parser_ReportNoTokens();
+                //_diagnostics.Parser_ReportNoTokens();
                 _diagnostics.DisplayDiagnostics();
                 return;
             }
@@ -45,6 +46,7 @@ namespace Illumi_CLI
         public void ParseProgram()
         {
             System.Console.WriteLine("Entered parse program.");
+            Next();
             ParseBlock();
             MatchAndConsume(TokenKind.EndOfProgramToken);
             Ascend();
@@ -53,6 +55,7 @@ namespace Illumi_CLI
 
         public void ParseBlock()
         {
+            System.Console.WriteLine("Entered parse block.");
             MatchAndConsume(TokenKind.LeftBraceToken);
             ParseStatementList();
             MatchAndConsume(TokenKind.RightBraceToken);
@@ -62,14 +65,15 @@ namespace Illumi_CLI
 
         public void ParseStatementList()
         {
+            Console.WriteLine("Entered parse statement list.");
             ParseStatement();
-
             Ascend();
             return;
         }
 
         public void ParseStatement()
         {
+            Console.WriteLine("Entered parse statement.");
             switch (currentToken.Kind)
             {
                 case TokenKind.PrintToken:
@@ -78,48 +82,116 @@ namespace Illumi_CLI
                 case TokenKind.WhileToken:
                     ParseWhileStatement();
                     break;
+                case TokenKind.IfToken:
+                    ParseIfStatement();
+                    break;
+                case TokenKind.Type_IntegerToken:
+                case TokenKind.Type_StringToken:
+                case TokenKind.Type_BooleanToken:
+                    ParseVariableDeclaration();
+                    break;
+                case TokenKind.LeftBraceToken:
+                    ParseBlock();
+                    break;
+                case TokenKind.IdentifierToken:
+                    ParseAssignmentStatement();
+                    break;
+                default:
+                    break;
             }
-
+            Ascend();
+            return;
         }
 
-        public void ParsePrintStatement() { }
-
-        public void ParseAssignmentStatement() { }
-
-        public void ParseVariableDeclaration() { }
-
-        public void ParseWhileStatement() { }
-
-        public void ParseIfStatement() { }
-
-        public void ParseExpression() { }
-
-        public void ParseIntExpression() { }
-
-        public void ParseStringExpression() { }
-
-        public void ParseBooleanExpression() { }
-
-        public void ParseIdentifier() { }
-
-        public boolean MatchAndConsume(TokenKind expectedKind)
+        public void ParsePrintStatement()
         {
+            Console.WriteLine("Entered parse print statement.");
+        }
+
+        public void ParseAssignmentStatement()
+        {
+            Console.WriteLine("Entered parse assignment statement.");
+        }
+
+        public void ParseVariableDeclaration()
+        {
+            Console.WriteLine("Entered parse variable declaration.");
+        }
+
+        public void ParseWhileStatement()
+        {
+            Console.WriteLine("Entered parse while statement.");
+        }
+
+        public void ParseIfStatement()
+        {
+            Console.WriteLine("Entered parse if statement.");
+        }
+
+        public void ParseExpression()
+        {
+            Console.WriteLine("Entered parse expression.");
+        }
+
+        public void ParseIntExpression()
+        {
+            Console.WriteLine("Entered parse int expression.");
+        }
+
+        public void ParseStringExpression()
+        {
+            Console.WriteLine("Entered parse string expression.");
+        }
+
+        public void ParseBooleanExpression()
+        {
+            Console.WriteLine("Entered parse boolean expression.");
+        }
+
+        public void ParseIdentifier()
+        {
+            Console.WriteLine("Entered parse identifier.");
+        }
+
+        public bool MatchAndConsume(TokenKind expectedKind)
+        {
+            System.Console.WriteLine($"Matching token {expectedKind}.");
+            bool success = false;
             if (currentToken.Kind == expectedKind)
             {
                 ConsumeToken();
-                return true;
             }
             else
             {
                 _diagnostics.Parser_ReportUnexpectedToken(currentToken, expectedKind);
             }
+            return success;
         }
 
         public void ConsumeToken()
         {
-            currentToken = TokenStream.
+            if (TokenStream.Count >= 0)
+            {
+                System.Console.WriteLine($"Consuming token {currentToken.Kind}.");
+                TokenStream.RemoveAt(0);
+                Next();
+            }
+            else
+            {
+                //_diagnostics.Parser_ReportNoRemainingTokens();
+            }
         }
 
-        public void Ascend() { }
+        public void Next()
+        {
+            if (TokenStream.Count > 0)
+            {
+                currentToken = TokenStream.First();
+            }
+        }
+        public void Ascend()
+        {
+            System.Console.WriteLine("Ascending tree");
+        }
     }
 }

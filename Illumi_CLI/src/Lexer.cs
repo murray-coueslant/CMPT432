@@ -236,7 +236,11 @@ namespace Illumi_CLI
         private void EmitToken(TokenKind kind, string text)
         {
             Token token = new Token(kind, text, _lineNumber, _linePosition);
-            _tokens.Add(token);
+
+            if (kind != TokenKind.WhitespaceToken && kind != TokenKind.CommentToken)
+            {
+                _tokens.Add(token);
+            }
 
             if (_lexerSession.debugMode)
             {
@@ -255,11 +259,6 @@ namespace Illumi_CLI
         public List<Token> GetTokens()
         {
             return _tokens;
-        }
-
-        public List<Token> GetParseTokens()
-        {
-            return _tokens.Where(t => t.Kind != TokenKind.WhitespaceToken || t.Kind != TokenKind.CommentToken).ToList();
         }
 
         private void HandleKeywordOrIdentifier()
