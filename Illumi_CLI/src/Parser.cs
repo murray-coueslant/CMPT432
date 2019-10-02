@@ -14,37 +14,73 @@ namespace Illumi_CLI
 
         public List<Token> TokenStream { get; }
 
+        public Token currentToken { get; }
+
         public Parser(Lexer lexer)
         {
             Lexer = lexer;
             TokenStream = Lexer.GetParseTokens();
+            currentToken = TokenStream.First();
             _diagnostics = new DiagnosticCollection();
         }
 
         public void Parse()
         {
-            if (TokenStream.First().Kind == TokenKind.LeftBraceToken)
+            System.Console.WriteLine("Beginning parse");
+            if (TokenStream.Count != 0)
             {
-                System.Console.WriteLine("Beginning parse");
                 ParseProgram();
+                _diagnostics.DisplayDiagnostics();
+                return;
             }
             else
             {
-                _diagnostics.Parser_ReportUnexpectedToken(TokenStream.First(), TokenKind.LeftBraceToken);
+                _diagnostics.Parser_ReportNoTokens();
+                _diagnostics.DisplayDiagnostics();
+                return;
             }
-            _diagnostics.DisplayDiagnostics();
+
         }
 
         public void ParseProgram()
         {
             System.Console.WriteLine("Entered parse program.");
+            ParseBlock();
+            MatchAndConsume(TokenKind.EndOfProgramToken);
+            Ascend();
+            return;
         }
 
-        public void ParseBlock() { }
+        public void ParseBlock()
+        {
+            MatchAndConsume(TokenKind.LeftBraceToken);
+            ParseStatementList();
+            MatchAndConsume(TokenKind.RightBraceToken);
+            Ascend();
+            return;
+        }
 
-        public void ParseStatementList() { }
+        public void ParseStatementList()
+        {
+            ParseStatement();
 
-        public void ParseStatement() { }
+            Ascend();
+            return;
+        }
+
+        public void ParseStatement()
+        {
+            switch (currentToken.Kind)
+            {
+                case TokenKind.PrintToken:
+                    ParsePrintStatement();
+                    break;
+                case TokenKind.WhileToken:
+                    ParseWhileStatement();
+                    break;
+            }
+
+        }
 
         public void ParsePrintStatement() { }
 
@@ -66,23 +102,24 @@ namespace Illumi_CLI
 
         public void ParseIdentifier() { }
 
-        public void Match() { }
-
-        public void ConsumeToken() { }
-    }
-
-    class ShiftReduceParser
-    {
-        private Stack<Token> symbols;
-        private Stack<Token> input;
-
-        public ShiftReduceParser()
+        public boolean MatchAndConsume(TokenKind expectedKind)
         {
-            symbols = new Stack<Token>();
-
-            symbols.First();
+            if (currentToken.Kind == expectedKind)
+            {
+                ConsumeToken();
+                return true;
+            }
+            else
+            {
+                _diagnostics.Parser_ReportUnexpectedToken(currentToken, expectedKind);
+            }
         }
 
+        public void ConsumeToken()
+        {
+            currentToken = TokenStream.
+        }
 
+        public void Ascend() { }
     }
 }
