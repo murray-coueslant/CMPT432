@@ -2,14 +2,29 @@ using System;
 using Microsoft.CodeAnalysis.Text;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Illumi_CLI
 {
-    public class Parser
+    class Parser
     {
-        public Parser() { }
+        public Lexer Lexer { get; }
 
-        public void Parse() { }
+        public Parser(Lexer lexer)
+        {
+            Lexer = lexer;
+            Parse();
+        }
+
+        public void Parse()
+        {
+            if (Lexer.GetTokens().First.kind == TokenKind.LeftBraceToken)
+            {
+                ParseProgram();
+            } else {
+                
+            }
+        }
 
         public void ParseProgram() { }
 
@@ -42,5 +57,20 @@ namespace Illumi_CLI
         public void Match() { }
 
         public void ConsumeToken() { }
+    }
+
+    class ShiftReduceParser
+    {
+        private Stack<Token> symbols;
+        private Stack<Token> input;
+
+        public ShiftReduceParser()
+        {
+            symbols = new Stack<Token>();
+
+            symbols.First();
+        }
+
+
     }
 }

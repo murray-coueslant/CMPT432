@@ -33,18 +33,16 @@ namespace Illumi_CLI
                             break;
                         }
 
-                        FileInfo file = new FileInfo(command[1]);
-
-                        IList<string> filePrograms = IllumiFileReader.ReadFile(file, currentSession);
+                        IList<string> lexerPrograms = openFile(command[1], currentSession);
 
                         currentSession.Diagnostics.DisplayDiagnostics();
 
-                        if (filePrograms.Count >= 1)
+                        if (lexerPrograms.Count >= 1)
                         {
                             IList<Lexer> lexers = new List<Lexer>();
                             int programCounter = 0;
 
-                            foreach (string program in filePrograms)
+                            foreach (string program in lexerPrograms)
                             {
                                 lexers.Add(new Lexer(program, currentSession));
                             }
@@ -57,6 +55,48 @@ namespace Illumi_CLI
                                 Console.WriteLine();
                                 programCounter++;
                             }
+                        }
+                        break;
+
+                    case "parse":
+                        if (command.Length != 2)
+                        {
+                            currentSession.Diagnostics.EntryPoint_MalformedCommand();
+                            break;
+                        }
+
+                        IList<string> parserPrograms = openFile(command[1], currentSession);
+
+                        currentSession.Diagnostics.DisplayDiagnostics();
+
+                        if (parserPrograms.Count >= 1)
+                        {
+                            IList<Lexer> lexers = new List<Lexer>();
+                            IList<Parser> parsers = new List<Parser>();
+                            int programCounter = 0;
+
+                            foreach (string program in parserPrograms)
+                            {
+                                lexers.Add(new Lexer(program, currentSession));
+                            }
+
+                            foreach (Lexer lexer in lexers)
+                            {
+                                parsers.Add(new Parser(lexer));
+                            }
+
+                            foreach (Parser parser in parsers)
+                            {
+                                Console.WriteLine($"Lexing program {programCounter}.");
+                                LexProgram(parser.Lexer, currentSession);
+                                Console.WriteLine($"Finished lexing program {programCounter}. Lex ended with {parser.Lexer.Diagnostics.ErrorCount} error(s) and {diagnostics.WarningCount} warnings.");
+                                Console.WriteLine($"Parsing program {programCounter}.");
+                                ParseProgram(parser, currentSession);
+                                //Console.WriteLine($"Finished parsing program {programCounter}. Parse ended with {parser.Diagnostics.ErrorCount} error(s) and {diagnostics.WarningCount} warnings.");
+                                Console.WriteLine();
+                                programCounter++;
+                            }
+
                         }
                         break;
 
@@ -116,6 +156,14 @@ namespace Illumi_CLI
             }
         }
 
+        private static void ParseProgram(Parser parser, Session currentSession)
+        {
+            foreach (Token token in parser.Lexer.GetTokens())
+            {
+                System.Console.WriteLine(token.Kind);
+            }
+        }
+
         public static string[] getCommand(Session session)
         {
 
@@ -145,6 +193,13 @@ namespace Illumi_CLI
             Console.WriteLine("\t  - Enter into setup mode, to alter some settings for the compiler.");
             Console.WriteLine("\t- help, h, or ?");
             Console.WriteLine("\t- quit, end, exit, close");
+        }
+
+        public static IList<string> openFile(string filePath, Session currentSession)
+        {
+            FileInfo file = new FileInfo(filePath);
+
+            return IllumiFileReader.ReadFile(file, currentSession);
         }
 
         public static void setupMode(Session session)

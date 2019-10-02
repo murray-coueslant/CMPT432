@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace Illumi_CLI
 {
-    class ConcreteSyntaxTree
+    class ConcreteSyntaxTree : Tree
     {
         public ConcreteSyntaxTree() { }
 
