@@ -211,7 +211,7 @@ namespace Illumi_CLI
             ErrorCount++;
             string originated = Parser;
             TextSpan span = new TextSpan(foundToken.LinePosition, foundToken.Text.Length);
-            string message = $"Unexpected token found in parse stream. Expected a token of type {expectedKind}, but found {foundToken.Kind}";
+            string message = $"Unexpected token found in parse stream. Expected a token of type {expectedKind}, but found {foundToken.Kind}.";
             ReportDiagnostic(type, span, message, originated, foundToken.LineNumber);
         }
     }

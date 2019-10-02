@@ -12,22 +12,25 @@ namespace Illumi_CLI
 
         private DiagnosticCollection _diagnostics { get; }
 
+        public List<Token> TokenStream { get; }
+
         public Parser(Lexer lexer)
         {
             Lexer = lexer;
+            TokenStream = Lexer.GetParseTokens();
             _diagnostics = new DiagnosticCollection();
         }
 
         public void Parse()
         {
-            if (Lexer.GetTokens().First().Kind == TokenKind.LeftBraceToken)
+            if (TokenStream.First().Kind == TokenKind.LeftBraceToken)
             {
                 System.Console.WriteLine("Beginning parse");
                 ParseProgram();
             }
             else
             {
-                _diagnostics.Parser_ReportUnexpectedToken(Lexer.GetTokens().First(), TokenKind.LeftBraceToken);
+                _diagnostics.Parser_ReportUnexpectedToken(TokenStream.First(), TokenKind.LeftBraceToken);
             }
             _diagnostics.DisplayDiagnostics();
         }

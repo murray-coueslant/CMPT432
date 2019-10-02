@@ -257,6 +257,11 @@ namespace Illumi_CLI
             return _tokens;
         }
 
+        public List<Token> GetParseTokens()
+        {
+            return _tokens.Where(t => t.Kind != TokenKind.WhitespaceToken || t.Kind != TokenKind.CommentToken).ToList();
+        }
+
         private void HandleKeywordOrIdentifier()
         {
             switch (CurrentChar)
