@@ -1,3 +1,4 @@
+using System.Text.RegularExpressions;
 using System;
 using Microsoft.CodeAnalysis.Text;
 using System.Collections;
@@ -106,51 +107,181 @@ namespace Illumi_CLI
         public void ParsePrintStatement()
         {
             Console.WriteLine("Entered parse print statement.");
+            MatchAndConsume(TokenKind.PrintToken);
+            ParseParenthesisedExpression();
+            Ascend();
+            return;
         }
 
         public void ParseAssignmentStatement()
         {
             Console.WriteLine("Entered parse assignment statement.");
+            ParseIdentifier();
+            MatchAndConsume(TokenKind.AssignmentToken);
+            ParseExpression();
+            Ascend();
+            return;
         }
 
         public void ParseVariableDeclaration()
         {
             Console.WriteLine("Entered parse variable declaration.");
+            ParseTypeDefinition();
+            ParseIdentifier();
+            Ascend();
+            return;
+        }
+
+        public void ParseTypeDefinition()
+        {
+            switch (currentToken.Kind)
+            {
+                case TokenKind.Type_IntegerToken:
+                    MatchAndConsume(TokenKind.Type_IntegerToken);
+                    break;
+                case TokenKind.Type_BooleanToken:
+                    MatchAndConsume(TokenKind.Type_BooleanToken);
+                    break;
+                case TokenKind.Type_StringToken:
+                    MatchAndConsume(TokenKind.Type_StringToken);
+                    break;
+                default:
+                    break;
+            }
+            Ascend();
+            return;
         }
 
         public void ParseWhileStatement()
         {
             Console.WriteLine("Entered parse while statement.");
+            MatchAndConsume(TokenKind.WhileToken);
+            ParseParenthesisedExpression();
+            Ascend();
+            return;
         }
 
         public void ParseIfStatement()
         {
             Console.WriteLine("Entered parse if statement.");
+            MatchAndConsume(TokenKind.IfToken);
+            ParseParenthesisedExpression();
+            Ascend();
+            return;
         }
 
         public void ParseExpression()
         {
             Console.WriteLine("Entered parse expression.");
+            switch (currentToken.Kind)
+            {
+                case TokenKind.DigitToken:
+                    ParseIntExpression();
+                    break;
+                case TokenKind.StringToken:
+                    ParseStringExpression();
+                    break;
+                case TokenKind.TrueToken:
+                case TokenKind.FalseToken:
+                    ParseBooleanExpression();
+                    break;
+                default:
+                    break;
+            }
+            Ascend();
+            return;
+        }
+
+        public void ParseParenthesisedExpression()
+        {
+            MatchAndConsume(TokenKind.LeftParenthesisToken);
+            ParseExpression();
+            MatchAndConsume(TokenKind.RightParenthesisToken);
+            Ascend();
+            return;
         }
 
         public void ParseIntExpression()
         {
             Console.WriteLine("Entered parse int expression.");
+            MatchAndConsume(TokenKind.DigitToken);
+            if (currentToken.Kind == TokenKind.AdditionToken)
+            {
+                MatchAndConsume(TokenKind.AdditionToken);
+                ParseExpression();
+            }
+            Ascend();
+            return;
         }
 
         public void ParseStringExpression()
         {
             Console.WriteLine("Entered parse string expression.");
+            MatchAndConsume(TokenKind.StringToken);
+            Ascend();
+            return;
         }
 
         public void ParseBooleanExpression()
         {
             Console.WriteLine("Entered parse boolean expression.");
+            if (currentToken.Kind == TokenKind.LeftParenthesisToken)
+            {
+                ParseParenthesisedBooleanExpression();
+            }
+            else
+            {
+                switch (currentToken.Kind)
+                {
+                    case TokenKind.TrueToken:
+                        MatchAndConsume(TokenKind.TrueToken);
+                        break;
+                    case TokenKind.FalseToken:
+                        MatchAndConsume(TokenKind.FalseToken);
+                        break;
+                    default:
+                        break;
+                }
+            }
+            Ascend();
+            return;
+        }
+
+        public void ParseParenthesisedBooleanExpression()
+        {
+            Console.WriteLine("Entered parse paren. boolean expr.");
+            MatchAndConsume(TokenKind.LeftParenthesisToken);
+            ParseExpression();
+            ParseBooleanOperator();
+            ParseExpression();
+            MatchAndConsume(TokenKind.RightParenthesisToken);
+            Ascend();
+            return;
+        }
+
+        public void ParseBooleanOperator()
+        {
+            Console.WriteLine("Entered parse bool op.");
+            switch (currentToken.Kind)
+            {
+                case TokenKind.EquivalenceToken:
+                    MatchAndConsume(TokenKind.EquivalenceToken);
+                    break;
+                case TokenKind.NotEqualToken:
+                    MatchAndConsume(TokenKind.NotEqualToken);
+                    break;
+                default:
+                    break;
+            }
+            Ascend();
+            return;
         }
 
         public void ParseIdentifier()
         {
             Console.WriteLine("Entered parse identifier.");
+            MatchAndConsume(TokenKind.IdentifierToken);
+            Ascend();
         }
 
         public bool MatchAndConsume(TokenKind expectedKind)
@@ -192,6 +323,11 @@ namespace Illumi_CLI
         public void Ascend()
         {
             System.Console.WriteLine("Ascending tree");
+        }
+
+        public void DisplayCST()
+        {
+            System.Console.WriteLine("Displaying CST.");
         }
     }
 }
