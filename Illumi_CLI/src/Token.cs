@@ -1,9 +1,6 @@
-namespace Illumi_CLI
-{
-    class Token
-    {
-        public Token(TokenKind kind, string text, int lineNumber, int linePosition)
-        {
+namespace Illumi_CLI {
+    class Token {
+        public Token (TokenKind kind, string text, int lineNumber, int linePosition) {
             Kind = kind;
             Text = text;
             LineNumber = lineNumber;

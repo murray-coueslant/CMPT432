@@ -1,19 +1,16 @@
 using System;
-using System.Linq;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using Microsoft.CodeAnalysis.Text;
 
-namespace Illumi_CLI
-{
-    class Session
-    {
+namespace Illumi_CLI {
+    class Session {
         public bool setupMode;
         public bool verboseMode;
 
-        public Session()
-        {
-            Diagnostics = new DiagnosticCollection();
+        public Session () {
+            Diagnostics = new DiagnosticCollection ();
             debugMode = true;
             verboseMode = true;
         }
@@ -21,18 +18,16 @@ namespace Illumi_CLI
         public bool debugMode { get; private set; }
         public DiagnosticCollection Diagnostics { get; private set; }
 
-        internal void setDebugMode()
-        {
+        internal void setDebugMode () {
             debugMode = !debugMode;
 
-            Console.WriteLine($"Debug mode changed from {(!debugMode).ToString().ToUpper()} to {debugMode.ToString().ToUpper()}.");
+            Console.WriteLine ($"Debug mode changed from {(!debugMode).ToString().ToUpper()} to {debugMode.ToString().ToUpper()}.");
         }
 
-        internal void setVerboseMode()
-        {
+        internal void setVerboseMode () {
             verboseMode = !verboseMode;
 
-            Console.WriteLine($"Verbose output mode changed from {(!verboseMode).ToString().ToUpper()} to {verboseMode.ToString().ToUpper()}.");
+            Console.WriteLine ($"Verbose output mode changed from {(!verboseMode).ToString().ToUpper()} to {verboseMode.ToString().ToUpper()}.");
         }
     }
 

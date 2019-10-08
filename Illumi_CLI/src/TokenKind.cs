@@ -1,7 +1,5 @@
-namespace Illumi_CLI
-{
-    public enum TokenKind
-    {
+namespace Illumi_CLI {
+    public enum TokenKind {
         WhitespaceToken,
         LeftBraceToken,
         RightBraceToken,

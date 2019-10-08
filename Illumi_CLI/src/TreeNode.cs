@@ -1,24 +1,19 @@
 using System.Collections.Generic;
 
-namespace Illumi_CLI
-{
-    class TreeNode
-    {
-        public TreeNode(TreeNode parent = null, List<TreeNode> children = null)
-        {
+namespace Illumi_CLI {
+    class TreeNode {
+        public TreeNode (TreeNode parent = null, List<TreeNode> children = null) {
             Parent = parent;
             Children = children;
         }
 
-        public void AddChild(TreeNode newChild)
-        {
-            Children.Add(newChild);
+        public void AddChild (TreeNode newChild) {
+            Children.Add (newChild);
         }
 
         // public void RemoveChild() { }
 
-        public void SetParent(TreeNode newParent)
-        {
+        public void SetParent (TreeNode newParent) {
             Parent = newParent;
         }
 

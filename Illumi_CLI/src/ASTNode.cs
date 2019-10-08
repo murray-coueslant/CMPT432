@@ -1,4 +1,3 @@
-namespace Illumi_CLI
-{
+namespace Illumi_CLI {
     class ASTNode : TreeNode { }
 }
