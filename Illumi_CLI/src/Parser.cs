@@ -17,9 +17,12 @@ namespace Illumi_CLI
 
         public Token currentToken { get; set; }
 
+        public ConcreteSyntaxTree Tree { get; }
+
         public Parser(Lexer lexer)
         {
             Lexer = lexer;
+            Tree = new ConcreteSyntaxTree();
             _diagnostics = new DiagnosticCollection();
         }
 
@@ -27,7 +30,6 @@ namespace Illumi_CLI
         {
             System.Console.WriteLine("Beginning parse");
             TokenStream = Lexer.GetTokens();
-            Console.WriteLine(TokenStream.Count);
             if (TokenStream.Count != 0)
             {
                 ParseProgram();
@@ -68,8 +70,12 @@ namespace Illumi_CLI
         {
             Console.WriteLine("Entered parse statement list.");
             ParseStatement();
-            Ascend();
-            return;
+            // if (currentToken.Kind != TokenKind.EndOfProgramToken)
+            // {
+            //     ParseStatementList();
+            // }
+            // Ascend();
+            // return;
         }
 
         public void ParseStatement()
@@ -108,7 +114,9 @@ namespace Illumi_CLI
         {
             Console.WriteLine("Entered parse print statement.");
             MatchAndConsume(TokenKind.PrintToken);
-            ParseParenthesisedExpression();
+            MatchAndConsume(TokenKind.LeftParenthesisToken);
+            ParseExpression();
+            MatchAndConsume(TokenKind.RightParenthesisToken);
             Ascend();
             return;
         }
@@ -134,6 +142,7 @@ namespace Illumi_CLI
 
         public void ParseTypeDefinition()
         {
+            System.Console.WriteLine("Entered parse type definition.");
             switch (currentToken.Kind)
             {
                 case TokenKind.Type_IntegerToken:
@@ -154,6 +163,7 @@ namespace Illumi_CLI
 
         public void ParseWhileStatement()
         {
+            System.Console.WriteLine("Entered parse while statement");
             Console.WriteLine("Entered parse while statement.");
             MatchAndConsume(TokenKind.WhileToken);
             ParseParenthesisedExpression();
@@ -175,6 +185,9 @@ namespace Illumi_CLI
             Console.WriteLine("Entered parse expression.");
             switch (currentToken.Kind)
             {
+                case TokenKind.IdentifierToken:
+                    ParseIdentifier();
+                    break;
                 case TokenKind.DigitToken:
                     ParseIntExpression();
                     break;
@@ -194,6 +207,7 @@ namespace Illumi_CLI
 
         public void ParseParenthesisedExpression()
         {
+            System.Console.WriteLine("Entered parse parenthesised expression");
             MatchAndConsume(TokenKind.LeftParenthesisToken);
             ParseExpression();
             MatchAndConsume(TokenKind.RightParenthesisToken);
@@ -295,6 +309,7 @@ namespace Illumi_CLI
             else
             {
                 _diagnostics.Parser_ReportUnexpectedToken(currentToken, expectedKind);
+                _diagnostics.DisplayDiagnostics();
             }
             return success;
         }

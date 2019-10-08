@@ -1,4 +1,7 @@
 namespace Illumi_CLI
 {
-    class CSTNode : TreeNode { }
+    class CSTNode : TreeNode
+    {
+
+    }
 }

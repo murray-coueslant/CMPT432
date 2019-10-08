@@ -7,10 +7,16 @@ namespace Illumi_CLI
             Root = root;
         }
 
-        public TreeNode Root { get; }
+        public TreeNode Root { get; set; }
 
-        public void SetRoot(TreeNode newRoot) { }
+        public void SetRoot(TreeNode newRoot)
+        {
+            Root = newRoot;
+        }
 
-        public void DisplayTree() { }
+        public void DisplayTree()
+        {
+
+        }
     }
 }

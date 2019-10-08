@@ -7,12 +7,24 @@ namespace Illumi_CLI
 {
     class ConcreteSyntaxTree : Tree
     {
-        public ConcreteSyntaxTree() { }
+        public ConcreteSyntaxTree()
+        {
 
-        public void AddLeafNode() { }
+        }
 
-        public void AddBranchNode() { }
+        public void AddLeafNode()
+        {
 
-        public void Ascend() { }
+        }
+
+        public void AddBranchNode()
+        {
+
+        }
+
+        public void Ascend()
+        {
+
+        }
     }
 }

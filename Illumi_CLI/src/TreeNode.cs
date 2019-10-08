@@ -10,11 +10,17 @@ namespace Illumi_CLI
             Children = children;
         }
 
-        public void AddChild(TreeNode newChild) { }
+        public void AddChild(TreeNode newChild)
+        {
+            Children.Add(newChild);
+        }
 
-        public void RemoveChild() { }
+        // public void RemoveChild() { }
 
-        public void SetParent(TreeNode newParent) { }
+        public void SetParent(TreeNode newParent)
+        {
+            Parent = newParent;
+        }
 
         public TreeNode Parent { get; private set; }
         public List<TreeNode> Children { get; private set; }
