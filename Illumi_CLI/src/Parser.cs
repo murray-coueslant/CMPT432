@@ -60,12 +60,12 @@ namespace Illumi_CLI {
         public void ParseStatementList () {
             Console.WriteLine ("Entered parse statement list.");
             ParseStatement ();
-            // if (currentToken.Kind != TokenKind.EndOfProgramToken)
-            // {
-            //     ParseStatementList();
-            // }
-            // Ascend();
-            // return;
+            Next ();
+            if (currentToken.Kind != TokenKind.RightBraceToken) {
+                ParseStatementList ();
+            }
+            Ascend ();
+            return;
         }
 
         public void ParseStatement () {
@@ -173,6 +173,9 @@ namespace Illumi_CLI {
                 case TokenKind.StringToken:
                     ParseStringExpression ();
                     break;
+                case TokenKind.LeftParenthesisToken:
+                    ParseParenthesisedExpression ();
+                    break;
                 case TokenKind.TrueToken:
                 case TokenKind.FalseToken:
                     ParseBooleanExpression ();
@@ -226,6 +229,16 @@ namespace Illumi_CLI {
                     default:
                         break;
                 }
+
+                switch (currentToken.Kind) {
+                    case TokenKind.EquivalenceToken:
+                    case TokenKind.NotEqualToken:
+                        ParseBooleanOperator ();
+                        ParseExpression ();
+                        break;
+                    default:
+                        break;
+                }
             }
             Ascend ();
             return;
@@ -262,13 +275,14 @@ namespace Illumi_CLI {
             Console.WriteLine ("Entered parse identifier.");
             MatchAndConsume (TokenKind.IdentifierToken);
             Ascend ();
+            return;
         }
 
         public bool MatchAndConsume (TokenKind expectedKind) {
             System.Console.WriteLine ($"Matching token {expectedKind}.");
             bool success = false;
             if (currentToken.Kind == expectedKind) {
-                ConsumeToken ();
+                success = ConsumeToken ();
             } else {
                 _diagnostics.Parser_ReportUnexpectedToken (currentToken, expectedKind);
                 _diagnostics.DisplayDiagnostics ();
@@ -276,14 +290,16 @@ namespace Illumi_CLI {
             return success;
         }
 
-        public void ConsumeToken () {
+        public bool ConsumeToken () {
             if (TokenStream.Count >= 0) {
                 System.Console.WriteLine ($"Consuming token {currentToken.Kind}.");
                 TokenStream.RemoveAt (0);
                 Next ();
+                return true;
             } else {
                 //_diagnostics.Parser_ReportNoRemainingTokens();
             }
+            return false;
         }
 
         public void Next () {
