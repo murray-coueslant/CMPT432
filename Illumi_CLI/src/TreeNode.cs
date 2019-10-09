@@ -24,7 +24,7 @@ namespace Illumi_CLI {
             Parent = newParent;
         }
 
-        public TreeNode Parent { get; private set; }
+        public TreeNode Parent { get; set; }
         public List<TreeNode> Children { get; private set; }
         public TreeNode mostRecentChild { get; private set; }
         public bool Leaf { get; set; }

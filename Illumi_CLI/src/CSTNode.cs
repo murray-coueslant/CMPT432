@@ -10,5 +10,9 @@ namespace Illumi_CLI {
         public CSTNode (string type = null) : base () {
             Type = type;
         }
+
+        public void SetParent (CSTNode newParent) {
+            Parent = newParent;
+        }
     }
 }
