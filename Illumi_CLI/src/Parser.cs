@@ -53,6 +53,7 @@ namespace Illumi_CLI {
 
         public void ParseProgram () {
             System.Console.WriteLine ("Entered parse program.");
+            AddBranchNode ("Program");
             Next ();
             ParseBlock ();
             MatchAndConsume (TokenKind.EndOfProgramToken);
@@ -62,6 +63,7 @@ namespace Illumi_CLI {
 
         public void ParseBlock () {
             System.Console.WriteLine ("Entered parse block.");
+            AddBranchNode ("Block");
             MatchAndConsume (TokenKind.LeftBraceToken);
             ParseStatementList ();
             MatchAndConsume (TokenKind.RightBraceToken);
@@ -71,6 +73,7 @@ namespace Illumi_CLI {
 
         public void ParseStatementList () {
             Console.WriteLine ("Entered parse statement list.");
+            AddBranchNode ("StatementList");
             ParseStatement ();
             Next ();
             if (currentToken.Kind != TokenKind.RightBraceToken && currentToken.Kind != TokenKind.EndOfProgramToken) {
@@ -82,6 +85,7 @@ namespace Illumi_CLI {
 
         public void ParseStatement () {
             Console.WriteLine ("Entered parse statement.");
+            AddBranchNode ("Statement");
             switch (currentToken.Kind) {
                 case TokenKind.PrintToken:
                     ParsePrintStatement ();
@@ -120,6 +124,7 @@ namespace Illumi_CLI {
 
         public void ParsePrintStatement () {
             Console.WriteLine ("Entered parse print statement.");
+            AddBranchNode (TokenKind.PrintToken.ToString ());
             MatchAndConsume (TokenKind.PrintToken);
             MatchAndConsume (TokenKind.LeftParenthesisToken);
             ParseExpression ();
@@ -130,6 +135,7 @@ namespace Illumi_CLI {
 
         public void ParseAssignmentStatement () {
             Console.WriteLine ("Entered parse assignment statement.");
+            AddBranchNode (TokenKind.AssignmentToken.ToString ());
             ParseIdentifier ();
             MatchAndConsume (TokenKind.AssignmentToken);
             ParseExpression ();
@@ -139,6 +145,7 @@ namespace Illumi_CLI {
 
         public void ParseVariableDeclaration () {
             Console.WriteLine ("Entered parse variable declaration.");
+            AddBranchNode ("VariableDeclaration");
             ParseTypeDefinition ();
             ParseIdentifier ();
             Ascend ();
@@ -147,6 +154,7 @@ namespace Illumi_CLI {
 
         public void ParseTypeDefinition () {
             System.Console.WriteLine ("Entered parse type definition.");
+            AddBranchNode ("Type");
             switch (currentToken.Kind) {
                 case TokenKind.Type_IntegerToken:
                     MatchAndConsume (TokenKind.Type_IntegerToken);
@@ -166,6 +174,7 @@ namespace Illumi_CLI {
 
         public void ParseWhileStatement () {
             Console.WriteLine ("Entered parse while statement.");
+            AddBranchNode (TokenKind.WhileToken.ToString ());
             MatchAndConsume (TokenKind.WhileToken);
             ParseExpression ();
             Ascend ();
@@ -174,6 +183,7 @@ namespace Illumi_CLI {
 
         public void ParseIfStatement () {
             Console.WriteLine ("Entered parse if statement.");
+            AddBranchNode (TokenKind.IfToken.ToString ());
             MatchAndConsume (TokenKind.IfToken);
             ParseExpression ();
             Ascend ();
@@ -182,6 +192,7 @@ namespace Illumi_CLI {
 
         public void ParseExpression () {
             Console.WriteLine ("Entered parse expression.");
+            AddBranchNode ("Expression");
             switch (currentToken.Kind) {
                 case TokenKind.IdentifierToken:
                     ParseIdentifier ();
@@ -208,6 +219,7 @@ namespace Illumi_CLI {
 
         public void ParseIntExpression () {
             Console.WriteLine ("Entered parse int expression.");
+            AddBranchNode (TokenKind.DigitToken.ToString ());
             MatchAndConsume (TokenKind.DigitToken);
             if (currentToken.Kind == TokenKind.AdditionToken) {
                 MatchAndConsume (TokenKind.AdditionToken);
@@ -219,6 +231,7 @@ namespace Illumi_CLI {
 
         public void ParseStringExpression () {
             Console.WriteLine ("Entered parse string expression.");
+            AddBranchNode (TokenKind.StringToken.ToString ());
             MatchAndConsume (TokenKind.StringToken);
             Ascend ();
             return;
@@ -226,6 +239,7 @@ namespace Illumi_CLI {
 
         public void ParseBooleanExpression () {
             Console.WriteLine ("Entered parse boolean expression.");
+            AddBranchNode (TokenKind.Type_BooleanToken.ToString ());
             if (currentToken.Kind == TokenKind.LeftParenthesisToken) {
                 MatchAndConsume (TokenKind.LeftParenthesisToken);
                 ParseExpression ();
@@ -260,11 +274,14 @@ namespace Illumi_CLI {
 
         public void ParseBooleanOperator () {
             Console.WriteLine ("Entered parse bool op.");
+
             switch (currentToken.Kind) {
                 case TokenKind.EquivalenceToken:
+                    AddBranchNode (TokenKind.EquivalenceToken.ToString ());
                     MatchAndConsume (TokenKind.EquivalenceToken);
                     break;
                 case TokenKind.NotEqualToken:
+                    AddBranchNode (TokenKind.NotEqualToken.ToString ());
                     MatchAndConsume (TokenKind.NotEqualToken);
                     break;
                 default:
@@ -276,6 +293,7 @@ namespace Illumi_CLI {
 
         public void ParseIdentifier () {
             Console.WriteLine ("Entered parse identifier.");
+            AddBranchNode ("Identifier");
             MatchAndConsume (TokenKind.IdentifierToken);
             Ascend ();
             return;
@@ -297,6 +315,7 @@ namespace Illumi_CLI {
             if (TokenStream.Count >= 0) {
                 System.Console.WriteLine ($"Consuming token {currentToken.Kind} [{currentToken.Text}].");
                 TokenStream.RemoveAt (0);
+                AddLeafNode (currentToken);
                 Next ();
                 return true;
             } else {
@@ -322,7 +341,19 @@ namespace Illumi_CLI {
             return;
         }
         public void Ascend () {
-            System.Console.WriteLine ("Ascending tree");
+            Tree.Ascend ();
+        }
+
+        public void AddLeafNode (Token token) {
+            CSTNode node = new CSTNode (token);
+            Tree.AddLeafNode (node);
+            return;
+        }
+
+        public void AddBranchNode (string type) {
+            CSTNode node = new CSTNode (type);
+            Tree.AddBranchNode (node);
+            return;
         }
 
         public void DisplayCST () {

@@ -1,26 +1,25 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Security.Cryptography;
 using Microsoft.CodeAnalysis.Text;
 
 namespace Illumi_CLI {
     class ConcreteSyntaxTree : Tree {
         public ConcreteSyntaxTree (CSTNode root = null) : base (root) { }
 
-        public void AddLeafNode (TreeNode newNode) {
+        public void AddLeafNode (CSTNode newNode) {
             if (Root is null) {
                 SetRoot (newNode);
-                currentNode = Root;
+                currentNode = (CSTNode) Root;
             } else {
                 currentNode.AddChild (newNode);
             }
         }
 
-        public void AddBranchNode (TreeNode newNode) {
+        public void AddBranchNode (CSTNode newNode) {
             if (Root is null) {
                 SetRoot (newNode);
-                currentNode = Root;
+                currentNode = (CSTNode) Root;
             } else {
                 currentNode.AddChild (newNode);
                 UpdateCurrentNode ();
@@ -29,15 +28,19 @@ namespace Illumi_CLI {
         }
 
         public void UpdateCurrentNode () {
-            currentNode = currentNode.mostRecentChild;
+            currentNode = (CSTNode) currentNode.mostRecentChild;
             return;
         }
 
         public void Ascend () {
-            System.Console.WriteLine ($"Ascending from node [{currentNode.Token.Kind}] to [{currentNode.Parent.Token.Kind}].");
-            currentNode = currentNode.Parent;
+            if (currentNode != Root) {
+                System.Console.WriteLine ($"Ascending from node [{currentNode.Type}].");
+                currentNode = (CSTNode) currentNode.Parent;
+            } else {
+                System.Console.WriteLine ("Reached root!");
+            }
+            return;
         }
-
         public CSTNode currentNode { get; set; }
     }
 }
