@@ -10,8 +10,17 @@ namespace Illumi_CLI {
             Root = newRoot;
         }
 
-        public void DisplayTree () {
+        // public void DisplayTree () {
+        //     foreach (TreeNode child in Root.Children) {
+        //         DisplayChildren (child);
+        //     }
+        // }
 
-        }
+        // public void DisplayChildren (TreeNode node) {
+        //     foreach (TreeNode child in node.Children) {
+        //         DisplayChildren (child);
+        //         System.Console.WriteLine (child.ToString ());
+        //     }
+        // }
     }
 }

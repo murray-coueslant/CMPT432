@@ -358,6 +358,7 @@ namespace Illumi_CLI {
 
         public void DisplayCST () {
             System.Console.WriteLine ("Displaying CST.");
+            Tree.DisplayCST ();
         }
     }
 }

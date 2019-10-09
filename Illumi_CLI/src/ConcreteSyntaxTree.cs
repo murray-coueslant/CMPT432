@@ -41,6 +41,28 @@ namespace Illumi_CLI {
             }
             return;
         }
+
+        public void DisplayCST () {
+            foreach (CSTNode child in Root.Children) {
+                DisplayChildren (child);
+                if (!child.Leaf) {
+                    System.Console.WriteLine (child.Type);
+                } else {
+                    System.Console.WriteLine (child.Token.Kind);
+                }
+            }
+        }
+
+        public void DisplayChildren (CSTNode node) {
+            foreach (CSTNode child in node.Children) {
+                DisplayChildren (child);
+                if (!child.Leaf) {
+                    System.Console.WriteLine ($"{child.Type} [{child.Parent}]");
+                } else {
+                    System.Console.WriteLine ($"{child.Token.Kind} [{child.Parent}]");
+                }
+            }
+        }
         public CSTNode currentNode { get; set; }
     }
 }

@@ -9,13 +9,12 @@ namespace Illumi_CLI {
             } else {
                 Children = children;
             }
-
             Leaf = leaf;
         }
 
         public void AddChild (TreeNode newChild) {
             Children.Add (newChild);
-            newChild.Parent = this;
+            newChild.SetParent (this);
             mostRecentChild = newChild;
         }
 
