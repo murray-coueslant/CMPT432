@@ -1,4 +1,59 @@
+{1 + 2 + 3 + 4
+a = 1 + 2 + 3}$
+{}$
+{{{{{{}}}}}}$
+{{{{{{}}}}}$
+{print("")}$
+{print(a)}$
+{print(2)}$
+{print("a")}$
+{print(false)}$
+{print("inta")}$
+print(a){print(a)}$
+{a=1}$
+{a = 1}$
+{a = 1 + 2 + 3 + 4    +    5}$
+{
+
+    int a
+    a = a
+    string b
+    a = b
+}$
+{int a a=a string b a=b}$
+{{{{{{a=1+2+3+4+5{print(4+a)}}}}}}}$
+{
+    /* what about comments */
+    string b
+}$
 {
     boolean d
     d = ("string" != "string")
 }$
+{intfintif=2}$
+{intii=0stringss="hello"booleanbb=(true==(1!=2))if(b==true){while(true!=(b!=(false==(2!=3)))){i=1+iprint(s)}}print("ugly code")}$
+
+/* bad code */
+
+{"two
+lines"}$
+{print("No Caps Mister Bond")}$
+{print("no digits 007")}$
+{int A}$
+{
+    ~!@#%^&*_+{}|:<>?[];',./
+    bool ean d
+}$
+
+/* questionable code */
+
+{"$"}$
+{int a /* unterminated comment }$
+{ a = "unterminated string }$
+{
+    string s
+    s = "this string is /* in */ visible"
+}$
+{intii=0stringss="hello"booleanbb=(true==(1!=2))if(b==true){while(true!=(b!=(false==(2!=3)))){i=1+iprint(s)}}print("ugly code")}$
+{print(007)}$
+{a=12}$

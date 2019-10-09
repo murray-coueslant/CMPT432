@@ -17,6 +17,18 @@ namespace Illumi_CLI {
 
         public ConcreteSyntaxTree Tree { get; }
 
+        public List<TokenKind> recoverySet = new List<TokenKind> () {
+            TokenKind.IdentifierToken,
+            TokenKind.Type_IntegerToken,
+            TokenKind.Type_StringToken,
+            TokenKind.Type_BooleanToken,
+            TokenKind.IfToken,
+            TokenKind.WhileToken,
+            TokenKind.PrintToken,
+            TokenKind.LeftBraceToken,
+            TokenKind.EndOfProgramToken
+        };
+
         public Parser (Lexer lexer) {
             Lexer = lexer;
             Tree = new ConcreteSyntaxTree ();
@@ -61,7 +73,7 @@ namespace Illumi_CLI {
             Console.WriteLine ("Entered parse statement list.");
             ParseStatement ();
             Next ();
-            if (currentToken.Kind != TokenKind.RightBraceToken) {
+            if (currentToken.Kind != TokenKind.RightBraceToken && currentToken.Kind != TokenKind.EndOfProgramToken) {
                 ParseStatementList ();
             }
             Ascend ();
@@ -91,7 +103,15 @@ namespace Illumi_CLI {
                 case TokenKind.LeftBraceToken:
                     ParseBlock ();
                     break;
+                case TokenKind.RightBraceToken:
+                    // this is the case in which a block is empty / statment is null
+                    break;
+                case TokenKind.EndOfProgramToken:
+                    break;
                 default:
+                    //_diagnostics.Parser_ReportIncorrectStatement (currentToken);
+                    System.Console.WriteLine ("Incorrect statement encountered, entering panic recovery mode.");
+                    Panic ();
                     break;
             }
             Ascend ();
@@ -145,7 +165,6 @@ namespace Illumi_CLI {
         }
 
         public void ParseWhileStatement () {
-            System.Console.WriteLine ("Entered parse while statement");
             Console.WriteLine ("Entered parse while statement.");
             MatchAndConsume (TokenKind.WhileToken);
             ParseParenthesisedExpression ();
@@ -292,7 +311,7 @@ namespace Illumi_CLI {
 
         public bool ConsumeToken () {
             if (TokenStream.Count >= 0) {
-                System.Console.WriteLine ($"Consuming token {currentToken.Kind}.");
+                System.Console.WriteLine ($"Consuming token {currentToken.Kind} [{currentToken.Text}].");
                 TokenStream.RemoveAt (0);
                 Next ();
                 return true;
@@ -306,6 +325,16 @@ namespace Illumi_CLI {
             if (TokenStream.Count > 0) {
                 currentToken = TokenStream.First ();
             }
+        }
+
+        public void Panic () {
+            System.Console.WriteLine ("Entering panic recovery mode.");
+            while (!recoverySet.Contains (currentToken.Kind)) {
+                System.Console.WriteLine ($"Throwing out token {currentToken.Kind} [{currentToken.Text}].");
+                ConsumeToken ();
+            }
+            System.Console.WriteLine ("Leaving panic recovery mode.");
+            return;
         }
         public void Ascend () {
             System.Console.WriteLine ("Ascending tree");
