@@ -185,5 +185,14 @@ namespace Illumi_CLI {
             string message = $"Unexpected token found in parse stream. Expected a token of type {expectedKind}, but found {foundToken.Kind}.";
             ReportDiagnostic (type, span, message, originated, foundToken.LineNumber);
         }
+
+        internal void Parser_ReportPanickedToken (Token foundToken) {
+            string type = Warning;
+            WarningCount++;
+            string originated = Parser;
+            TextSpan span = new TextSpan (foundToken.LinePosition, foundToken.Text.Length);
+            string message = $"Panic mode, discarding token [{foundToken.Kind}].";
+            ReportDiagnostic (type, span, message, originated, foundToken.LineNumber);
+        }
     }
 }

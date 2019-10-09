@@ -167,7 +167,7 @@ namespace Illumi_CLI {
         public void ParseWhileStatement () {
             Console.WriteLine ("Entered parse while statement.");
             MatchAndConsume (TokenKind.WhileToken);
-            ParseParenthesisedExpression ();
+            ParseExpression ();
             Ascend ();
             return;
         }
@@ -175,7 +175,7 @@ namespace Illumi_CLI {
         public void ParseIfStatement () {
             Console.WriteLine ("Entered parse if statement.");
             MatchAndConsume (TokenKind.IfToken);
-            ParseParenthesisedExpression ();
+            ParseExpression ();
             Ascend ();
             return;
         }
@@ -193,7 +193,7 @@ namespace Illumi_CLI {
                     ParseStringExpression ();
                     break;
                 case TokenKind.LeftParenthesisToken:
-                    ParseParenthesisedExpression ();
+                    ParseBooleanExpression ();
                     break;
                 case TokenKind.TrueToken:
                 case TokenKind.FalseToken:
@@ -202,15 +202,6 @@ namespace Illumi_CLI {
                 default:
                     break;
             }
-            Ascend ();
-            return;
-        }
-
-        public void ParseParenthesisedExpression () {
-            System.Console.WriteLine ("Entered parse parenthesised expression");
-            MatchAndConsume (TokenKind.LeftParenthesisToken);
-            ParseExpression ();
-            MatchAndConsume (TokenKind.RightParenthesisToken);
             Ascend ();
             return;
         }
@@ -236,7 +227,11 @@ namespace Illumi_CLI {
         public void ParseBooleanExpression () {
             Console.WriteLine ("Entered parse boolean expression.");
             if (currentToken.Kind == TokenKind.LeftParenthesisToken) {
-                ParseParenthesisedBooleanExpression ();
+                MatchAndConsume (TokenKind.LeftParenthesisToken);
+                ParseExpression ();
+                ParseBooleanOperator ();
+                ParseExpression ();
+                MatchAndConsume (TokenKind.RightParenthesisToken);
             } else {
                 switch (currentToken.Kind) {
                     case TokenKind.TrueToken:
@@ -259,17 +254,6 @@ namespace Illumi_CLI {
                         break;
                 }
             }
-            Ascend ();
-            return;
-        }
-
-        public void ParseParenthesisedBooleanExpression () {
-            Console.WriteLine ("Entered parse paren. boolean expr.");
-            MatchAndConsume (TokenKind.LeftParenthesisToken);
-            ParseExpression ();
-            ParseBooleanOperator ();
-            ParseExpression ();
-            MatchAndConsume (TokenKind.RightParenthesisToken);
             Ascend ();
             return;
         }
@@ -330,7 +314,8 @@ namespace Illumi_CLI {
         public void Panic () {
             System.Console.WriteLine ("Entering panic recovery mode.");
             while (!recoverySet.Contains (currentToken.Kind)) {
-                System.Console.WriteLine ($"Throwing out token {currentToken.Kind} [{currentToken.Text}].");
+                _diagnostics.Parser_ReportPanickedToken (currentToken);
+                _diagnostics.DisplayDiagnostics ();
                 ConsumeToken ();
             }
             System.Console.WriteLine ("Leaving panic recovery mode.");
