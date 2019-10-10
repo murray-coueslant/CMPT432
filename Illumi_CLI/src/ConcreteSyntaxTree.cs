@@ -54,7 +54,7 @@ namespace Illumi_CLI {
         }
 
         public void DisplayChildren (CSTNode node) {
-            foreach (CSTNode child in node.Children) {
+            foreach (CSTNode child in node.GetChildren ()) {
                 DisplayChildren (child);
                 if (!child.Leaf) {
                     System.Console.WriteLine ($"{child.Type} [{child.Parent.Type}]");

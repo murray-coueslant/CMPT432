@@ -3,13 +3,7 @@ using System.Collections.Generic;
 namespace Illumi_CLI {
     class TreeNode {
         public TreeNode (TreeNode parent = null, List<TreeNode> children = null, bool leaf = false) {
-            Parent = parent;
-            if (children is null) {
-                Children = new List<TreeNode> ();
-            } else {
-                Children = children;
-            }
-            Leaf = leaf;
+
         }
 
         public void AddChild (TreeNode newChild) {
@@ -24,8 +18,8 @@ namespace Illumi_CLI {
             Parent = newParent;
         }
 
-        public TreeNode Parent { get; set; }
-        public List<TreeNode> Children { get; private set; }
+        // public TreeNode Parent { get; set; }
+        // public List<TreeNode> Children { get; private set; }
         public TreeNode mostRecentChild { get; private set; }
         public bool Leaf { get; set; }
     }
