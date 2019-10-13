@@ -21,6 +21,8 @@ namespace Illumi_CLI {
 
         public int ErrorCount { get; set; }
 
+        public int WarningCount { get; set; }
+
         public List<TokenKind> recoverySet = new List<TokenKind> () {
             TokenKind.IdentifierToken,
             TokenKind.Type_IntegerToken,
@@ -39,26 +41,26 @@ namespace Illumi_CLI {
             CurrentSession = currentSession;
             _diagnostics = new DiagnosticCollection ();
             ErrorCount = 0;
+            WarningCount = 0;
         }
 
         public void Parse () {
             if (CurrentSession.debugMode) {
-                // TODO _diagnostics.Parser_ReportParseBeginning ();
+                _diagnostics.Parser_ReportParseBeginning ();
                 _diagnostics.DisplayDiagnostics ();
             }
             TokenStream = Lexer.GetTokens ();
             if (TokenStream.Count != 0) {
                 ParseProgram ();
-                // TODO y_diagnostics.Parser_ReportEndOfParse (ErrorCount);
-                _diagnostics.DisplayDiagnostics ();
                 DisplayCST ();
-                return;
             } else {
-                // TODO _diagnostics.Parser_ReportNoTokens();
+                _diagnostics.Parser_ReportNoTokens ();
                 _diagnostics.DisplayDiagnostics ();
                 ErrorCount++;
-                return;
             }
+            _diagnostics.Parser_ReportEndOfParse ();
+            _diagnostics.DisplayDiagnostics ();
+            return;
 
         }
 
@@ -72,7 +74,7 @@ namespace Illumi_CLI {
             Next ();
             ParseBlock ();
             MatchAndConsume (TokenKind.EndOfProgramToken);
-            Ascend ();
+            //Ascend ();
             return;
         }
 
@@ -85,6 +87,7 @@ namespace Illumi_CLI {
             MatchAndConsume (TokenKind.LeftBraceToken);
             ParseStatementList ();
             MatchAndConsume (TokenKind.RightBraceToken);
+            Ascend ();
             return;
         }
 
@@ -137,8 +140,7 @@ namespace Illumi_CLI {
                 case TokenKind.EndOfProgramToken:
                     break;
                 default:
-                    // TODO _diagnostics.Parser_ReportIncorrectStatement (currentToken);
-                    // System.Console.WriteLine ("Incorrect statement encountered, entering panic recovery mode.");
+                    _diagnostics.Parser_ReportIncorrectStatement (currentToken);
                     ErrorCount++;
                     Panic ();
                     break;
@@ -385,7 +387,7 @@ namespace Illumi_CLI {
                 Next ();
                 return true;
             } else {
-                // TODO _diagnostics.Parser_ReportNoRemainingTokens();
+                _diagnostics.Parser_ReportNoRemainingTokens ();
             }
             return false;
         }

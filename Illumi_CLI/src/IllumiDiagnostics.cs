@@ -41,6 +41,7 @@ namespace Illumi_CLI {
         private const string Error = "ERROR";
         private const string Warning = "WARNING";
         private const string Debug = "Debug";
+        private const string Information = "Info";
         private const string EntryPoint = "Entry Point";
         private const string Lexer = "Lexer";
         private const string Parser = "Parser";
@@ -48,11 +49,8 @@ namespace Illumi_CLI {
         private List<Diagnostic> _diagnostics = new List<Diagnostic> ();
         public int ErrorCount { get; internal set; }
         public int WarningCount { get; internal set; }
-
         public IEnumerator GetEnumerator () => _diagnostics.GetEnumerator ();
-
         IEnumerator IEnumerable.GetEnumerator () => GetEnumerator ();
-
         public void DisplayDiagnostics () {
             foreach (Diagnostic diag in _diagnostics) {
                 Console.WriteLine (diag.ToString ());
@@ -177,6 +175,30 @@ namespace Illumi_CLI {
             ReportDiagnostic (type, span, message, originated, lineNumber);
         }
 
+        internal void Parser_ReportNoTokens () {
+            string type = Error;
+            string originated = Parser;
+            string message = $"Lexer returned no tokens to the parser. Ending parse.";
+            ErrorCount++;
+            ReportDiagnostic (type, originated, message);
+        }
+
+        internal void Parser_ReportIncorrectStatement (Token token) {
+            string type = Error;
+            string originated = Parser;
+            string message = $"Incorrect statement encountered at column [{token.LinePosition}] on line [{token.LineNumber}]. Entering panic recovery mode.";
+            ErrorCount++;
+            ReportDiagnostic (type, originated, message);
+        }
+
+        internal void Parser_ReportNoRemainingTokens () {
+            string type = Error;
+            string originated = Parser;
+            string message = $"No tokens remaining in parse stream. Parse cannot continue.";
+            ErrorCount++;
+            ReportDiagnostic (type, originated, message);
+        }
+
         internal void Parser_ReportUnexpectedToken (Token foundToken, TokenKind expectedKind) {
             string type = Error;
             ErrorCount++;
@@ -193,6 +215,20 @@ namespace Illumi_CLI {
             TextSpan span = new TextSpan (foundToken.LinePosition, foundToken.Text.Length);
             string message = $"Panic mode, discarding token [{foundToken.Kind}].";
             ReportDiagnostic (type, span, message, originated, foundToken.LineNumber);
+        }
+
+        internal void Parser_ReportParseBeginning () {
+            string type = Information;
+            string originated = Parser;
+            string message = $"Beginning parse.";
+            ReportDiagnostic (type, originated, message);
+        }
+
+        internal void Parser_ReportEndOfParse () {
+            string type = Information;
+            string originated = Parser;
+            string message = $"Finished parsing program. Parse ended with [{ErrorCount}] errors and [{WarningCount}] warnings.";
+            ReportDiagnostic (type, originated, message);
         }
 
         internal void Parser_EnteredParseStage (string stage) {

@@ -75,7 +75,8 @@ namespace Illumi_CLI {
                             foreach (Parser parser in parsers) {
                                 Console.WriteLine ($"[Info] - [Lexer] -> Lexing program {programCounter}.");
                                 LexProgram (parser.Lexer, currentSession);
-                                Console.WriteLine ($"[Info] - [Lexer] -> Finished lexing program {programCounter}. Lex ended with {parser.Lexer.Diagnostics.ErrorCount} error(s) and {diagnostics.WarningCount} warnings.");
+                                Console.WriteLine ($"[Info] - [Lexer] -> Finished lexing program {programCounter}. Lex ended with [{parser.Lexer.Diagnostics.ErrorCount}] error(s) and [{diagnostics.WarningCount}] warnings.");
+                                Console.WriteLine ();
                                 if (parser.Lexer.Diagnostics.ErrorCount > 0) {
                                     //currentSession.Diagnostics.Parser_LexErrorCannotProceed();
                                     System.Console.WriteLine ("[Error] - [Lexer] Lex error, cannot parse. Exiting.");
