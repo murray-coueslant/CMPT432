@@ -40,9 +40,9 @@ namespace Illumi_CLI {
                             }
 
                             foreach (Lexer lexer in lexers) {
-                                Console.WriteLine ($"Lexing program {programCounter}.");
+                                Console.WriteLine ($"[Info] - [Lexer] -> Lexing program {programCounter}.");
                                 LexProgram (lexer, currentSession);
-                                Console.WriteLine (value: $"Finished lexing program {programCounter}. Lex ended with {lexer.Diagnostics.ErrorCount} error(s) and {diagnostics.WarningCount} warnings.");
+                                Console.WriteLine (value: $"[Info] - [Lexer] -> Finished lexing program {programCounter}. Lex ended with {lexer.Diagnostics.ErrorCount} error(s) and {diagnostics.WarningCount} warnings.");
                                 Console.WriteLine ();
                                 programCounter++;
                             }
@@ -69,18 +69,18 @@ namespace Illumi_CLI {
                             }
 
                             foreach (Lexer lexer in lexers) {
-                                parsers.Add (new Parser (lexer));
+                                parsers.Add (new Parser (lexer, currentSession));
                             }
 
                             foreach (Parser parser in parsers) {
-                                Console.WriteLine ($"Lexing program {programCounter}.");
+                                Console.WriteLine ($"[Info] - [Lexer] -> Lexing program {programCounter}.");
                                 LexProgram (parser.Lexer, currentSession);
-                                Console.WriteLine ($"Finished lexing program {programCounter}. Lex ended with {parser.Lexer.Diagnostics.ErrorCount} error(s) and {diagnostics.WarningCount} warnings.");
+                                Console.WriteLine ($"[Info] - [Lexer] -> Finished lexing program {programCounter}. Lex ended with {parser.Lexer.Diagnostics.ErrorCount} error(s) and {diagnostics.WarningCount} warnings.");
                                 if (parser.Lexer.Diagnostics.ErrorCount > 0) {
                                     //currentSession.Diagnostics.Parser_LexErrorCannotProceed();
-                                    System.Console.WriteLine ("Lex error, cannot parse. Exiting.");
+                                    System.Console.WriteLine ("[Error] - [Lexer] Lex error, cannot parse. Exiting.");
                                 } else {
-                                    Console.WriteLine ($"Parsing program {programCounter}.");
+                                    Console.WriteLine ($"[Info] - [Parser] -> Parsing program {programCounter}.");
                                     ParseProgram (parser, currentSession);
                                 }
 

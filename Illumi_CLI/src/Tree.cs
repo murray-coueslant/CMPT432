@@ -30,24 +30,37 @@ namespace Illumi_CLI {
         public void UpdateCurrentNode () {
             currentNode = currentNode.MostRecentChild;
         }
-        public void Ascend () {
+        public void Ascend (Session session) {
             if (currentNode != Root) {
-                System.Console.WriteLine ($"Ascending from node [{currentNode.Type}].");
+                if (session.debugMode) {
+                    System.Console.WriteLine ($"[Debug] - [Tree] -> Ascending from node [{currentNode.Type}] to [{currentNode.Parent.Type}].");
+                }
                 currentNode = currentNode.Parent;
             } else {
-                System.Console.WriteLine ("Reached root!");
+                System.Console.WriteLine ("[Info] - [Parser] -> Reached root!");
             }
             return;
         }
 
-        public static void PrintTree (TreeNode root, string indent, bool lastChild) {
+        public static void PrintTree (TreeNode root, string indent, bool lastChild = true) {
+            // ├──
+            // └──
+            // │
+            string marker = lastChild ? "└── " : "├── ";
+
             if (root.NodeToken != null) {
-                System.Console.WriteLine (indent + "+- " + root.NodeToken.Text);
+                System.Console.Write (indent);
+                System.Console.Write (marker);
+                System.Console.Write (root.NodeToken.Text);
+                System.Console.WriteLine ();
             } else {
-                System.Console.WriteLine (indent + "+- " + root.Type);
+                System.Console.Write (indent);
+                System.Console.Write (marker);
+                System.Console.Write (root.Type);
+                System.Console.WriteLine ();
             }
 
-            indent += lastChild ? "   " : "|  ";
+            indent += lastChild ? "    " : "│   ";
 
             for (int i = 0; i < root.Children.Count; i++) {
                 PrintTree (root.Children[i], indent, i == root.Children.Count - 1);

@@ -194,5 +194,26 @@ namespace Illumi_CLI {
             string message = $"Panic mode, discarding token [{foundToken.Kind}].";
             ReportDiagnostic (type, span, message, originated, foundToken.LineNumber);
         }
+
+        internal void Parser_EnteredParseStage (string stage) {
+            string type = Debug;
+            string originated = Parser;
+            string message = $"Parser attempting to parse grammar object [{stage}].";
+            ReportDiagnostic (type, originated, message);
+        }
+
+        internal void Parser_ReportMatchingToken (TokenKind kind) {
+            string type = Debug;
+            string originated = Parser;
+            string message = $"Attempting to match token of kind {kind}.";
+            ReportDiagnostic (type, originated, message);
+        }
+
+        internal void Parser_ReportConsumingToken (Token token) {
+            string type = Debug;
+            string originated = Parser;
+            string message = $"Found match. Consuming token {token.Kind} [{token.Text}].";
+            ReportDiagnostic (type, originated, message);
+        }
     }
 }
