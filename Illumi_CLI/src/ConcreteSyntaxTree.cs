@@ -8,26 +8,18 @@ namespace Illumi_CLI {
         public ConcreteSyntaxTree (CSTNode root = null) : base (root) { }
 
         public void DisplayCST () {
-            foreach (CSTNode child in Root.Children) {
-                DisplayChildren (child);
-                if (!child.Leaf) {
-                    System.Console.WriteLine (child.Type);
-                } else {
-                    System.Console.WriteLine (child.Token.Kind);
-                }
-            }
+            PrintTree (Root, "", false);
         }
 
-        public void DisplayChildren (CSTNode node) {
-            foreach (CSTNode child in node.GetChildren ()) {
-                DisplayChildren (child);
-                if (!child.Leaf) {
-                    System.Console.WriteLine ($"{child.Type} [{child.Parent.Type}]");
-                } else {
-                    System.Console.WriteLine ($"{child.Token.Kind} [{child.Parent.Type}]");
-                }
-            }
-        }
-        public CSTNode currentNode { get; set; }
+        // public void DisplayChildren (TreeNode node) {
+        //     foreach (TreeNode child in node.Children) {
+        //         DisplayChildren (child);
+        //         if (!child.Leaf) {
+        //             System.Console.WriteLine ($"{child.Type} [{child.Parent.Type}]");
+        //         } else {
+        //             System.Console.WriteLine ($"{child.Type} [{child.Parent.Type}]");
+        //         }
+        //     }
+        // }
     }
 }

@@ -75,7 +75,7 @@ namespace Illumi_CLI {
                     // calculate the length of the token found, and then grab the
                     // text of that token from the program text
                     _tokenLength = _position - _tokenStart;
-                    _tokenText = _text.Substring (_tokenStart, _tokenLength);
+                    _tokenText = _text.Substring (_tokenStart, 1);
                     break;
 
                 case '{':

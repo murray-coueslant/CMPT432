@@ -345,13 +345,13 @@ namespace Illumi_CLI {
         }
 
         public void AddLeafNode (Token token) {
-            CSTNode node = new CSTNode (token);
+            TreeNode node = new TreeNode (null, null, true, token, token.Kind.ToString ());
             Tree.AddLeafNode (node);
             return;
         }
 
         public void AddBranchNode (string type) {
-            CSTNode node = new CSTNode (type);
+            TreeNode node = new TreeNode (null, null, false, null, type);
             Tree.AddBranchNode (node);
             return;
         }

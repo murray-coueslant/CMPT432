@@ -21,14 +21,14 @@ namespace Illumi_CLI {
         }
         public void AddBranchNode (TreeNode node) {
             if (Root is null) {
-                SetRoot (node)
+                SetRoot (node);
             } else {
                 currentNode.AddChild (node);
                 UpdateCurrentNode ();
             }
         }
         public void UpdateCurrentNode () {
-            currentNode = currentNode.mostRecentChild;
+            currentNode = currentNode.MostRecentChild;
         }
         public void Ascend () {
             if (currentNode != Root) {
@@ -38,6 +38,20 @@ namespace Illumi_CLI {
                 System.Console.WriteLine ("Reached root!");
             }
             return;
+        }
+
+        public static void PrintTree (TreeNode root, string indent, bool lastChild) {
+            if (root.NodeToken != null) {
+                System.Console.WriteLine (indent + "+- " + root.NodeToken.Text);
+            } else {
+                System.Console.WriteLine (indent + "+- " + root.Type);
+            }
+
+            indent += lastChild ? "   " : "|  ";
+
+            for (int i = 0; i < root.Children.Count; i++) {
+                PrintTree (root.Children[i], indent, i == root.Children.Count - 1);
+            }
         }
     }
 }
