@@ -32,6 +32,7 @@ namespace Illumi_CLI {
             TokenKind.WhileToken,
             TokenKind.PrintToken,
             TokenKind.LeftBraceToken,
+            TokenKind.RightBraceToken,
             TokenKind.EndOfProgramToken
         };
 
@@ -52,7 +53,14 @@ namespace Illumi_CLI {
             TokenStream = Lexer.GetTokens ();
             if (TokenStream.Count != 0) {
                 ParseProgram ();
-                DisplayCST ();
+                if (ErrorCount > 0) {
+                    _diagnostics.Parser_ParseEndedWithErrors ();
+                    _diagnostics.DisplayDiagnostics ();
+                    Tree.Discard ();
+                } else {
+                    DisplayCST ();
+                }
+
             } else {
                 _diagnostics.Parser_ReportNoTokens ();
                 _diagnostics.DisplayDiagnostics ();
@@ -403,7 +411,8 @@ namespace Illumi_CLI {
             while (!recoverySet.Contains (currentToken.Kind)) {
                 _diagnostics.Parser_ReportPanickedToken (currentToken);
                 _diagnostics.DisplayDiagnostics ();
-                ConsumeToken ();
+                TokenStream.RemoveAt (0);
+                Next ();
             }
             System.Console.WriteLine ("[ERROR] - [Parser] -> Leaving panic recovery mode.");
             return;

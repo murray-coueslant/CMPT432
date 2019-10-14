@@ -238,6 +238,13 @@ namespace Illumi_CLI {
             ReportDiagnostic (type, originated, message);
         }
 
+        internal void Parser_ParseEndedWithErrors () {
+            string type = Information;
+            string originated = Parser;
+            string message = $"Parse encountered errors, discarding concrete syntax tree.";
+            ReportDiagnostic (type, originated, message);
+        }
+
         internal void Parser_ReportMatchingToken (TokenKind kind) {
             string type = Debug;
             string originated = Parser;
