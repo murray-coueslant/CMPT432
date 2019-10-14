@@ -18,6 +18,9 @@ namespace Illumi_CLI {
         public ConcreteSyntaxTree Tree { get; }
 
         public Session CurrentSession { get; set; }
+
+        public int ErrorCount { get; set; }
+
         public int WarningCount { get; set; }
 
         public List<TokenKind> recoverySet = new List<TokenKind> () {
