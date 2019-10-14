@@ -1,0 +1,14 @@
+filename, language, C#, comment, blank, total
+ASTNode.cs, C#, 3, 0, 0, 3
+CSTNode.cs, C#, 4, 0, 1, 5
+ConcreteSyntaxTree.cs, C#, 12, 0, 2, 14
+IllumiDiagnostics.cs, C#, 223, 0, 32, 255
+IllumiFileReader.cs, C#, 51, 0, 13, 64
+Lexer.cs, C#, 313, 50, 58, 421
+Parser.cs, C#, 408, 2, 38, 448
+Session.cs, C#, 26, 0, 8, 34
+Token.cs, C#, 14, 0, 1, 15
+TokenKind.cs, C#, 28, 0, 0, 28
+Tree.cs, C#, 62, 3, 5, 70
+TreeNode.cs, C#, 31, 0, 1, 32
+Total, -, 1175, 55, 159, 1389
