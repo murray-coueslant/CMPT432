@@ -1,18 +1,32 @@
+{}$
+{{{{{{}}}}}}$
+{{{{{{}}}}}$
+{print("")}$
+{print(a)}$
+{print(2)}$
+{print("a")}$
+{print(false)}$
+{print("inta")}$
+print(a){print(a)}$
+{a=1}$
+{a = 1}$
+{a = 1 + 2 + 3 + 4    +    5}$
 {
+
     int a
-    a = a + 2
+    a = a
+    string b
+    a = b
+}$
+{int a a=a string b a=b}$
+{{{{{{a=1+2+3+4+5{print(a+4)}}}}}}}$
+{
+    /* what about comments */
+    string b
 }$
 {
-    s = "strb"
-    print(s)
-    
-    if (a != ) {
-        print("true")
-    }
+    boolean d
+    d = ("string" != "string")
 }$
-{
-	string 1
-}$
-{
-	print($)
-}$
+{intfintif=2}$
+{intii=0stringss="hello"booleanbb=(true==(1!=2))if(b==true){while(true!=(b!=(false==(2!=3)))){i=1+iprint(s)}}print("ugly code")}$

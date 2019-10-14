@@ -475,9 +475,9 @@ namespace Illumi_CLI {
                     case "okay":
                     case "yeah":
                         Tree.DisplayCST ();
-                        break;
+                        return;
                     default:
-                        break;
+                        return;
                 }
             }
         }

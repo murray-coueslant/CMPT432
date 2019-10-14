@@ -55,3 +55,39 @@ lines"}$
 {intii=0stringss="hello"booleanbb=(true==(1!=2))if(b==true){while(true!=(b!=(false==(2!=3)))){i=1+iprint(s)}}print("ugly code")}$
 {print(007)}$
 {a=12}$
+{
+    int a
+    a = a + 2
+}$
+{
+    s = "strb"
+    print(s)
+    
+    if (a != ) {
+        print("true")
+    }
+}$
+{
+	string 1
+}$
+{
+	print($)
+}$
+{
+	int a
+	int b
+	a = 0
+	b = 0
+	while (a != 3) {
+		print(a)
+		while (b != 3) {
+			print(b)
+			b = 1 + b
+			if (b == 2) {
+				print("there is no spoon")
+			}
+		}
+		b = 0
+		a = 1 + 
+	}
+}$
