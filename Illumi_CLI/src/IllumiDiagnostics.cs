@@ -267,7 +267,13 @@ namespace Illumi_CLI {
             ReportDiagnostic (type, originated, message);
         }
 
-        internal void Parser_ReportMissingExpression (Token currentToken) { string type = Error; ErrorCount++; TextSpan span = new TextSpan (currentToken.LinePosition, currentToken.Text.Length); string originated = Parser; string message = "Parser expected an expression and found nothing."; ReportDiagnostic (type, span, message, originated, currentToken.LineNumber); }
-
+        internal void Parser_ReportMissingExpression (Token currentToken) {
+            string type = Error;
+            ErrorCount++;
+            TextSpan span = new TextSpan (currentToken.LinePosition, currentToken.Text.Length);
+            string originated = Parser;
+            string message = "Parser expected an expression and found nothing.";
+            ReportDiagnostic (type, span, message, originated, currentToken.LineNumber);
+        }
     }
 }
