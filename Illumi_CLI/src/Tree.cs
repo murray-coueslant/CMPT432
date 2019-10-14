@@ -33,7 +33,7 @@ namespace Illumi_CLI {
         public void Ascend (Session session) {
             if (currentNode != Root) {
                 if (session.debugMode) {
-                    System.Console.WriteLine ($"[Debug] - [Tree] -> Ascending from node [{currentNode.Type}] to [{currentNode.Parent.Type}].");
+                    System.Console.WriteLine ($"[Debug] - [Tree] -> Ascending from node [ {currentNode.Type} ] to [ {currentNode.Parent.Type} ].");
                 }
                 currentNode = currentNode.Parent;
             } else {
@@ -50,7 +50,7 @@ namespace Illumi_CLI {
 
             System.Console.Write (indent);
             System.Console.Write (marker);
-            System.Console.Write ($"{root.Type} {(root.NodeToken is null ? "" : $"[{root.NodeToken.Text}]")}");
+            System.Console.Write ($"{root.Type} {(root.NodeToken is null ? "" : $"[ {root.NodeToken.Text} ]")}");
             System.Console.WriteLine ();
 
             indent += lastChild ? "    " : "│   ";

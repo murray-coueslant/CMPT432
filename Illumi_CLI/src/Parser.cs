@@ -2,7 +2,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection.Metadata.Ecma335;
 using System.Text.RegularExpressions;
 using Microsoft.CodeAnalysis.Text;
 
@@ -149,7 +148,7 @@ namespace Illumi_CLI {
                     break;
                 case TokenKind.RightBraceToken:
                     // this is the case in which a block is empty / statment is null
-                    break;
+                    return;
                 case TokenKind.EndOfProgramToken:
                     break;
                 default:
@@ -221,7 +220,7 @@ namespace Illumi_CLI {
                     MatchAndConsume (TokenKind.Type_StringToken);
                     break;
                 default:
-                    break;
+                    return;
             }
             Ascend ();
             return;
@@ -279,7 +278,7 @@ namespace Illumi_CLI {
                     ParseBooleanExpression ();
                     break;
                 default:
-                    break;
+                    return;
             }
             Ascend ();
             return;
@@ -335,7 +334,7 @@ namespace Illumi_CLI {
                         MatchAndConsume (TokenKind.FalseToken);
                         break;
                     default:
-                        break;
+                        return;
                 }
 
                 switch (currentToken.Kind) {
@@ -345,7 +344,7 @@ namespace Illumi_CLI {
                         ParseExpression ();
                         break;
                     default:
-                        break;
+                        return;
                 }
             }
             Ascend ();
@@ -367,7 +366,7 @@ namespace Illumi_CLI {
                     MatchAndConsume (TokenKind.NotEqualToken);
                     break;
                 default:
-                    break;
+                    return;
             }
             Ascend ();
             return;
@@ -433,15 +432,17 @@ namespace Illumi_CLI {
             return;
         }
         public void Ascend () {
-            switch (Tree.currentNode.Parent.Type) {
-                case "Program":
-                    if (currentToken.Kind == TokenKind.EndOfProgramToken) {
+            if (Tree.currentNode.Parent != null) {
+                switch (Tree.currentNode.Parent.Type) {
+                    case "Program":
+                        if (currentToken.Kind == TokenKind.EndOfProgramToken) {
+                            Tree.Ascend (CurrentSession);
+                        }
+                        break;
+                    default:
                         Tree.Ascend (CurrentSession);
-                    }
-                    break;
-                default:
-                    Tree.Ascend (CurrentSession);
-                    break;
+                        break;
+                }
             }
         }
 

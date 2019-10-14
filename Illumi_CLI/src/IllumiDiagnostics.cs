@@ -164,7 +164,7 @@ namespace Illumi_CLI {
             string type = Error;
             ErrorCount++;
             string originated = Lexer;
-            string message = $"An invalid character ({character}) was encountered in a string. Strings may only contain lower case letters.";
+            string message = $"An invalid character ( {character} ) was encountered in a string. Strings may only contain lower case letters.";
             ReportDiagnostic (type, span, message, originated, lineNumber);
         }
 
@@ -172,7 +172,7 @@ namespace Illumi_CLI {
             string type = Error;
             ErrorCount++;
             string originated = Lexer;
-            string message = $"An invalid character ({character}) was encountered in a comment. Comments may only contain lower case letters, and certain punctuation marks.";
+            string message = $"An invalid character ( {character} ) was encountered in a comment. Comments may only contain lower case letters, and certain punctuation marks.";
             ReportDiagnostic (type, span, message, originated, lineNumber);
         }
 
@@ -187,7 +187,7 @@ namespace Illumi_CLI {
         internal void Parser_ReportIncorrectStatement (Token token) {
             string type = Error;
             string originated = Parser;
-            string message = $"Incorrect statement encountered at column [{token.LinePosition}] on line [{token.LineNumber}]. Entering panic recovery mode.";
+            string message = $"Incorrect statement encountered at column [ {token.LinePosition} ] on line [ {token.LineNumber} ]. Entering panic recovery mode.";
             ErrorCount++;
             ReportDiagnostic (type, originated, message);
         }
@@ -205,7 +205,7 @@ namespace Illumi_CLI {
             ErrorCount++;
             string originated = Parser;
             TextSpan span = new TextSpan (foundToken.LinePosition, foundToken.Text.Length);
-            string message = $"Unexpected token found in parse stream. Expected a token of type {expectedKind}, but found {foundToken.Kind}.";
+            string message = $"Unexpected token found in parse stream. Expected a token of type [ {expectedKind} ], but found [ {foundToken.Kind} ].";
             ReportDiagnostic (type, span, message, originated, foundToken.LineNumber);
         }
 
@@ -214,7 +214,7 @@ namespace Illumi_CLI {
             WarningCount++;
             string originated = Parser;
             TextSpan span = new TextSpan (foundToken.LinePosition, foundToken.Text.Length);
-            string message = $"Panic mode, discarding token [{foundToken.Kind}].";
+            string message = $"Panic mode, discarding token [ {foundToken.Kind} ].";
             ReportDiagnostic (type, span, message, originated, foundToken.LineNumber);
         }
 
@@ -228,14 +228,14 @@ namespace Illumi_CLI {
         internal void Parser_ReportEndOfParse (int programCount) {
             string type = Information;
             string originated = Parser;
-            string message = $"Finished parsing program {programCount}. Parse ended with [{ErrorCount}] errors and [{WarningCount}] warnings.";
+            string message = $"Finished parsing program {programCount}. Parse ended with [ {ErrorCount} ] errors and [ {WarningCount} ] warnings.";
             ReportDiagnostic (type, originated, message);
         }
 
         internal void Parser_EnteredParseStage (string stage) {
             string type = Debug;
             string originated = Parser;
-            string message = $"Parser attempting to parse grammar object [{stage}].";
+            string message = $"Parser attempting to parse grammar object [ {stage} ].";
             ReportDiagnostic (type, originated, message);
         }
 
@@ -249,14 +249,14 @@ namespace Illumi_CLI {
         internal void Parser_ReportMatchingToken (TokenKind kind) {
             string type = Debug;
             string originated = Parser;
-            string message = $"Attempting to match token of kind {kind}.";
+            string message = $"Attempting to match token of kind [ {kind} ].";
             ReportDiagnostic (type, originated, message);
         }
 
         internal void Parser_ReportConsumingToken (Token token) {
             string type = Debug;
             string originated = Parser;
-            string message = $"Found match. Consuming token {token.Kind} [{token.Text}].";
+            string message = $"Found match. Consuming token {token.Kind} [ {token.Text} ].";
             ReportDiagnostic (type, originated, message);
         }
     }
