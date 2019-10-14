@@ -53,7 +53,13 @@ namespace Illumi_CLI {
         IEnumerator IEnumerable.GetEnumerator () => GetEnumerator ();
         public void DisplayDiagnostics () {
             foreach (Diagnostic diag in _diagnostics) {
-                if (diag.Type == Error) { Console.ForegroundColor = ConsoleColor.Red; Console.WriteLine (diag.ToString ()); Console.ForegroundColor = ConsoleColor.Green; } else { Console.WriteLine (diag.ToString ()); }
+                if (diag.Type == Error) {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine (diag.ToString ());
+                    Console.ForegroundColor = ConsoleColor.Green;
+                } else {
+                    Console.WriteLine (diag.ToString ());
+                }
             }
 
             _diagnostics = new List<Diagnostic> ();

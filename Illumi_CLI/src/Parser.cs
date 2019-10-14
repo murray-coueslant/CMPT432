@@ -346,7 +346,7 @@ namespace Illumi_CLI {
                         ParseExpression ();
                         break;
                     default:
-                        return;
+                        break;
                 }
             }
             Ascend ();
