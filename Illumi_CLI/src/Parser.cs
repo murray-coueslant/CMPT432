@@ -233,7 +233,9 @@ namespace Illumi_CLI {
             }
             AddBranchNode (TokenKind.WhileToken.ToString ());
             MatchAndConsume (TokenKind.WhileToken);
+            MatchAndConsume (TokenKind.LeftParenthesisToken);
             ParseExpression ();
+            MatchAndConsume (TokenKind.RightParenthesisToken);
             Ascend ();
             return;
         }
@@ -245,7 +247,9 @@ namespace Illumi_CLI {
             }
             AddBranchNode (TokenKind.IfToken.ToString ());
             MatchAndConsume (TokenKind.IfToken);
+            MatchAndConsume (TokenKind.LeftParenthesisToken);
             ParseExpression ();
+            MatchAndConsume (TokenKind.RightParenthesisToken);
             Ascend ();
             return;
         }
