@@ -53,7 +53,7 @@ namespace Illumi_CLI {
         IEnumerator IEnumerable.GetEnumerator () => GetEnumerator ();
         public void DisplayDiagnostics () {
             foreach (Diagnostic diag in _diagnostics) {
-                Console.WriteLine (diag.ToString ());
+                if (diag.Type == Error) { Console.ForegroundColor = ConsoleColor.Red; Console.WriteLine (diag.ToString ()); Console.ForegroundColor = ConsoleColor.Green; } else { Console.WriteLine (diag.ToString ()); }
             }
 
             _diagnostics = new List<Diagnostic> ();
@@ -210,8 +210,8 @@ namespace Illumi_CLI {
         }
 
         internal void Parser_ReportPanickedToken (Token foundToken) {
-            string type = Warning;
-            WarningCount++;
+            string type = Error;
+            ErrorCount++;
             string originated = Parser;
             TextSpan span = new TextSpan (foundToken.LinePosition, foundToken.Text.Length);
             string message = $"Panic mode, discarding token [ {foundToken.Kind} ].";
@@ -259,5 +259,15 @@ namespace Illumi_CLI {
             string message = $"Found match. Consuming token {token.Kind} [ {token.Text} ].";
             ReportDiagnostic (type, originated, message);
         }
+
+        internal void Parser_ReportExitedPanicMode () {
+            string type = Error;
+            string originated = Parser;
+            string message = "Leaving panic recovery mode.";
+            ReportDiagnostic (type, originated, message);
+        }
+
+        internal void Parser_ReportMissingExpression (Token currentToken) { string type = Error; ErrorCount++; TextSpan span = new TextSpan (currentToken.LinePosition, currentToken.Text.Length); string originated = Parser; string message = "Parser expected an expression and found nothing."; ReportDiagnostic (type, span, message, originated, currentToken.LineNumber); }
+
     }
 }
