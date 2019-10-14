@@ -83,6 +83,8 @@ namespace Illumi_CLI {
                                 } else {
                                     Console.WriteLine ($"[Info] - [Parser] -> Parsing program {programCounter}.");
                                     ParseProgram (parser, currentSession);
+                                    parser.diagnostics.Parser_ReportEndOfParse (programCounter);
+                                    parser.diagnostics.DisplayDiagnostics ();
                                 }
 
                                 //Console.WriteLine($"Finished parsing program {programCounter}. Parse ended with {parser.Diagnostics.ErrorCount} error(s) and {diagnostics.WarningCount} warnings.");

@@ -50,9 +50,11 @@ namespace Illumi_CLI {
                 } else {
                     length++;
                     string programSubstring = sourceText.Substring (programStartPosition, length).Trim ();
-                    programs.Add (programSubstring);
+                    if (programSubstring.Length > 0) {
+                        programs.Add (programSubstring);
+                        programStartPosition = currentPosition + 1;
+                    }
                     length = 0;
-                    programStartPosition = currentPosition + 1;
                 }
 
                 currentPosition++;

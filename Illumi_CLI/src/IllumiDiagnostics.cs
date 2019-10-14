@@ -139,6 +139,7 @@ namespace Illumi_CLI {
             string type = Error;
             string originated = FileReader;
             string message = $"No file found with the name {fileName}. Try typing a different name or correcting any mistakes.";
+            ErrorCount++;
             ReportDiagnostic (type, originated, message);
         }
 
@@ -224,10 +225,10 @@ namespace Illumi_CLI {
             ReportDiagnostic (type, originated, message);
         }
 
-        internal void Parser_ReportEndOfParse () {
+        internal void Parser_ReportEndOfParse (int programCount) {
             string type = Information;
             string originated = Parser;
-            string message = $"Finished parsing program. Parse ended with [{ErrorCount}] errors and [{WarningCount}] warnings.";
+            string message = $"Finished parsing program {programCount}. Parse ended with [{ErrorCount}] errors and [{WarningCount}] warnings.";
             ReportDiagnostic (type, originated, message);
         }
 
