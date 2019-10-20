@@ -7,13 +7,12 @@ namespace Illumi_CLI {
     class Program {
         static void Main (string[] args) {
             DiagnosticCollection mainDiagnostics = new DiagnosticCollection ();
+            Session currentSession = new Session ();
 
             Console.ForegroundColor = ConsoleColor.Green;
             Console.BackgroundColor = ConsoleColor.Black;
 
             Console.WriteLine ("Welcome to Illumi!");
-
-            Session currentSession = new Session ();
 
             bool commandLineEnded = false;
 
