@@ -149,3 +149,10 @@ lines"}$
         }
     }
 }$
+{
+    int a
+    a = 1
+    if(a==1{
+        print(while(a==5){})
+    }$
+}

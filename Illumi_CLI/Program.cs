@@ -5,10 +5,11 @@ using System.Linq;
 
 namespace Illumi_CLI {
     class Program {
-        static void Main (string[] args) {
-            DiagnosticCollection mainDiagnostics = new DiagnosticCollection ();
-            Session currentSession = new Session ();
 
+        public static DiagnosticCollection mainDiagnostics = new DiagnosticCollection ();
+        public static Session currentSession = new Session ();
+
+        static void Main (string[] args) {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.BackgroundColor = ConsoleColor.Black;
 
@@ -22,7 +23,7 @@ namespace Illumi_CLI {
                 switch (command.FirstOrDefault ().ToLower ()) {
                     case "lex":
                         if (command.Length != 2) {
-                            currentSession.Diagnostics.EntryPoint_MalformedCommand ();
+                            mainDiagnostics.EntryPoint_MalformedCommand ();
                             break;
                         }
 
@@ -33,17 +34,13 @@ namespace Illumi_CLI {
                             int programCounter = 0;
 
                             foreach (string program in lexerPrograms) {
-<<<<<<< HEAD
                                 lexers.Add (new Lexer (program, currentSession, mainDiagnostics));
-=======
-                                lexers.Add (new Lexer (program, currentSession));
->>>>>>> project2
                             }
 
                             foreach (Lexer lexer in lexers) {
-                                Console.WriteLine ($"[Info] - [Lexer] -> Lexing program {programCounter}.");
+                                mainDiagnostics.Lexer_ReportLexStart (programCounter);
                                 LexProgram (lexer, currentSession);
-                                Console.WriteLine (value: $"[Info] - [Lexer] -> Finished lexing program {programCounter}. Lex ended with {lexer.Diagnostics.ErrorCount} error(s) and {mainDiagnostics.WarningCount} warnings.");
+                                mainDiagnostics.Lexer_ReportLexEnd (programCounter);
                                 Console.WriteLine ();
                                 programCounter++;
                             }
@@ -52,7 +49,7 @@ namespace Illumi_CLI {
 
                     case "parse":
                         if (command.Length != 2) {
-                            currentSession.Diagnostics.EntryPoint_MalformedCommand ();
+                            mainDiagnostics.EntryPoint_MalformedCommand ();
                             break;
                         }
 
@@ -64,24 +61,24 @@ namespace Illumi_CLI {
                             int programCounter = 0;
 
                             foreach (string program in parserPrograms) {
-                                lexers.Add (new Lexer (program, currentSession));
+                                lexers.Add (new Lexer (program, currentSession, mainDiagnostics));
                             }
 
                             foreach (Lexer lexer in lexers) {
-                                parsers.Add (new Parser (lexer, currentSession));
+                                parsers.Add (new Parser (lexer, currentSession, mainDiagnostics));
                             }
 
                             foreach (Parser parser in parsers) {
-                                Console.WriteLine ($"[Info] - [Lexer] -> Lexing program {programCounter}.");
+                                mainDiagnostics.Lexer_ReportLexStart (programCounter);
                                 LexProgram (parser.Lexer, currentSession);
-                                Console.WriteLine ($"[Info] - [Lexer] -> Finished lexing program {programCounter}. Lex ended with [{parser.Lexer.Diagnostics.ErrorCount}] error(s) and [{mainDiagnostics.WarningCount}] warnings.");
+                                mainDiagnostics.Lexer_ReportLexEnd (programCounter);
                                 Console.WriteLine ();
-                                if (parser.Lexer.Diagnostics.ErrorCount > 0) {
-                                    System.Console.WriteLine ("[Error] - [Lexer] Lex error, cannot parse. Exiting.");
+                                if (mainDiagnostics.ErrorCount > 0) {
+                                    mainDiagnostics.Parser_EncounteredLexError ();
                                 } else {
-                                    Console.WriteLine ($"[Info] - [Parser] -> Parsing program {programCounter}.");
+                                    mainDiagnostics.Parser_ReportStartOfParse (programCounter);
                                     ParseProgram (parser, currentSession);
-                                    parser.diagnostics.Parser_ReportEndOfParse (programCounter);
+                                    mainDiagnostics.Parser_ReportEndOfParse (programCounter);
                                 }
                                 Console.WriteLine ();
                                 programCounter++;
@@ -90,6 +87,59 @@ namespace Illumi_CLI {
                         }
                         break;
 
+                    case "semantic":
+                        if (command.Length != 2) {
+                            mainDiagnostics.EntryPoint_MalformedCommand ();
+                            break;
+                        }
+
+                        IList<string> programs = openFile (command[1], currentSession);
+
+                        if (programs.Count >= 1) {
+                            IList<Lexer> lexers = new List<Lexer> ();
+                            IList<Parser> parsers = new List<Parser> ();
+                            IList<SemanticAnalyser> semanticAnalysers = new List<SemanticAnalyser> ();
+
+                            int programCounter = 0;
+
+                            foreach (string program in programs) {
+                                lexers.Add (new Lexer (program, currentSession, mainDiagnostics));
+                            }
+
+                            foreach (Lexer lexer in lexers) {
+                                parsers.Add (new Parser (lexer, currentSession, mainDiagnostics));
+                            }
+
+                            foreach (Parser parser in parsers) {
+                                semanticAnalysers.Add (new SemanticAnalyser (parser, currentSession, mainDiagnostics));
+                            }
+
+                            foreach (SemanticAnalyser sA in semanticAnalysers) {
+                                mainDiagnostics.Lexer_ReportLexStart (programCounter);
+                                LexProgram (sA.Parser.Lexer, currentSession);
+                                mainDiagnostics.Lexer_ReportLexEnd (programCounter);
+                                Console.WriteLine ();
+                                if (mainDiagnostics.ErrorCount > 0) {
+                                    mainDiagnostics.Parser_EncounteredLexError ();
+                                } else {
+                                    mainDiagnostics.Parser_ReportStartOfParse (programCounter);
+                                    ParseProgram (sA.Parser, currentSession);
+                                    mainDiagnostics.Parser_ReportEndOfParse (programCounter);
+                                }
+
+                                if (mainDiagnostics.ErrorCount > 0) {
+                                    // todo mainDiagnostics.Semantic_EncounteredParseError();
+                                } else {
+                                    // todo mainDiagnostics.Semantic_ReportStartOfSemantic(programCounter);
+                                    SemanticProgram (sA);
+                                    // todo mainDiagnostics.Semantic_ReportEndOfSemantic(programCounter);
+                                }
+
+                                Console.WriteLine ();
+                                programCounter++;
+                            }
+                        }
+                        break;
                     case "settings":
                     case "options":
                     case "setup":
@@ -112,7 +162,7 @@ namespace Illumi_CLI {
                         break;
 
                     default:
-                        currentSession.Diagnostics.EntryPoint_ReportInvalidCommand ();
+                        mainDiagnostics.EntryPoint_ReportInvalidCommand ();
                         break;
                 }
             }
@@ -123,24 +173,25 @@ namespace Illumi_CLI {
             lexer.Lex ();
 
             try {
-                while (lexer.GetTokens ().LastOrDefault ().Kind != TokenKind.EndOfProgramToken && lexer.Diagnostics.ErrorCount == 0) {
+                while (lexer.GetTokens ().LastOrDefault ().Kind != TokenKind.EndOfProgramToken && mainDiagnostics.ErrorCount == 0) {
                     lexer.Lex ();
                 }
             } catch {
-                currentSession.Diagnostics.Lexer_LexerFindsNoTokens ();
+                mainDiagnostics.Lexer_LexerFindsNoTokens ();
             }
 
-            if (lexer.Diagnostics.ErrorCount >= 1) {
+            if (mainDiagnostics.ErrorCount >= 1) {
                 lexer.ClearTokens ();
             }
-
-            currentSession.Diagnostics.ErrorCount = 0;
-            currentSession.Diagnostics.WarningCount = 0;
 
         }
 
         private static void ParseProgram (Parser parser, Session currentSession) {
             parser.Parse ();
+        }
+
+        private static void SemanticProgram (SemanticAnalyser sA) {
+            sA.Analyse ();
         }
 
         public static string[] getCommand (Session session) {

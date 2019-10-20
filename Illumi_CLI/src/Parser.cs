@@ -9,7 +9,7 @@ namespace Illumi_CLI {
     class Parser {
         public Lexer Lexer { get; }
 
-        public DiagnosticCollection diagnostics { get; }
+        public DiagnosticCollection _diagnostics { get; }
 
         public List<Token> TokenStream { get; set; }
 
@@ -36,31 +36,28 @@ namespace Illumi_CLI {
             TokenKind.EndOfProgramToken
         };
 
-        public Parser (Lexer lexer, Session currentSession) {
+        public Parser (Lexer lexer, Session currentSession, DiagnosticCollection diagnostics) {
             Lexer = lexer;
             Tree = new ConcreteSyntaxTree ();
             CurrentSession = currentSession;
-            diagnostics = new DiagnosticCollection ();
+            _diagnostics = diagnostics;
             ErrorCount = 0;
             WarningCount = 0;
         }
 
         public void Parse () {
-            if (CurrentSession.debugMode) {
-                diagnostics.Parser_ReportParseBeginning ();
-            }
             TokenStream = Lexer.GetTokens ();
             if (TokenStream.Count != 0) {
                 ParseProgram ();
-                if (diagnostics.ErrorCount > 0) {
-                    diagnostics.Parser_ParseEndedWithErrors ();
+                if (_diagnostics.ErrorCount > 0) {
+                    _diagnostics.Parser_ParseEndedWithErrors ();
                     Tree.Discard ();
                 } else {
                     DisplayCST ();
                 }
 
             } else {
-                diagnostics.Parser_ReportNoTokens ();
+                _diagnostics.Parser_ReportNoTokens ();
                 ErrorCount++;
             }
             return;
@@ -69,7 +66,7 @@ namespace Illumi_CLI {
 
         public void ParseProgram () {
             if (CurrentSession.debugMode) {
-                diagnostics.Parser_EnteredParseStage ("program");
+                _diagnostics.Parser_EnteredParseStage ("program");
             }
 
             AddBranchNode ("Program");
@@ -81,7 +78,7 @@ namespace Illumi_CLI {
 
         public void ParseBlock () {
             if (CurrentSession.debugMode) {
-                diagnostics.Parser_EnteredParseStage ("block");
+                _diagnostics.Parser_EnteredParseStage ("block");
             }
             AddBranchNode ("Block");
             MatchAndConsume (TokenKind.LeftBraceToken);
@@ -93,7 +90,7 @@ namespace Illumi_CLI {
 
         public void ParseStatementList () {
             if (CurrentSession.debugMode) {
-                diagnostics.Parser_EnteredParseStage ("statement list");
+                _diagnostics.Parser_EnteredParseStage ("statement list");
             }
 
             AddBranchNode ("Statement List");
@@ -108,7 +105,7 @@ namespace Illumi_CLI {
 
         public void ParseStatement () {
             if (CurrentSession.debugMode) {
-                diagnostics.Parser_EnteredParseStage ("statement");
+                _diagnostics.Parser_EnteredParseStage ("statement");
             }
 
             switch (currentToken.Kind) {
@@ -144,7 +141,7 @@ namespace Illumi_CLI {
                 case TokenKind.EndOfProgramToken:
                     break;
                 default:
-                    diagnostics.Parser_ReportIncorrectStatement (currentToken);
+                    _diagnostics.Parser_ReportIncorrectStatement (currentToken);
                     ErrorCount++;
                     Panic ();
                     break;
@@ -155,7 +152,7 @@ namespace Illumi_CLI {
 
         public void ParsePrintStatement () {
             if (CurrentSession.debugMode) {
-                diagnostics.Parser_EnteredParseStage ("print statement");
+                _diagnostics.Parser_EnteredParseStage ("print statement");
             }
             AddBranchNode ("Print Statement");
             MatchAndConsume (TokenKind.PrintToken);
@@ -168,7 +165,7 @@ namespace Illumi_CLI {
 
         public void ParseAssignmentStatement () {
             if (CurrentSession.debugMode) {
-                diagnostics.Parser_EnteredParseStage ("assignment statement");
+                _diagnostics.Parser_EnteredParseStage ("assignment statement");
             }
             AddBranchNode ("Assignment Statement");
             ParseIdentifier ();
@@ -180,7 +177,7 @@ namespace Illumi_CLI {
 
         public void ParseVariableDeclaration () {
             if (CurrentSession.debugMode) {
-                diagnostics.Parser_EnteredParseStage ("variable declaration");
+                _diagnostics.Parser_EnteredParseStage ("variable declaration");
             }
             AddBranchNode ("VariableDeclaration");
             ParseTypeDefinition ();
@@ -191,7 +188,7 @@ namespace Illumi_CLI {
 
         public void ParseTypeDefinition () {
             if (CurrentSession.debugMode) {
-                diagnostics.Parser_EnteredParseStage ("type definition");
+                _diagnostics.Parser_EnteredParseStage ("type definition");
             }
 
             switch (currentToken.Kind) {
@@ -216,7 +213,7 @@ namespace Illumi_CLI {
 
         public void ParseWhileStatement () {
             if (CurrentSession.debugMode) {
-                diagnostics.Parser_EnteredParseStage ("while statement");
+                _diagnostics.Parser_EnteredParseStage ("while statement");
             }
             AddBranchNode (TokenKind.WhileToken.ToString ());
             MatchAndConsume (TokenKind.WhileToken);
@@ -230,7 +227,7 @@ namespace Illumi_CLI {
 
         public void ParseIfStatement () {
             if (CurrentSession.debugMode) {
-                diagnostics.Parser_EnteredParseStage ("if statement");
+                _diagnostics.Parser_EnteredParseStage ("if statement");
             }
             AddBranchNode (TokenKind.IfToken.ToString ());
             MatchAndConsume (TokenKind.IfToken);
@@ -244,7 +241,7 @@ namespace Illumi_CLI {
 
         public void ParseExpression () {
             if (CurrentSession.debugMode) {
-                diagnostics.Parser_EnteredParseStage ("expression");
+                _diagnostics.Parser_EnteredParseStage ("expression");
             }
             switch (currentToken.Kind) {
                 case TokenKind.IdentifierToken:
@@ -269,7 +266,7 @@ namespace Illumi_CLI {
                     ParseBooleanExpression ();
                     break;
                 default:
-                    diagnostics.Parser_ReportMissingExpression (currentToken);
+                    _diagnostics.Parser_ReportMissingExpression (currentToken);
                     return;
             }
             Ascend ();
@@ -278,7 +275,7 @@ namespace Illumi_CLI {
 
         public void ParseIntExpression () {
             if (CurrentSession.debugMode) {
-                diagnostics.Parser_EnteredParseStage ("integer expression");
+                _diagnostics.Parser_EnteredParseStage ("integer expression");
             }
             AddBranchNode ("Integer Expression");
             MatchAndConsume (TokenKind.DigitToken);
@@ -292,7 +289,7 @@ namespace Illumi_CLI {
 
         public void ParseStringExpression () {
             if (CurrentSession.debugMode) {
-                diagnostics.Parser_EnteredParseStage ("string expression");
+                _diagnostics.Parser_EnteredParseStage ("string expression");
             }
             AddBranchNode (TokenKind.StringToken.ToString ());
             MatchAndConsume (TokenKind.StringToken);
@@ -302,7 +299,7 @@ namespace Illumi_CLI {
 
         public void ParseBooleanExpression () {
             if (CurrentSession.debugMode) {
-                diagnostics.Parser_EnteredParseStage ("boolean expression");
+                _diagnostics.Parser_EnteredParseStage ("boolean expression");
             }
             AddBranchNode ("Boolean Expression");
 
@@ -330,7 +327,7 @@ namespace Illumi_CLI {
 
         public void ParseBooleanOperator () {
             if (CurrentSession.debugMode) {
-                diagnostics.Parser_EnteredParseStage ("boolean operator");
+                _diagnostics.Parser_EnteredParseStage ("boolean operator");
             }
             switch (currentToken.Kind) {
                 case TokenKind.EquivalenceToken:
@@ -350,7 +347,7 @@ namespace Illumi_CLI {
 
         public void ParseIdentifier () {
             if (CurrentSession.debugMode) {
-                diagnostics.Parser_EnteredParseStage ("identifier");
+                _diagnostics.Parser_EnteredParseStage ("identifier");
             }
             AddBranchNode ("Identifier");
             MatchAndConsume (TokenKind.IdentifierToken);
@@ -360,13 +357,13 @@ namespace Illumi_CLI {
 
         public bool MatchAndConsume (TokenKind expectedKind) {
             if (CurrentSession.debugMode) {
-                diagnostics.Parser_ReportMatchingToken (expectedKind);
+                _diagnostics.Parser_ReportMatchingToken (expectedKind);
             }
             bool success = false;
             if (currentToken.Kind == expectedKind) {
                 success = ConsumeToken ();
             } else {
-                diagnostics.Parser_ReportUnexpectedToken (currentToken, expectedKind);
+                _diagnostics.Parser_ReportUnexpectedToken (currentToken, expectedKind);
             }
             return success;
         }
@@ -374,14 +371,14 @@ namespace Illumi_CLI {
         public bool ConsumeToken () {
             if (TokenStream.Count >= 0) {
                 if (CurrentSession.debugMode) {
-                    diagnostics.Parser_ReportConsumingToken (currentToken);
+                    _diagnostics.Parser_ReportConsumingToken (currentToken);
                 }
                 TokenStream.RemoveAt (0);
                 AddLeafNode (currentToken);
                 Next ();
                 return true;
             } else {
-                diagnostics.Parser_ReportNoRemainingTokens ();
+                _diagnostics.Parser_ReportNoRemainingTokens ();
             }
             return false;
         }
@@ -394,11 +391,11 @@ namespace Illumi_CLI {
 
         public void Panic () {
             while (!recoverySet.Contains (currentToken.Kind)) {
-                diagnostics.Parser_ReportPanickedToken (currentToken);
+                _diagnostics.Parser_ReportPanickedToken (currentToken);
                 TokenStream.RemoveAt (0);
                 Next ();
             }
-            diagnostics.Parser_ReportExitedPanicMode ();
+            _diagnostics.Parser_ReportExitedPanicMode ();
             return;
         }
         public void Ascend () {

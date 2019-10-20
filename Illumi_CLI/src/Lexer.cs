@@ -6,7 +6,7 @@ using Microsoft.CodeAnalysis.Text;
 
 namespace Illumi_CLI {
     class Lexer {
-        private DiagnosticCollection _diagnostics = new DiagnosticCollection ();
+        private DiagnosticCollection _diagnostics;
         private Session _lexerSession;
         private List<Token> _tokens;
         private string _text;
@@ -20,10 +20,11 @@ namespace Illumi_CLI {
         private char[] _allowablePunctuation = { '-', ':', ';', ',', '.' };
         private char[] _keywordFirstCharacters = { 'i', 'w', 'b', 'p', 's' };
 
-        public Lexer (string text, Session session) {
+        public Lexer (string text, Session session, DiagnosticCollection diagnostics) {
             _text = text;
             _lexerSession = session;
             _tokens = new List<Token> ();
+            _diagnostics = diagnostics;
         }
 
         public DiagnosticCollection Diagnostics => _diagnostics;

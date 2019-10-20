@@ -1,4 +1,8 @@
-using System.Reflection.Metadata.Ecma335;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+
 namespace Illumi_CLI {
     internal class Tree {
         public Tree (TreeNode root = null) {
@@ -63,6 +67,16 @@ namespace Illumi_CLI {
         public void Discard () {
             Root = null;
             return;
+        }
+
+        public void Traverse (TreeNode root) {
+            string currentNode = root.Type;
+
+            Console.WriteLine (currentNode);
+
+            for (int i = 0; i < root.Children.Count; i++) {
+                Traverse (root.Children[i]);
+            }
         }
     }
 }
