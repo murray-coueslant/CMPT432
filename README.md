@@ -4,19 +4,19 @@ A repository which shall contain all of the wonderous adventures I have in CMPT4
 ## The Illumi Compiler
 The Illumi compiler is written in C# and uses the ASP.NET framework.
 
-## Building the Project
+The current version of Illumi is command line only.  To use it, see the instructions `Building and Running Illumi`.
 
-The project is created in ASP.NET, and is interacted with through a web based front end.
+## Building and Running Illumi
 
-To install ASP.NET, follow the instuctions given in [this guide](https://dotnet.microsoft.com/learn/aspnet/hello-world-tutorial/intro).
+Illumi is a .NET console application. It is cross platform, and so can be run on Windows, Linux, and macOS.
 
-To build the project, first you must clone the repository to your local machine. Once you have done that, the following steps should leave
-you with a running version of the compiler which can be accessed by visiting `localhost:5000` or `127.0.0.1:5000`.
+To use Illumi, you must have the .NET core SDK installed. [This guide](https://dotnet.microsoft.com/learn/aspnet/hello-world-tutorial/intro) contains instructions for installing the .NET core.
 
-Build instructions:
-- Ensure that you have the latest version of ASP.NET installed
-- Navigate to the cloned version of this repository
-- Execute `dotnet run` in the root project folder, for this project that folder is called `Illumi`
-- Take note of the address which the compiler is running at, it should be `localhost:5000` but it could be different
+Once you have installed .NET, follow these instructions to run Illumi on your code.
 
-Once you have followed these steps, you should be able to interact with the compiler and its functions.
+- Clone this repository
+- Navigate to the `Illumi_CLI` folder
+- Once inside `Illumi_CLI`, issue `dotnet run` to start Illumi 
+
+That's it! Easy as pie. Once you have started Illumi you will be greeted by its command line interface. To see what Illumi can do, simply 
+issue `help` to see the help screen.

@@ -33,7 +33,11 @@ namespace Illumi_CLI {
                             int programCounter = 0;
 
                             foreach (string program in lexerPrograms) {
+<<<<<<< HEAD
                                 lexers.Add (new Lexer (program, currentSession, mainDiagnostics));
+=======
+                                lexers.Add (new Lexer (program, currentSession));
+>>>>>>> project2
                             }
 
                             foreach (Lexer lexer in lexers) {

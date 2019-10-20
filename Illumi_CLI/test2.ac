@@ -1,0 +1,151 @@
+{}$
+{{{{{{}}}}}}$
+{{{{{{}}}}}$
+{print("")}$
+{print(a)}$
+{print(2)}$
+{print("a")}$
+{print(false)}$
+{print("inta")}$
+print(a){print(a)}$
+{a=1}$
+{a = 1}$
+{a = 1 + 2 + 3 + 4    +    5}$
+{
+
+    int a
+    a = a
+    string b
+    a = b
+}$
+{int a a=a string b a=b}$
+{{{{{{a=1+2+3+4+5{print(4+a)}}}}}}}$
+{
+    /* what about comments */
+    string b
+}$
+{
+    boolean d
+    d = ("string" != "string")
+}$
+{intfintif=2}$
+{intii=0stringss="hello"booleanbb=(true==(1!=2))if(b==true){while(true!=(b!=(false==(2!=3)))){i=1+iprint(s)}}print("ugly code")}$
+
+/* bad code */
+
+{"two
+lines"}$
+{print("No Caps Mister Bond")}$
+{print("no digits 007")}$
+{int A}$
+{
+    ~!@#%^&*_+{}|:<>?[];',./
+    bool ean d
+}$
+
+/* questionable code */
+
+{"$"}$
+{int a /* unterminated comment }$
+{ a = "unterminated string }$
+{
+    string s
+    s = "this string is /* in */ visible"
+}$
+{intii=0stringss="hello"booleanbb=(true==(1!=2))if(b==true){while(true!=(b!=(false==(2!=3)))){i=1+iprint(s)}}print("ugly code")}$
+{print(007)}$
+{a=12}$
+{
+    int a
+    a = a + 2
+}$
+{
+    s = "strb"
+    print(s)
+    
+    if (a != ) {
+        print("true")
+    }
+}$
+{
+	string 1
+}$
+{
+	print($)
+}$
+{
+	int a
+	int b
+	a = 0
+	b = 0
+	while (a != 3) {
+		print(a)
+		while (b != 3) {
+			print(b)
+			b = 1 + b
+			if (b == 2) {
+				print("there is no spoon")
+			}
+		}
+		b = 0
+		a = 1 + 
+	}
+}$
+{
+    int a
+    a = 1
+    {
+        int a
+        a = 2
+        print(a)
+    }
+    string b
+    b="alan"
+    if(a==1){
+        print(b)
+    }
+    string c
+    c="james"
+    b="blackstone"
+    print(b)
+}$
+{
+    int a
+    a = 0
+    string z
+    z="bond"
+
+    while(a!=9){
+        if(a!=5){
+            print("bond")
+        }
+        {
+            a = 1 + a
+            string b
+            b = "james bond"
+            print(b)
+        }
+    }
+    {}
+    boolean c
+    c = true
+    boolean d
+    d=(true==(true==false))
+    d=(a==b)
+    d=(1==a)
+    d=("string"==1)
+    d=(a != "string")
+    d=("string" != "string")
+    if(d==true){
+        int c
+        c = 1 + d
+        if(c==1){
+            print("ugh")
+        }
+    }
+    while("string"==a){
+        while(1==true){
+            a = 1 + "string"
+        }
+    }
+}$
