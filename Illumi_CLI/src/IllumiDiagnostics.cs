@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using Microsoft.CodeAnalysis.Text;
 
 namespace Illumi_CLI {
@@ -67,6 +68,7 @@ namespace Illumi_CLI {
 
         public void AddMultiple (DiagnosticCollection diagnostics) {
             _diagnostics.AddRange (diagnostics._diagnostics);
+            DisplayDiagnostics ();
         }
 
         public void ReportDiagnostic (string type, TextSpan span, string message, string originated, int lineNumber) {
@@ -78,6 +80,7 @@ namespace Illumi_CLI {
         private void ReportDiagnostic (string type, string originated, string message) {
             Diagnostic diagnostic = new Diagnostic (type, originated, message);
             _diagnostics.Add (diagnostic);
+            DisplayDiagnostics ();
         }
 
         public void Lexer_ReportInvalidIdentifier (TextSpan span, int lineNumber) {
@@ -123,6 +126,13 @@ namespace Illumi_CLI {
             string type = Warning;
             string originated = FileReader;
             string message = "Did not find a final '$' character in file. Inserting one at the last position in the file.";
+            ReportDiagnostic (type, span, message, originated, lineNumber);
+        }
+
+        public void FileReader_ReportEndOfProgramInString (TextSpan span, int lineNumber) {
+            string type = Error;
+            string originated = FileReader;
+            string message = "An end of program marker was found inside a string, perhaps you forgot a closing quote?";
             ReportDiagnostic (type, span, message, originated, lineNumber);
         }
 
@@ -279,7 +289,7 @@ namespace Illumi_CLI {
             ErrorCount++;
             TextSpan span = new TextSpan (currentToken.LinePosition, currentToken.Text.Length);
             string originated = Parser;
-            string message = "Parser expected an expression and found nothing.";
+            string message = $"Parser expected an expression and found [ {currentToken.Kind} ].";
             ReportDiagnostic (type, span, message, originated, currentToken.LineNumber);
         }
     }

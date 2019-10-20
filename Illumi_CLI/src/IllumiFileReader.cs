@@ -19,7 +19,7 @@ namespace Illumi_CLI {
                     fullFileText = fullFileText + "$";
                 }
 
-                return ExtractPrograms (fullFileText.Replace ("\r", string.Empty));
+                return ExtractPrograms (fullFileText.Replace ("\r", string.Empty), currentSession);
             } else {
 
                 currentSession.Diagnostics.FileReader_ReportNoFileFound (filePath.Name);
@@ -27,7 +27,7 @@ namespace Illumi_CLI {
             }
         }
 
-        private static IList<string> ExtractPrograms (string sourceText) {
+        private static IList<string> ExtractPrograms (string sourceText, Session currentSession) {
             IList<string> programs = new List<string> ();
 
             int currentPosition = 0;
@@ -47,7 +47,9 @@ namespace Illumi_CLI {
                 if (currentChar != '$') {
                     length++;
                 } else if (currentChar == '$' && inString) {
-                    length++;
+                    TextSpan span = new TextSpan (currentPosition, 1);
+                    int lineNumber = sourceText.Count (c => c == '\n') + 1;
+                    currentSession.Diagnostics.FileReader_ReportEndOfProgramInString (span, lineNumber);
                 } else {
                     length++;
                     string programSubstring = sourceText.Substring (programStartPosition, length).Trim ();

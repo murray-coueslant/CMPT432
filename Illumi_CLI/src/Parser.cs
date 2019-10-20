@@ -220,9 +220,10 @@ namespace Illumi_CLI {
             }
             AddBranchNode (TokenKind.WhileToken.ToString ());
             MatchAndConsume (TokenKind.WhileToken);
-            MatchAndConsume (TokenKind.LeftParenthesisToken);
-            ParseExpression ();
-            MatchAndConsume (TokenKind.RightParenthesisToken);
+            ParseBooleanExpression ();
+            // MatchAndConsume (TokenKind.LeftParenthesisToken);
+            // ParseExpression ();
+            // MatchAndConsume (TokenKind.RightParenthesisToken);
             Ascend ();
             return;
         }
@@ -233,9 +234,10 @@ namespace Illumi_CLI {
             }
             AddBranchNode (TokenKind.IfToken.ToString ());
             MatchAndConsume (TokenKind.IfToken);
-            MatchAndConsume (TokenKind.LeftParenthesisToken);
-            ParseExpression ();
-            MatchAndConsume (TokenKind.RightParenthesisToken);
+            ParseBooleanExpression ();
+            // MatchAndConsume (TokenKind.LeftParenthesisToken);
+            // ParseExpression ();
+            // MatchAndConsume (TokenKind.RightParenthesisToken);
             Ascend ();
             return;
         }
@@ -302,9 +304,9 @@ namespace Illumi_CLI {
             if (CurrentSession.debugMode) {
                 diagnostics.Parser_EnteredParseStage ("boolean expression");
             }
+            AddBranchNode ("Boolean Expression");
 
             if (currentToken.Kind == TokenKind.LeftParenthesisToken) {
-                AddBranchNode (TokenKind.Type_BooleanToken.ToString ());
                 MatchAndConsume (TokenKind.LeftParenthesisToken);
                 ParseExpression ();
                 ParseBooleanOperator ();
@@ -313,25 +315,13 @@ namespace Illumi_CLI {
             } else {
                 switch (currentToken.Kind) {
                     case TokenKind.TrueToken:
-                        AddBranchNode (TokenKind.Type_BooleanToken.ToString ());
                         MatchAndConsume (TokenKind.TrueToken);
                         break;
                     case TokenKind.FalseToken:
-                        AddBranchNode (TokenKind.Type_BooleanToken.ToString ());
                         MatchAndConsume (TokenKind.FalseToken);
                         break;
                     default:
                         return;
-                }
-
-                switch (currentToken.Kind) {
-                    case TokenKind.EquivalenceToken:
-                    case TokenKind.NotEqualToken:
-                        ParseBooleanOperator ();
-                        ParseExpression ();
-                        break;
-                    default:
-                        break;
                 }
             }
             Ascend ();

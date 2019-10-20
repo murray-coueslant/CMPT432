@@ -9,8 +9,10 @@ namespace Illumi_CLI {
         public Session () {
             Diagnostics = new DiagnosticCollection ();
             debugMode = true;
+            setupMode = false;
         }
 
+        public bool setupMode { get; set; }
         public bool debugMode { get; private set; }
         public DiagnosticCollection Diagnostics { get; private set; }
 
