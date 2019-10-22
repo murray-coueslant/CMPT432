@@ -6,7 +6,7 @@ using System.Linq;
 namespace Illumi_CLI {
     class Program {
         static void Main (string[] args) {
-            DiagnosticCollection diagnostics = new DiagnosticCollection ();
+            DiagnosticCollection mainDiagnostics = new DiagnosticCollection ();
 
             Console.ForegroundColor = ConsoleColor.Green;
             Console.BackgroundColor = ConsoleColor.Black;
@@ -29,8 +29,6 @@ namespace Illumi_CLI {
 
                         IList<string> lexerPrograms = openFile (command[1], currentSession);
 
-                        currentSession.Diagnostics.DisplayDiagnostics ();
-
                         if (lexerPrograms.Count >= 1) {
                             IList<Lexer> lexers = new List<Lexer> ();
                             int programCounter = 0;
@@ -42,7 +40,7 @@ namespace Illumi_CLI {
                             foreach (Lexer lexer in lexers) {
                                 Console.WriteLine ($"[Info] - [Lexer] -> Lexing program {programCounter}.");
                                 LexProgram (lexer, currentSession);
-                                Console.WriteLine (value: $"[Info] - [Lexer] -> Finished lexing program {programCounter}. Lex ended with {lexer.Diagnostics.ErrorCount} error(s) and {diagnostics.WarningCount} warnings.");
+                                Console.WriteLine (value: $"[Info] - [Lexer] -> Finished lexing program {programCounter}. Lex ended with {lexer.Diagnostics.ErrorCount} error(s) and {mainDiagnostics.WarningCount} warnings.");
                                 Console.WriteLine ();
                                 programCounter++;
                             }
@@ -56,8 +54,6 @@ namespace Illumi_CLI {
                         }
 
                         IList<string> parserPrograms = openFile (command[1], currentSession);
-
-                        currentSession.Diagnostics.DisplayDiagnostics ();
 
                         if (parserPrograms.Count >= 1) {
                             IList<Lexer> lexers = new List<Lexer> ();
@@ -75,7 +71,7 @@ namespace Illumi_CLI {
                             foreach (Parser parser in parsers) {
                                 Console.WriteLine ($"[Info] - [Lexer] -> Lexing program {programCounter}.");
                                 LexProgram (parser.Lexer, currentSession);
-                                Console.WriteLine ($"[Info] - [Lexer] -> Finished lexing program {programCounter}. Lex ended with [{parser.Lexer.Diagnostics.ErrorCount}] error(s) and [{diagnostics.WarningCount}] warnings.");
+                                Console.WriteLine ($"[Info] - [Lexer] -> Finished lexing program {programCounter}. Lex ended with [{parser.Lexer.Diagnostics.ErrorCount}] error(s) and [{mainDiagnostics.WarningCount}] warnings.");
                                 Console.WriteLine ();
                                 if (parser.Lexer.Diagnostics.ErrorCount > 0) {
                                     System.Console.WriteLine ("[Error] - [Lexer] Lex error, cannot parse. Exiting.");
@@ -83,7 +79,6 @@ namespace Illumi_CLI {
                                     Console.WriteLine ($"[Info] - [Parser] -> Parsing program {programCounter}.");
                                     ParseProgram (parser, currentSession);
                                     parser.diagnostics.Parser_ReportEndOfParse (programCounter);
-                                    parser.diagnostics.DisplayDiagnostics ();
                                 }
                                 Console.WriteLine ();
                                 programCounter++;
@@ -117,10 +112,7 @@ namespace Illumi_CLI {
                         currentSession.Diagnostics.EntryPoint_ReportInvalidCommand ();
                         break;
                 }
-
-                currentSession.Diagnostics.DisplayDiagnostics ();
             }
-
             Console.ForegroundColor = ConsoleColor.White;
         }
 
@@ -135,11 +127,13 @@ namespace Illumi_CLI {
                 currentSession.Diagnostics.Lexer_LexerFindsNoTokens ();
             }
 
-            lexer.Diagnostics.DisplayDiagnostics ();
-
             if (lexer.Diagnostics.ErrorCount >= 1) {
                 lexer.ClearTokens ();
             }
+
+            currentSession.Diagnostics.ErrorCount = 0;
+            currentSession.Diagnostics.WarningCount = 0;
+
         }
 
         private static void ParseProgram (Parser parser, Session currentSession) {
@@ -192,11 +186,6 @@ namespace Illumi_CLI {
                         session.setDebugMode ();
                         break;
 
-                    case "v":
-                    case "verbose":
-                        session.setVerboseMode ();
-                        break;
-
                     case "quit":
                     case "exit":
                     case "return":
@@ -226,13 +215,11 @@ namespace Illumi_CLI {
         private static void showConfig (Session session) {
             Console.WriteLine ("The current compiler configuration is:");
             Console.WriteLine ($"\t- debug = {session.debugMode.ToString().ToUpper()}");
-            Console.WriteLine ($"\t- verbose = {session.verboseMode.ToString().ToUpper()}");
         }
 
         private static void showSetupHelp () {
             Console.WriteLine ("The current settings for Illumi are:");
             Console.WriteLine ("\t- debug -> Output more specific information about what the compiler is doing");
-            Console.WriteLine ("\t- verbose -> Sets the compiler to verbose mode, making it output more informative messages (including comments and whitespace in lex etc...). \t  Not currently implemented.");
             Console.WriteLine ("\t- config -> Display the current compiler configuration");
         }
     }

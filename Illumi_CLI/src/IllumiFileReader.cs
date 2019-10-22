@@ -15,6 +15,7 @@ namespace Illumi_CLI {
                     int lineNumber = fullFileText.Count (c => c == '\n') + 1;
                     currentSession.Diagnostics.FileReader_ReportNoFinalEndOfProgramToken (span, lineNumber);
                     currentSession.Diagnostics.WarningCount++;
+                    currentSession.Diagnostics.DisplayDiagnostics ();
                     fullFileText = fullFileText + "$";
                 }
 
@@ -50,7 +51,7 @@ namespace Illumi_CLI {
                 } else {
                     length++;
                     string programSubstring = sourceText.Substring (programStartPosition, length).Trim ();
-                    if (programSubstring.Length > 0) {
+                    if (programSubstring.Length > 0 && programSubstring != "") {
                         programs.Add (programSubstring);
                         programStartPosition = currentPosition + 1;
                     }

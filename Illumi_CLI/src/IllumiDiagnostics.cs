@@ -72,6 +72,7 @@ namespace Illumi_CLI {
         public void ReportDiagnostic (string type, TextSpan span, string message, string originated, int lineNumber) {
             Diagnostic diagnostic = new Diagnostic (type, span, message, originated, lineNumber);
             _diagnostics.Add (diagnostic);
+            DisplayDiagnostics ();
         }
 
         private void ReportDiagnostic (string type, string originated, string message) {
