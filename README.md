@@ -11,8 +11,7 @@ based version of Illumi, see `Building and Running Illumi for the Web`.
 
 Illumi is a .NET console application. It is cross platform, and so can be run on Windows, Linux, and macOS.
 
-To use Illumi, you must have the .NET core SDK installed. [This guide](https://dotnet.microsoft.com/learn/aspnet/hello-world-tutorial
-/intro) contains instructions for installing the .NET core.
+To use Illumi, you must have the .NET core SDK installed. [This guide](https://dotnet.microsoft.com/learn/aspnet/hello-world-tutorial/intro) contains instructions for installing the .NET core.
 
 Once you have installed .NET, follow these instructions to run Illumi on your code.
 
