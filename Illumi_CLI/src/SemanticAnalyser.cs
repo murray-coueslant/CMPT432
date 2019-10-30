@@ -8,14 +8,14 @@ namespace Illumi_CLI {
         public Parser Parser { get; }
         public Session CurrentSession { get; }
         public DiagnosticCollection Diagnostics { get; }
-        public static Tree AbstractSyntaxTree { get; set; }
-        public static SymbolTable Symbols { get; set; }
+        public Tree AbstractSyntaxTree { get; set; }
+        public SymbolTable Symbols { get; set; }
         public SemanticAnalyser (Parser parser, Session currentSession, DiagnosticCollection diagnostics) {
             Parser = parser;
             CurrentSession = currentSession;
             Diagnostics = diagnostics;
             AbstractSyntaxTree = new AbstractSyntaxTree ();
-            Symbols = new SymbolTable ();
+            Symbols = new SymbolTable (Diagnostics);
         }
         public void Analyse () {
             if (Parser.Failed) {
@@ -24,9 +24,22 @@ namespace Illumi_CLI {
                 TraverseParseTreeAndBuildAST ();
             }
         }
+        public void Traverse (TreeNode root) {
+            CheckNode (root);
 
-        public void TraverseParseTreeAndBuildAST () {
-            Parser.Tree.Traverse (Parser.Tree.Root);
+            for (int i = 0; i < root.Children.Count; i++) {
+                Traverse (root.Children[i]);
+            }
         }
+        public void CheckNode (TreeNode node) {
+            if (node.Type == TokenKind.IdentifierToken.ToString ()) {
+                System.Console.WriteLine (node.NodeToken.Text);
+                Symbols.AddSymbol (node.NodeToken.Text);
+            }
+        }
+        public void TraverseParseTreeAndBuildAST () {
+            Traverse (Parser.Tree.Root);
+        }
+
     }
 }

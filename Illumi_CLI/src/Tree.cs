@@ -45,7 +45,6 @@ namespace Illumi_CLI {
             }
             return;
         }
-
         public static void PrintTree (TreeNode root, string indent, bool lastChild = true) {
             // ├──
             // └──
@@ -67,16 +66,6 @@ namespace Illumi_CLI {
         public void Discard () {
             Root = null;
             return;
-        }
-
-        public void Traverse (TreeNode root) {
-            string currentNode = root.Type;
-
-            Console.WriteLine (currentNode);
-
-            for (int i = 0; i < root.Children.Count; i++) {
-                Traverse (root.Children[i]);
-            }
         }
     }
 }

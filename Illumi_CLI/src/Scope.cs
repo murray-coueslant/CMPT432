@@ -1,6 +1,9 @@
+using System;
 using System.Collections;
-namespace Illumi_CLI.src {
-    public class Scope {
+using System.Collections.Generic;
+
+namespace Illumi_CLI {
+    class Scope {
         public int Level { get; set; }
         public Hashtable Symbols { get; set; }
         public Scope ParentScope { get; set; }
@@ -18,13 +21,13 @@ namespace Illumi_CLI.src {
 
         }
 
-        public static AddDescendant () {
-            Scope newScope = new Scope (level + 1, this);
+        public void AddDescendant () {
+            Scope newScope = new Scope (Level + 1, this);
             DescendantScopes.Add (newScope);
             MostRecentScope = newScope;
         }
 
-        public static boolean AddSymbol (string symbol, object attributes) {
+        public bool AddSymbol (string symbol, object attributes = null) {
             try {
                 Symbols.Add (symbol, attributes);
                 return true;
@@ -33,7 +36,7 @@ namespace Illumi_CLI.src {
             }
         }
 
-        public static UpdateParent (Scope newParent) {
+        public void UpdateParent (Scope newParent) {
             ParentScope = newParent;
         }
     }
