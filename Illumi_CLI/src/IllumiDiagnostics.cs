@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
@@ -186,7 +186,7 @@ namespace Illumi_CLI {
             string type = Error;
             ErrorCount++;
             string originated = Parser;
-            string message = $"Lexer passed no tokens to the parser. Ending parse.";
+            string message = $"Lexer passed no tokens to the parser. Check if you had any lexical errors.";
             ReportDiagnostic (type, originated, message);
         }
         internal void Parser_ReportIncorrectStatement (Token token) {
@@ -297,7 +297,6 @@ namespace Illumi_CLI {
             ErrorCount = 0;
             WarningCount = 0;
         }
-
         internal void Semantic_ParserGaveNoTree () {
             string type = Error;
             ErrorCount++;

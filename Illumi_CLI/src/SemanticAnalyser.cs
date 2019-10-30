@@ -9,10 +9,13 @@ namespace Illumi_CLI {
         public Session CurrentSession { get; }
         public DiagnosticCollection Diagnostics { get; }
         public static Tree AbstractSyntaxTree { get; set; }
+        public static SymbolTable Symbols { get; set; }
         public SemanticAnalyser (Parser parser, Session currentSession, DiagnosticCollection diagnostics) {
             Parser = parser;
             CurrentSession = currentSession;
             Diagnostics = diagnostics;
+            AbstractSyntaxTree = new AbstractSyntaxTree ();
+            Symbols = new SymbolTable ();
         }
         public void Analyse () {
             if (Parser.Failed) {
