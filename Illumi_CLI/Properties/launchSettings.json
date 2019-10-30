@@ -1,8 +1,0 @@
-{
-  "profiles": {
-    "Illumi_CLI": {
-      "commandName": "Project",
-      "commandLineArgs": "lex --file-path ..\\..\\..\\abc.ac"
-    }
-  }
-}

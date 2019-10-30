@@ -46,6 +46,7 @@ namespace Illumi_CLI {
         private const string EntryPoint = "Entry Point";
         private const string Lexer = "Lexer";
         private const string Parser = "Parser";
+        private const string Semantic = "Semantic Analyser";
         private const string FileReader = "File Reader";
         private List<Diagnostic> _diagnostics = new List<Diagnostic> ();
         public int ErrorCount { get; internal set; }
@@ -107,14 +108,14 @@ namespace Illumi_CLI {
             string type = Error;
             ErrorCount++;
             string originated = Lexer;
-            string message = "No tokens found in stack.Ending lex.";
+            string message = "No tokens found in stack. Ending lex.";
             ReportDiagnostic (type, originated, message);
         }
         public void Lexer_ReportInvalidCharacter (TextSpan span, int lineNumber, char character) {
             string type = Error;
             ErrorCount++;
             string originated = Lexer;
-            string message = $"Invalid character[{ character }] found in input.See the grammar sheet for alanC to view the permitted characters";
+            string message = $"Invalid character [ { character } ] found in input. See the grammar sheet for alanC to view the permitted characters.";
             ReportDiagnostic (type, span, message, originated, lineNumber);
         }
         public void FileReader_ReportNoFinalEndOfProgramToken (TextSpan span, int lineNumber) {
@@ -135,7 +136,7 @@ namespace Illumi_CLI {
             string type = Error;
             ErrorCount++;
             string originated = EntryPoint;
-            string message = "Malformed command entered.Run 'help' or '?' to see the syntax for Illumi 's commands.";
+            string message = "Malformed command entered. Run 'help' or '?' to see the syntax for Illumi's commands.";
             ReportDiagnostic (type, originated, message);
         }
         internal void Lexer_ReportMalformedComment (int startPosition, int lineNumber) {
@@ -157,7 +158,7 @@ namespace Illumi_CLI {
                 string type = Debug;
                 string originated = Lexer;
                 string message = $"Token {token.Kind.ToString ()} [ {token.Text} ] found.";
-                Console.WriteLine ($"[{type}] - [{originated}] ({token.LinePosition}:{token.LineNumber}) -> {message}");
+                Console.WriteLine ($"[ {type} ] - [ {originated} ] ( {token.LinePosition} : {token.LineNumber} ) -> {message}");
             }
         }
         internal void Lexer_ReportUnterminatedString (TextSpan span, int lineNumber) {
@@ -227,7 +228,9 @@ namespace Illumi_CLI {
         internal void Parser_ReportEndOfParse (int programCounter) {
             string type = Information;
             string originated = Parser;
-            string message = $"Finished parsing program {programCounter}. Parse ended with [ {ErrorCount} ] errors and [ {WarningCount} ] warnings.";
+            string message = $"Finished parsing program [ {programCounter} ]. Parse ended with [ {ErrorCount} ] errors and [ {WarningCount} ] warnings.";
+            ErrorCount = 0;
+            WarningCount = 0;
             ReportDiagnostic (type, originated, message);
         }
         internal void Parser_EnteredParseStage (string stage) {
@@ -257,7 +260,7 @@ namespace Illumi_CLI {
         internal void Parser_ReportConsumingToken (Token token) {
             string type = Debug;
             string originated = Parser;
-            string message = $"Found match. Consuming token {token.Kind} [ {token.Text} ].";
+            string message = $"Found match. Consuming token [ {token.Kind} ] ( {token.Text} ).";
             ReportDiagnostic (type, originated, message);
         }
         internal void Parser_ReportExitedPanicMode () {
@@ -273,6 +276,34 @@ namespace Illumi_CLI {
             string originated = Parser;
             string message = $"Parser expected an expression and found [ {currentToken.Kind} ].";
             ReportDiagnostic (type, span, message, originated, currentToken.LineNumber);
+        }
+        internal void Semantic_EncounteredParseError () {
+            string type = Error;
+            string originated = Semantic;
+            string message = "Parse error, cannot analyse. Exiting.";
+            ReportDiagnostic (type, originated, message);
+        }
+        internal void Semantic_ReportStartOfSemantic (int programCounter) {
+            string type = Information;
+            string originated = Semantic;
+            string message = $"Analysing program [ {programCounter} ].";
+            ReportDiagnostic (type, originated, message);
+        }
+        internal void Semantic_ReportEndOfSemantic (int programCounter) {
+            string type = Information;
+            string originated = Semantic;
+            string message = $"Finished analysing program [ {programCounter} ]. Semantic analysis ended with [ {ErrorCount} ] errors and [ {WarningCount} ] warnings.";
+            ReportDiagnostic (type, originated, message);
+            ErrorCount = 0;
+            WarningCount = 0;
+        }
+
+        internal void Semantic_ParserGaveNoTree () {
+            string type = Error;
+            ErrorCount++;
+            string originated = Semantic;
+            string message = "The parser handed a null tree to the semantic analyser, cannot analyse. Perhaps you encountered a lex or parse error?";
+            ReportDiagnostic (type, originated, message);
         }
     }
 }

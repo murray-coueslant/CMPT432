@@ -72,14 +72,20 @@ namespace Illumi_CLI {
                                 mainDiagnostics.Lexer_ReportLexStart (programCounter);
                                 LexProgram (parser.Lexer, currentSession);
                                 mainDiagnostics.Lexer_ReportLexEnd (programCounter);
+
                                 Console.WriteLine ();
+
                                 if (mainDiagnostics.ErrorCount > 0) {
                                     mainDiagnostics.Parser_EncounteredLexError ();
                                 } else {
                                     mainDiagnostics.Parser_ReportStartOfParse (programCounter);
                                     ParseProgram (parser, currentSession);
+                                    if (mainDiagnostics.ErrorCount > 0) {
+                                        mainDiagnostics.Parser_ParseEndedWithErrors ();
+                                    }
                                     mainDiagnostics.Parser_ReportEndOfParse (programCounter);
                                 }
+
                                 Console.WriteLine ();
                                 programCounter++;
                             }
@@ -118,7 +124,9 @@ namespace Illumi_CLI {
                                 mainDiagnostics.Lexer_ReportLexStart (programCounter);
                                 LexProgram (sA.Parser.Lexer, currentSession);
                                 mainDiagnostics.Lexer_ReportLexEnd (programCounter);
+
                                 Console.WriteLine ();
+
                                 if (mainDiagnostics.ErrorCount > 0) {
                                     mainDiagnostics.Parser_EncounteredLexError ();
                                 } else {
@@ -127,12 +135,14 @@ namespace Illumi_CLI {
                                     mainDiagnostics.Parser_ReportEndOfParse (programCounter);
                                 }
 
+                                Console.WriteLine ();
+
                                 if (mainDiagnostics.ErrorCount > 0) {
-                                    // todo mainDiagnostics.Semantic_EncounteredParseError();
+                                    mainDiagnostics.Semantic_EncounteredParseError ();
                                 } else {
-                                    // todo mainDiagnostics.Semantic_ReportStartOfSemantic(programCounter);
+                                    mainDiagnostics.Semantic_ReportStartOfSemantic (programCounter);
                                     SemanticProgram (sA);
-                                    // todo mainDiagnostics.Semantic_ReportEndOfSemantic(programCounter);
+                                    mainDiagnostics.Semantic_ReportEndOfSemantic (programCounter);
                                 }
 
                                 Console.WriteLine ();

@@ -15,7 +15,11 @@ namespace Illumi_CLI {
             Diagnostics = diagnostics;
         }
         public void Analyse () {
-            TraverseParseTreeAndBuildAST ();
+            if (Parser.Failed) {
+                Diagnostics.Semantic_ParserGaveNoTree ();
+            } else {
+                TraverseParseTreeAndBuildAST ();
+            }
         }
 
         public void TraverseParseTreeAndBuildAST () {
