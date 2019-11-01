@@ -21,25 +21,52 @@ namespace Illumi_CLI {
             if (Parser.Failed) {
                 Diagnostics.Semantic_ParserGaveNoTree ();
             } else {
-                TraverseParseTreeAndBuildAST ();
+                TraverseParseTreeAndBuildASTAndSymbolTables ();
+                if (Diagnostics.ErrorCount == 0) {
+                    Diagnostics.Semantic_ReportDisplayingSymbolTables ();
+                    Symbols.DisplaySymbolTables (Symbols.RootScope);
+                }
             }
         }
-        public void Traverse (TreeNode root) {
-            CheckNode (root);
+        public void Traverse (TreeNode root, Action<TreeNode> checkFunction) {
+            checkFunction (root);
 
             for (int i = 0; i < root.Children.Count; i++) {
-                Traverse (root.Children[i]);
+                Traverse (root.Children[i], checkFunction);
             }
         }
-        public void CheckNode (TreeNode node) {
-            if (node.Type == TokenKind.IdentifierToken.ToString ()) {
-                System.Console.WriteLine (node.NodeToken.Text);
-                Symbols.AddSymbol (node.NodeToken.Text);
+        public void CheckSymbols (TreeNode node) {
+            if (node.Type == "Block") {
+                Symbols.NewScope ();
+                Symbols.UpdateCurrentScope ();
+            }
+            if (node.Type == "RightBraceToken") {
+                Symbols.AscendScope ();
+            }
+            if (Symbols.CurrentScope != null) {
+                if (node.Type == "VariableDeclaration") {
+                    Symbols.AddSymbol (node.Children[1].Children[0], node.Children[0].Children[0].NodeToken.Text);
+                }
+                if (node.Type == "AssignmentStatement") {
+                    if (!FindSymbol (node.Children[0].Children[0].NodeToken.Text, Symbols.RootScope)) {
+                        Diagnostics.Semantic_ReportUndeclaredIdentifier (node.Children[0].Children[0].NodeToken);
+                    }
+                }
             }
         }
-        public void TraverseParseTreeAndBuildAST () {
-            Traverse (Parser.Tree.Root);
+        public void TraverseParseTreeAndBuildASTAndSymbolTables () {
+            Traverse (Parser.Tree.Root, CheckSymbols);
         }
 
+        public bool FindSymbol (string symbol, Scope rootScope) {
+            if (rootScope.Symbols.ContainsKey (symbol)) {
+                return true;
+            } else {
+                for (int i = 0; i < rootScope.DescendantScopes.Count; i++) {
+                    FindSymbol (symbol, rootScope.DescendantScopes[i]);
+                }
+            }
+            return false;
+        }
     }
 }

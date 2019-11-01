@@ -12,32 +12,34 @@ namespace Illumi_CLI {
 
         public Scope (int level, Scope parentScope = null) {
             Level = level;
-
             Symbols = new Hashtable ();
-
             DescendantScopes = new List<Scope> ();
-
             ParentScope = parentScope;
-
         }
-
-        public void AddDescendant () {
-            Scope newScope = new Scope (Level + 1, this);
+        public void AddDescendant (int counter) {
+            Scope newScope = new Scope (counter + 1, this);
             DescendantScopes.Add (newScope);
             MostRecentScope = newScope;
         }
-
-        public bool AddSymbol (string symbol, object attributes = null) {
+        public bool AddSymbol (string symbol, string type) {
             try {
-                Symbols.Add (symbol, attributes);
+                Symbols.Add (symbol, type);
                 return true;
             } catch {
                 return false;
             }
         }
-
         public void UpdateParent (Scope newParent) {
             ParentScope = newParent;
+        }
+        public void DisplayScope () {
+            Console.WriteLine (ParentScope == null ? $"Table for Scope: {Level}" : $"Table for Scope: {Level} [ Parent: {ParentScope.Level} ]");
+            Console.WriteLine (String.Format ("+ {0, -10} + {1, -10} +", "Symbol", "Type"));
+            Console.WriteLine (String.Format ("+ {0, -10} + {0, -10} +", "----------"));
+            foreach (DictionaryEntry symbol in Symbols) {
+                Console.WriteLine (String.Format ("| {0, -10} | {1, -10} |", symbol.Key, symbol.Value));
+                Console.WriteLine (String.Format ("+ {0, -10} + {0, -10} +", "----------"));
+            }
         }
     }
 }

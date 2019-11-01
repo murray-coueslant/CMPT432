@@ -31,9 +31,9 @@ namespace Illumi_CLI {
 
         public override string ToString () {
             if (shortDiagnostic) {
-                return $"[{Type}] - [{Originated}] -> {Message}";
+                return $"[ {Type} ] - [ {Originated} ] -> {Message}";
             } else {
-                return $"[{Type}] - [{Originated}] ({Span.Start}:{LineNumber}) -> {Message}";
+                return $"[ {Type} ] - [ {Originated}]  ( {Span.Start} : {LineNumber} ) -> {Message}";
             }
         }
     }
@@ -303,6 +303,45 @@ namespace Illumi_CLI {
             string originated = Semantic;
             string message = "The parser handed a null tree to the semantic analyser, cannot analyse. Perhaps you encountered a lex or parse error?";
             ReportDiagnostic (type, originated, message);
+        }
+        internal void Semantic_ReportAddingSymbol (string symbol, string symbolType, int scope) {
+            string type = Information;
+            string originated = Semantic;
+            string message = $"Adding symbol [ {symbol} ] of type [ {symbolType} ] to symbol table for scope [ {scope} ].";
+            ReportDiagnostic (type, originated, message);
+        }
+        internal void Semantic_ReportSymbolAlreadyDeclared (string symbol, int currentScope, TextSpan span, int lineNumber) {
+            string type = Error;
+            ErrorCount++;
+            string originated = Semantic;
+            string message = $"Symbol [ {symbol} ] has already been declared in scope [ {currentScope} ].";
+            ReportDiagnostic (type, span, message, originated, lineNumber);
+        }
+        internal void Semantic_ReportAscendingScope (Scope currentScope) {
+            string type = Information;
+            string originated = Semantic;
+            string message = $"Ascending from scope [ {currentScope.Level} ] to [ {currentScope.ParentScope.Level} ].";
+            ReportDiagnostic (type, originated, message);
+        }
+        internal void Semantic_ReportReachedRootScope () {
+            string type = Information;
+            string originated = Semantic;
+            string message = "Attempting to ascend from a scope with no parent, analyser has reached the root scope.";
+            ReportDiagnostic (type, originated, message);
+        }
+        internal void Semantic_ReportDisplayingSymbolTables () {
+            string type = Information;
+            string originated = Semantic;
+            string message = $"Displaying symbol tables for the current program.";
+            ReportDiagnostic (type, originated, message);
+        }
+        internal void Semantic_ReportUndeclaredIdentifier (Token identifier) {
+            string type = Error;
+            ErrorCount++;
+            string originated = Semantic;
+            TextSpan span = new TextSpan (identifier.LinePosition, 1);
+            string message = $"The identifier [ {identifier.Text} ] was used before being declared.";
+            ReportDiagnostic (type, span, message, originated, identifier.LineNumber);
         }
     }
 }

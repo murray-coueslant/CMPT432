@@ -156,3 +156,23 @@ lines"}$
         print(while(a==5){})
     }$
 }
+{
+    int a
+    a=a
+    {
+        int a
+        a=1
+        boolean z
+        string f
+    }
+    int b
+    {
+        {
+            boolean y
+            string p
+            int t
+        }
+        int t
+    }
+    a=b
+}$

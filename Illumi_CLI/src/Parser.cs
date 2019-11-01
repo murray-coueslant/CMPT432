@@ -91,7 +91,7 @@ namespace Illumi_CLI {
                 Diagnostics.Parser_EnteredParseStage ("statement list");
             }
 
-            AddBranchNode ("Statement List");
+            AddBranchNode ("StatementList");
             ParseStatement ();
             Next ();
             if (currentToken.Kind != TokenKind.RightBraceToken && currentToken.Kind != TokenKind.EndOfProgramToken) {
@@ -151,7 +151,7 @@ namespace Illumi_CLI {
             if (CurrentSession.debugMode) {
                 Diagnostics.Parser_EnteredParseStage ("print statement");
             }
-            AddBranchNode ("Print Statement");
+            AddBranchNode ("PrintStatement");
             MatchAndConsume (TokenKind.PrintToken);
             MatchAndConsume (TokenKind.LeftParenthesisToken);
             ParseExpression ();
@@ -164,7 +164,7 @@ namespace Illumi_CLI {
             if (CurrentSession.debugMode) {
                 Diagnostics.Parser_EnteredParseStage ("assignment statement");
             }
-            AddBranchNode ("Assignment Statement");
+            AddBranchNode ("AssignmentStatement");
             ParseIdentifier ();
             MatchAndConsume (TokenKind.AssignmentToken);
             ParseExpression ();
@@ -212,7 +212,7 @@ namespace Illumi_CLI {
             if (CurrentSession.debugMode) {
                 Diagnostics.Parser_EnteredParseStage ("while statement");
             }
-            AddBranchNode (TokenKind.WhileToken.ToString ());
+            AddBranchNode ("WhileStatement");
             MatchAndConsume (TokenKind.WhileToken);
             ParseBooleanExpression ();
             // MatchAndConsume (TokenKind.LeftParenthesisToken);
@@ -226,7 +226,7 @@ namespace Illumi_CLI {
             if (CurrentSession.debugMode) {
                 Diagnostics.Parser_EnteredParseStage ("if statement");
             }
-            AddBranchNode (TokenKind.IfToken.ToString ());
+            AddBranchNode ("IfStatement");
             MatchAndConsume (TokenKind.IfToken);
             ParseBooleanExpression ();
             // MatchAndConsume (TokenKind.LeftParenthesisToken);
@@ -274,7 +274,7 @@ namespace Illumi_CLI {
             if (CurrentSession.debugMode) {
                 Diagnostics.Parser_EnteredParseStage ("integer expression");
             }
-            AddBranchNode ("Integer Expression");
+            AddBranchNode ("IntegerExpression");
             MatchAndConsume (TokenKind.DigitToken);
             if (currentToken.Kind == TokenKind.AdditionToken) {
                 MatchAndConsume (TokenKind.AdditionToken);
@@ -288,7 +288,7 @@ namespace Illumi_CLI {
             if (CurrentSession.debugMode) {
                 Diagnostics.Parser_EnteredParseStage ("string expression");
             }
-            AddBranchNode (TokenKind.StringToken.ToString ());
+            AddBranchNode ("StringExpression");
             MatchAndConsume (TokenKind.StringToken);
             Ascend ();
             return;
@@ -298,7 +298,7 @@ namespace Illumi_CLI {
             if (CurrentSession.debugMode) {
                 Diagnostics.Parser_EnteredParseStage ("boolean expression");
             }
-            AddBranchNode ("Boolean Expression");
+            AddBranchNode ("BooleanExpression");
 
             if (currentToken.Kind == TokenKind.LeftParenthesisToken) {
                 MatchAndConsume (TokenKind.LeftParenthesisToken);
@@ -328,11 +328,11 @@ namespace Illumi_CLI {
             }
             switch (currentToken.Kind) {
                 case TokenKind.EquivalenceToken:
-                    AddBranchNode ("Boolean Operator");
+                    AddBranchNode ("BooleanOperator");
                     MatchAndConsume (TokenKind.EquivalenceToken);
                     break;
                 case TokenKind.NotEqualToken:
-                    AddBranchNode ("Boolean Operator");
+                    AddBranchNode ("BooleanOperator");
                     MatchAndConsume (TokenKind.NotEqualToken);
                     break;
                 default:
