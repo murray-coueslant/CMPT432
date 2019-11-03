@@ -35,13 +35,14 @@ namespace Illumi_CLI {
             currentNode = currentNode.MostRecentChild;
         }
         public void Ascend (Session session) {
+            // TODO convert these to diagnostics
             if (currentNode != Root) {
                 if (session.debugMode) {
-                    System.Console.WriteLine ($"[Debug] - [Tree] -> Ascending from node [ {currentNode.Type} ] to [ {currentNode.Parent.Type} ].");
+                    System.Console.WriteLine ($"[ Debug ] - [ Tree ] -> Ascending from node [ {currentNode.Type} ] to [ {currentNode.Parent.Type} ].");
                 }
                 currentNode = currentNode.Parent;
             } else {
-                System.Console.WriteLine ("[Info] - [Parser] -> Reached root!");
+                System.Console.WriteLine ("[ Info ] - [ Parser ] -> Reached root!");
             }
             return;
         }

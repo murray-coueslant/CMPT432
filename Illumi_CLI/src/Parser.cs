@@ -214,10 +214,10 @@ namespace Illumi_CLI {
             }
             AddBranchNode ("WhileStatement");
             MatchAndConsume (TokenKind.WhileToken);
+            MatchAndConsume (TokenKind.LeftParenthesisToken);
             ParseBooleanExpression ();
-            // MatchAndConsume (TokenKind.LeftParenthesisToken);
-            // ParseExpression ();
-            // MatchAndConsume (TokenKind.RightParenthesisToken);
+            MatchAndConsume (TokenKind.RightParenthesisToken);
+            ParseBlock ();
             Ascend ();
             return;
         }
@@ -228,10 +228,10 @@ namespace Illumi_CLI {
             }
             AddBranchNode ("IfStatement");
             MatchAndConsume (TokenKind.IfToken);
+            MatchAndConsume (TokenKind.LeftParenthesisToken);
             ParseBooleanExpression ();
-            // MatchAndConsume (TokenKind.LeftParenthesisToken);
-            // ParseExpression ();
-            // MatchAndConsume (TokenKind.RightParenthesisToken);
+            MatchAndConsume (TokenKind.RightParenthesisToken);
+            ParseBlock ();
             Ascend ();
             return;
         }
@@ -313,6 +313,9 @@ namespace Illumi_CLI {
                         break;
                     case TokenKind.FalseToken:
                         MatchAndConsume (TokenKind.FalseToken);
+                        break;
+                    case TokenKind.IdentifierToken:
+                        ParseIdentifier ();
                         break;
                     default:
                         return;

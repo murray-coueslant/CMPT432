@@ -34,6 +34,7 @@ namespace Illumi_CLI {
         }
         public void DisplayScope () {
             Console.WriteLine (ParentScope == null ? $"Table for Scope: {Level}" : $"Table for Scope: {Level} [ Parent: {ParentScope.Level} ]");
+            Console.WriteLine (String.Format ("+ {0, -10} + {0, -10} +", "----------"));
             Console.WriteLine (String.Format ("+ {0, -10} + {1, -10} +", "Symbol", "Type"));
             Console.WriteLine (String.Format ("+ {0, -10} + {0, -10} +", "----------"));
             foreach (DictionaryEntry symbol in Symbols) {

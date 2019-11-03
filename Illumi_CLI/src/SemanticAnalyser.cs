@@ -24,6 +24,7 @@ namespace Illumi_CLI {
                 TraverseParseTreeAndBuildASTAndSymbolTables ();
                 if (Diagnostics.ErrorCount == 0) {
                     Diagnostics.Semantic_ReportDisplayingSymbolTables ();
+                    Console.WriteLine ();
                     Symbols.DisplaySymbolTables (Symbols.RootScope);
                 }
             }
@@ -47,9 +48,11 @@ namespace Illumi_CLI {
                 if (node.Type == "VariableDeclaration") {
                     Symbols.AddSymbol (node.Children[1].Children[0], node.Children[0].Children[0].NodeToken.Text);
                 }
-                if (node.Type == "AssignmentStatement") {
-                    if (!FindSymbol (node.Children[0].Children[0].NodeToken.Text, Symbols.RootScope)) {
-                        Diagnostics.Semantic_ReportUndeclaredIdentifier (node.Children[0].Children[0].NodeToken);
+                if (node.Type == "Identifier") {
+                    Diagnostics.Semantic_ReportSymbolLookup (node.Children[0].NodeToken.Text);
+                    bool success = FindSymbol (node.Children[0].NodeToken.Text, Symbols.CurrentScope);
+                    if (!success) {
+                        Diagnostics.Semantic_ReportUndeclaredIdentifier (node.Children[0].NodeToken, Symbols.CurrentScope.Level);
                     }
                 }
             }
@@ -58,15 +61,18 @@ namespace Illumi_CLI {
             Traverse (Parser.Tree.Root, CheckSymbols);
         }
 
-        public bool FindSymbol (string symbol, Scope rootScope) {
-            if (rootScope.Symbols.ContainsKey (symbol)) {
+        public bool FindSymbol (string symbol, Scope searchScope) {
+            if (searchScope.Symbols.ContainsKey (symbol)) {
+                Diagnostics.Semantic_ReportFoundSymbol (symbol, searchScope);
                 return true;
             } else {
-                for (int i = 0; i < rootScope.DescendantScopes.Count; i++) {
-                    FindSymbol (symbol, rootScope.DescendantScopes[i]);
+                if (searchScope.ParentScope != null) {
+                    Diagnostics.Semantic_ReportSymbolNotFound (symbol, searchScope);
+                    return FindSymbol (symbol, searchScope.ParentScope);
                 }
+                return false;
             }
-            return false;
+
         }
     }
 }

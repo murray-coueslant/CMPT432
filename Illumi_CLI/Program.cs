@@ -6,7 +6,7 @@ using System.Linq;
 namespace Illumi_CLI {
     class Program {
 
-        public static DiagnosticCollection mainDiagnostics = new DiagnosticCollection ();
+        static DiagnosticCollection mainDiagnostics = new DiagnosticCollection ();
         public static Session currentSession = new Session ();
 
         static void Main (string[] args) {

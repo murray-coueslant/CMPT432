@@ -193,7 +193,7 @@ namespace Illumi_CLI {
             string type = Error;
             ErrorCount++;
             string originated = Parser;
-            string message = $"Incorrect statement encountered at column [ {token.LinePosition} ] on line [ {token.LineNumber} ]. Entering panic recovery mode.";
+            string message = $"Incorrect statement encountered at column [ {token.LinePosition} ] on line [ {token.LineNumber} ] due to token [ {token.Text} ]. Entering panic recovery mode.";
             ReportDiagnostic (type, originated, message);
         }
         internal void Parser_ReportNoRemainingTokens () {
@@ -335,13 +335,31 @@ namespace Illumi_CLI {
             string message = $"Displaying symbol tables for the current program.";
             ReportDiagnostic (type, originated, message);
         }
-        internal void Semantic_ReportUndeclaredIdentifier (Token identifier) {
+        internal void Semantic_ReportUndeclaredIdentifier (Token identifier, int scopeLevel) {
             string type = Error;
             ErrorCount++;
             string originated = Semantic;
             TextSpan span = new TextSpan (identifier.LinePosition, 1);
-            string message = $"The identifier [ {identifier.Text} ] was used before being declared.";
+            string message = $"The identifier [ {identifier.Text} ] was used before being declared in scope [ {scopeLevel} ].";
             ReportDiagnostic (type, span, message, originated, identifier.LineNumber);
+        }
+        internal void Semantic_ReportSymbolLookup (string symbol) {
+            string type = Information;
+            string originated = Semantic;
+            string message = $"Attempting to find [ {symbol} ] in symbol table.";
+            ReportDiagnostic (type, originated, message);
+        }
+        internal void Semantic_ReportFoundSymbol (string symbol, Scope foundScope) {
+            string type = Information;
+            string originated = Semantic;
+            string message = $"Found symbol [ {symbol} ] in scope [ {foundScope.Level} ]";
+            ReportDiagnostic (type, originated, message);
+        }
+        internal void Semantic_ReportSymbolNotFound (string symbol, Scope searchScope) {
+            string type = Information;
+            string originated = Semantic;
+            string message = $"Could not find symbol [ {symbol} ] in scope [ {searchScope.Level} ]. Searching [ {searchScope.ParentScope.Level} ]";
+            ReportDiagnostic (type, originated, message);
         }
     }
 }
