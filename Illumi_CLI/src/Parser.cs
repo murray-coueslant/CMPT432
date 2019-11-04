@@ -115,6 +115,10 @@ namespace Illumi_CLI {
                     AddBranchNode ("Statement");
                     ParseAssignmentStatement ();
                     break;
+                case TokenKind.LeftParenthesisToken:
+                    AddBranchNode ("BooleanExpression");
+                    ParseBooleanExpression ();
+                    break;
                 case TokenKind.WhileToken:
                     AddBranchNode ("Statement");
                     ParseWhileStatement ();

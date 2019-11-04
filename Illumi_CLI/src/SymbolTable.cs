@@ -13,7 +13,7 @@ namespace Illumi_CLI {
         public void AddSymbol (TreeNode symbol, string type) {
             if (!CurrentScope.AddSymbol (symbol.NodeToken.Text, type)) {
                 TextSpan errorSpan = new TextSpan (symbol.NodeToken.LinePosition, 1);
-                Diagnostics.Semantic_ReportSymbolAlreadyDeclared (symbol.NodeToken.Text, CurrentScope.Level, errorSpan, symbol.NodeToken.LineNumber);
+                Diagnostics.Semantic_ReportSymbolAlreadyDeclared (symbol.NodeToken.Text, CurrentScope.Level, errorSpan, symbol.NodeToken.LineNumber, type);
                 return;
             }
             Diagnostics.Semantic_ReportAddingSymbol (symbol.NodeToken.Text, type, CurrentScope.Level);

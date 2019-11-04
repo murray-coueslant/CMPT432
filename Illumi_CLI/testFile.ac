@@ -1,12 +1,8 @@
 {
-    boolean a
-    boolean b
-    if(a){
-        int c
-        c = 9 + a
-    }
-    while(b){
-        int d
-        d = 3 + b
-    }
+    int a
+    string b
+    a = b
+    (a == b)
+    (a != b)
+    a = 3 + a
 }$

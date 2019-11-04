@@ -36,7 +36,22 @@ namespace Illumi_CLI {
                 Traverse (root.Children[i], checkFunction);
             }
         }
-        public void CheckSymbols (TreeNode node) {
+        public bool CheckSymbolScope (TreeNode root) {
+            Traverse (root, CheckScope);
+            if (Diagnostics.ErrorCount == 0) {
+                return true;
+            }
+            return false;
+        }
+        public bool CheckSymbolType (TreeNode root) {
+            Traverse (root, CheckType);
+            if (Diagnostics.ErrorCount == 0) {
+                return true;
+            }
+            return false;
+        }
+
+        public void CheckScope (TreeNode node) {
             if (node.Type == "Block") {
                 Symbols.NewScope ();
                 Symbols.UpdateCurrentScope ();
@@ -57,8 +72,24 @@ namespace Illumi_CLI {
                 }
             }
         }
+        public void CheckType (TreeNode node) {
+            if (node.Type == "AssignmentStatement") {
+                string leftIdentifierType = Symbols.CurrentScope.Symbols[node.Children[0].Children[0].NodeToken.Text].ToString ();
+                string rightIdentifierType = Symbols.CurrentScope.Symbols[node.Children[2].Children[0].Children[0].NodeToken.Text].ToString ();
+
+                System.Console.WriteLine (leftIdentifierType == rightIdentifierType);
+
+                //string leftIdentifierType = Console.WriteLine (Symbols.CurrentScope.Symbols[leftIdentifier.])
+            }
+        }
         public void TraverseParseTreeAndBuildASTAndSymbolTables () {
-            Traverse (Parser.Tree.Root, CheckSymbols);
+            //TraverseAndBuildAST (Parser.Tree.Root, CheckSymbols);
+            //TODO Diagnostics.Semantic_ReportCheckingScope();
+            if (CheckSymbolScope (Parser.Tree.Root)) {
+                //TODO Diagnostics.Semantic_ReportCheckingType();
+                System.Console.WriteLine ("Checking type");
+                CheckSymbolType (Parser.Tree.Root);
+            }
         }
 
         public bool FindSymbol (string symbol, Scope searchScope) {

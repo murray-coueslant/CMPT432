@@ -310,11 +310,11 @@ namespace Illumi_CLI {
             string message = $"Adding symbol [ {symbol} ] of type [ {symbolType} ] to symbol table for scope [ {scope} ].";
             ReportDiagnostic (type, originated, message);
         }
-        internal void Semantic_ReportSymbolAlreadyDeclared (string symbol, int currentScope, TextSpan span, int lineNumber) {
+        internal void Semantic_ReportSymbolAlreadyDeclared (string symbol, int currentScope, TextSpan span, int lineNumber, string symbolType) {
             string type = Error;
             ErrorCount++;
             string originated = Semantic;
-            string message = $"Symbol [ {symbol} ] has already been declared in scope [ {currentScope} ].";
+            string message = $"Symbol [ {symbol} ] of type [ {symbolType} ] has already been declared in scope [ {currentScope} ].";
             ReportDiagnostic (type, span, message, originated, lineNumber);
         }
         internal void Semantic_ReportAscendingScope (Scope currentScope) {

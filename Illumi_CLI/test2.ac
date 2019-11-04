@@ -238,3 +238,35 @@ lines"}$
         d = 3 + b
     }
 }$
+{
+    boolean a
+    boolean b
+    if(a){
+        int c
+        c = 9 + a
+    }
+    while(b){
+        int d
+        d = 3 + b
+    }
+}$
+{
+int a
+b = 4
+}$
+{
+int a
+{
+string a
+a = "this is fine"
+string b
+int b
+}
+boolean a /* this is not fine */
+}$
+{
+    a = b
+    (a == b)
+    (a != b)
+    a = 3 + b
+}$
