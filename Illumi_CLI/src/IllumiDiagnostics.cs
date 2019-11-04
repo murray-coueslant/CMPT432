@@ -361,5 +361,17 @@ namespace Illumi_CLI {
             string message = $"Could not find symbol [ {symbol} ] in scope [ {searchScope.Level} ]. Searching [ {searchScope.ParentScope.Level} ]";
             ReportDiagnostic (type, originated, message);
         }
+        internal void Semantic_ReportCheckingScope () {
+            string type = Information;
+            string originated = Semantic;
+            string message = $"Checking scope.";
+            ReportDiagnostic (type, originated, message);
+        }
+        internal void Semantic_ReportCheckingType () {
+            string type = Information;
+            string originated = Semantic;
+            string message = $"Checking type.";
+            ReportDiagnostic (type, originated, message);
+        }
     }
 }

@@ -1,8 +1,12 @@
 {
     int a
-    string b
-    a = b
-    (a == b)
-    (a != b)
-    a = 3 + a
+    int b
+    {
+        int c
+        c = b
+    }
+    {
+        int c
+        c = a
+    }
 }$

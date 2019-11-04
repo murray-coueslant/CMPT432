@@ -37,6 +37,7 @@ namespace Illumi_CLI {
             Console.WriteLine (String.Format ("+ {0, -10} + {0, -10} +", "----------"));
             Console.WriteLine (String.Format ("| {0, -10} | {1, -10} |", "Symbol", "Type"));
             Console.WriteLine (String.Format ("+ {0, -10} + {0, -10} +", "----------"));
+            Console.WriteLine (String.Format ("+ {0, -10} + {0, -10} +", "----------"));
             foreach (DictionaryEntry symbol in Symbols) {
                 Console.WriteLine (String.Format ("| {0, -10} | {1, -10} |", symbol.Key, symbol.Value));
                 Console.WriteLine (String.Format ("+ {0, -10} + {0, -10} +", "----------"));

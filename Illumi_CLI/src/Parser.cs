@@ -13,7 +13,9 @@ namespace Illumi_CLI {
 
         public List<Token> TokenStream { get; set; }
 
-        public Token currentToken { get; set; }
+        public Token currentToken { get => TokenStream[tokenCounter]; }
+
+        public int tokenCounter { get; set; }
 
         public ConcreteSyntaxTree Tree { get; set; }
 
@@ -43,6 +45,7 @@ namespace Illumi_CLI {
 
         public void Parse () {
             TokenStream = Lexer.GetTokens ();
+            tokenCounter = 0;
 
             if (TokenStream.Count != 0) {
                 ParseProgram ();
@@ -68,7 +71,6 @@ namespace Illumi_CLI {
             }
 
             AddBranchNode ("Program");
-            Next ();
             ParseBlock ();
             MatchAndConsume (TokenKind.EndOfProgramToken);
             return;
@@ -93,7 +95,7 @@ namespace Illumi_CLI {
 
             AddBranchNode ("StatementList");
             ParseStatement ();
-            Next ();
+            //Next ();
             if (currentToken.Kind != TokenKind.RightBraceToken && currentToken.Kind != TokenKind.EndOfProgramToken) {
                 ParseStatementList ();
             }
@@ -377,7 +379,7 @@ namespace Illumi_CLI {
                 if (CurrentSession.debugMode) {
                     Diagnostics.Parser_ReportConsumingToken (currentToken);
                 }
-                TokenStream.RemoveAt (0);
+                //TokenStream.RemoveAt (0);
                 AddLeafNode (currentToken);
                 Next ();
                 return true;
@@ -388,15 +390,18 @@ namespace Illumi_CLI {
         }
 
         public void Next () {
-            if (TokenStream.Count > 0) {
-                currentToken = TokenStream.First ();
+            if (tokenCounter != TokenStream.Count) {
+                tokenCounter++;
             }
+            // if (TokenStream.Count > 0) {
+            //     currentToken = TokenStream.First ();
+            // }
         }
 
         public void Panic () {
             while (!recoverySet.Contains (currentToken.Kind)) {
                 Diagnostics.Parser_ReportPanickedToken (currentToken);
-                TokenStream.RemoveAt (0);
+                //TokenStream.RemoveAt (0);
                 Next ();
             }
             Diagnostics.Parser_ReportExitedPanicMode ();

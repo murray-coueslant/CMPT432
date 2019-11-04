@@ -50,7 +50,6 @@ namespace Illumi_CLI {
             }
             return false;
         }
-
         public void CheckScope (TreeNode node) {
             if (node.Type == "Block") {
                 Symbols.NewScope ();
@@ -65,7 +64,7 @@ namespace Illumi_CLI {
                 }
                 if (node.Type == "Identifier") {
                     Diagnostics.Semantic_ReportSymbolLookup (node.Children[0].NodeToken.Text);
-                    bool success = FindSymbol (node.Children[0].NodeToken.Text, Symbols.CurrentScope);
+                    bool success = SymbolExists (node.Children[0].NodeToken.Text, Symbols.CurrentScope);
                     if (!success) {
                         Diagnostics.Semantic_ReportUndeclaredIdentifier (node.Children[0].NodeToken, Symbols.CurrentScope.Level);
                     }
@@ -73,37 +72,64 @@ namespace Illumi_CLI {
             }
         }
         public void CheckType (TreeNode node) {
-            if (node.Type == "AssignmentStatement") {
-                string leftIdentifierType = Symbols.CurrentScope.Symbols[node.Children[0].Children[0].NodeToken.Text].ToString ();
-                string rightIdentifierType = Symbols.CurrentScope.Symbols[node.Children[2].Children[0].Children[0].NodeToken.Text].ToString ();
+            switch (node.Type) {
+                case "AssignmentStatement":
+                    string leftIdentifierType = GetSymbolType (node.Children[0].Children[0].NodeToken.Text, Symbols.CurrentScope);
+                    string rightExpressionType = GetExpressionType (node.Children[2]);
+                    System.Console.WriteLine ($"Assignment type checked: {leftIdentifierType == rightExpressionType}");
+                    break;
+                default:
+                    break;
+            }
 
-                System.Console.WriteLine (leftIdentifierType == rightIdentifierType);
-
-                //string leftIdentifierType = Console.WriteLine (Symbols.CurrentScope.Symbols[leftIdentifier.])
+        }
+        public string GetExpressionType (TreeNode expressionNode) {
+            switch (expressionNode.Children[0].Type) {
+                case "Identifier":
+                    return GetSymbolType (expressionNode.Children[0].Children[0].NodeToken.Text, Symbols.CurrentScope);
+                case "IntegerExpression":
+                    return GetExpressionType (expressionNode.Children[0]);
+                default:
+                    return null;
             }
         }
         public void TraverseParseTreeAndBuildASTAndSymbolTables () {
             //TraverseAndBuildAST (Parser.Tree.Root, CheckSymbols);
-            //TODO Diagnostics.Semantic_ReportCheckingScope();
+            BuildAST (Parser);
+            Diagnostics.Semantic_ReportCheckingScope ();
             if (CheckSymbolScope (Parser.Tree.Root)) {
-                //TODO Diagnostics.Semantic_ReportCheckingType();
-                System.Console.WriteLine ("Checking type");
+                Diagnostics.Semantic_ReportCheckingType ();
                 CheckSymbolType (Parser.Tree.Root);
             }
         }
+        public void BuildAST (Parser parser) {
+            Token currentToken = parser.TokenStream.First ();
 
-        public bool FindSymbol (string symbol, Scope searchScope) {
+            System.Console.WriteLine (currentToken.Text);
+        }
+        public bool SymbolExists (string symbol, Scope searchScope) {
             if (searchScope.Symbols.ContainsKey (symbol)) {
                 Diagnostics.Semantic_ReportFoundSymbol (symbol, searchScope);
                 return true;
             } else {
                 if (searchScope.ParentScope != null) {
                     Diagnostics.Semantic_ReportSymbolNotFound (symbol, searchScope);
-                    return FindSymbol (symbol, searchScope.ParentScope);
+                    return SymbolExists (symbol, searchScope.ParentScope);
                 }
                 return false;
             }
-
+        }
+        public string GetSymbolType (string symbol, Scope searchScope) {
+            if (searchScope.Symbols.ContainsKey (symbol)) {
+                Diagnostics.Semantic_ReportFoundSymbol (symbol, searchScope);
+                return searchScope.Symbols[symbol].ToString ();
+            } else {
+                if (searchScope.ParentScope != null) {
+                    Diagnostics.Semantic_ReportSymbolNotFound (symbol, searchScope);
+                    return GetSymbolType (symbol, searchScope.ParentScope);
+                }
+                return null;
+            }
         }
     }
 }
