@@ -1,12 +1,10 @@
 {
-    int a
+    boolean a
     int b
-    {
-        int c
-        c = b
+    if(a){
+        print(a)
     }
-    {
-        int c
-        c = a
+    while(a){
+        print(b)
     }
 }$

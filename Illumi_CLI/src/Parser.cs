@@ -220,9 +220,9 @@ namespace Illumi_CLI {
             }
             AddBranchNode ("WhileStatement");
             MatchAndConsume (TokenKind.WhileToken);
-            MatchAndConsume (TokenKind.LeftParenthesisToken);
+            //MatchAndConsume (TokenKind.LeftParenthesisToken);
             ParseBooleanExpression ();
-            MatchAndConsume (TokenKind.RightParenthesisToken);
+            //MatchAndConsume (TokenKind.RightParenthesisToken);
             ParseBlock ();
             Ascend ();
             return;
@@ -234,9 +234,9 @@ namespace Illumi_CLI {
             }
             AddBranchNode ("IfStatement");
             MatchAndConsume (TokenKind.IfToken);
-            MatchAndConsume (TokenKind.LeftParenthesisToken);
+            //MatchAndConsume (TokenKind.LeftParenthesisToken);
             ParseBooleanExpression ();
-            MatchAndConsume (TokenKind.RightParenthesisToken);
+            //MatchAndConsume (TokenKind.RightParenthesisToken);
             ParseBlock ();
             Ascend ();
             return;
@@ -309,8 +309,10 @@ namespace Illumi_CLI {
             if (currentToken.Kind == TokenKind.LeftParenthesisToken) {
                 MatchAndConsume (TokenKind.LeftParenthesisToken);
                 ParseExpression ();
-                ParseBooleanOperator ();
-                ParseExpression ();
+                if (currentToken.Kind == TokenKind.EquivalenceToken || currentToken.Kind == TokenKind.NotEqualToken) {
+                    ParseBooleanOperator ();
+                    ParseExpression ();
+                }
                 MatchAndConsume (TokenKind.RightParenthesisToken);
             } else {
                 switch (currentToken.Kind) {

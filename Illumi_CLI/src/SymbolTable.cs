@@ -42,11 +42,13 @@ namespace Illumi_CLI {
             }
         }
         public void DisplaySymbolTables (Scope RootScope) {
-            RootScope.DisplayScope ();
-            Console.WriteLine ();
+            if (RootScope != null) {
+                RootScope.DisplayScope ();
+                Console.WriteLine ();
 
-            for (int i = 0; i < RootScope.DescendantScopes.Count; i++) {
-                DisplaySymbolTables (RootScope.DescendantScopes[i]);
+                for (int i = 0; i < RootScope.DescendantScopes.Count; i++) {
+                    DisplaySymbolTables (RootScope.DescendantScopes[i]);
+                }
             }
         }
     }

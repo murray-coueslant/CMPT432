@@ -38,7 +38,7 @@ namespace Illumi_CLI {
             // TODO convert these to diagnostics
             if (currentNode != Root) {
                 if (session.debugMode) {
-                    System.Console.WriteLine ($"[ Debug ] - [ Tree ] -> Ascending from node [ {currentNode.Type} ] to [ {currentNode.Parent.Type} ].");
+                    System.Console.WriteLine ($"[ Info ] - [ Tree ] -> Ascending from node [ {currentNode.Type} ] to [ {currentNode.Parent.Type} ].");
                 }
                 currentNode = currentNode.Parent;
             } else {
@@ -46,7 +46,7 @@ namespace Illumi_CLI {
             }
             return;
         }
-        public static void PrintTree (TreeNode root, string indent, bool lastChild = true) {
+        public static void PrintTree (TreeNode root, string indent = "", bool lastChild = true) {
             // ├──
             // └──
             // │
