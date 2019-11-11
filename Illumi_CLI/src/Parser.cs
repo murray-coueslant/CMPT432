@@ -41,10 +41,10 @@ namespace Illumi_CLI {
             Tree = new ConcreteSyntaxTree ();
             CurrentSession = currentSession;
             Diagnostics = diagnostics;
+            TokenStream = Lexer.GetTokens ();
         }
 
         public void Parse () {
-            TokenStream = Lexer.GetTokens ();
             tokenCounter = 0;
 
             if (TokenStream.Count != 0) {

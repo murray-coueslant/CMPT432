@@ -1,10 +1,17 @@
 {
     boolean a
     int b
-    if(a){
-        print(a)
-    }
-    while(a){
-        print(b)
+    string c
+    c = "hello"
+    b = 1 + 2 + 3 + 4 + 5
+    a = false
+    a = true
+    {
+        if(a){
+            print(a)
+        }
+        while(a==b){
+            print(b)
+        }
     }
 }$

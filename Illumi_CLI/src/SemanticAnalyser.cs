@@ -8,6 +8,8 @@ namespace Illumi_CLI {
         public Parser Parser { get; set; }
         public Tree ConcreteSyntaxTree { get; }
         public List<Token> TokenStream { get; set; }
+        public int TokenCounter { get; set; }
+        public Token CurrentToken { get => TokenStream[TokenCounter]; }
         public Session CurrentSession { get; set; }
         public DiagnosticCollection Diagnostics { get; set; }
         public AbstractSyntaxTree AbstractSyntaxTree { get; set; }
@@ -18,94 +20,189 @@ namespace Illumi_CLI {
             TokenStream = parser.TokenStream;
             CurrentSession = currentSession;
             Diagnostics = diagnostics;
+            TokenCounter = 0;
             AbstractSyntaxTree = new AbstractSyntaxTree ();
         }
         public void Analyse () {
             BuildAST ();
-        }
-        public void Traverse (TreeNode root, Action<TreeNode> checkFunction) {
-            checkFunction (root);
-
-            for (int i = 0; i < root.Children.Count; i++) {
-                Traverse (root.Children[i], checkFunction);
-            }
-        }
-        public void BuildAST () {
-            Traverse (ConcreteSyntaxTree.Root, HandleCSTNode);
             AbstractSyntaxTree.PrintTree (AbstractSyntaxTree.Root);
         }
-        public void HandleCSTNode (TreeNode node) {
-            switch (node.Type) {
-                case "Block":
-                    HandleBlock (node);
-                    break;
-                case "VariableDeclaration":
-                    HandleVariableDeclaration (node);
-                    break;
-                case "AssignmentStatement":
-                    HandleAssignmentStatement (node);
-                    break;
-                case "IfStatement":
-                    HandleIfStatement (node);
-                    break;
-                case "WhileStatement":
-                    HandleWhileStatement (node);
-                    break;
-                case "PrintStatement":
-                    HandlePrintStatement (node);
-                    break;
-                case "RightBraceToken":
-                    AbstractSyntaxTree.Ascend (CurrentSession);
-                    break;
+        public void BuildAST () {
+            while (TokenCounter < TokenStream.Count) {
+                switch (CurrentToken.Kind) {
+                    case TokenKind.LeftBraceToken:
+                        HandleBlock ();
+                        break;
+                    case TokenKind.AssignmentToken:
+                        HandleAssignmentStatement ();
+                        break;
+                    case TokenKind.Type_IntegerToken:
+                    case TokenKind.Type_StringToken:
+                    case TokenKind.Type_BooleanToken:
+                        HandleVariableDeclaration ();
+                        break;
+                    default:
+                        NextToken ();
+                        break;
+                }
             }
-            //AbstractSyntaxTree.Ascend (CurrentSession);
         }
-        public void HandleBlock (TreeNode node) {
-            AbstractSyntaxTree.AddBranchNode (node.Type);
-            //Traverse (node, HandleCSTNode);
-            //AbstractSyntaxTree.Ascend (CurrentSession);
+        public void HandleBlock () {
+            // Diagnostics.Semantic_ReportAddingASTNode()
+            AbstractSyntaxTree.AddBranchNode ("Block");
+            NextToken ();
         }
-        public void HandleVariableDeclaration (TreeNode node) {
-            AbstractSyntaxTree.AddBranchNode (node.Type);
-            AbstractSyntaxTree.AddLeafNode (node.Children[0].Children[0].NodeToken.Text);
-            AbstractSyntaxTree.AddLeafNode (node.Children[1].Children[0].NodeToken.Text);
-            AbstractSyntaxTree.Ascend (CurrentSession);
-        }
-        public void HandleAssignmentStatement (TreeNode node) {
-            AbstractSyntaxTree.AddBranchNode (node.Type);
-            AbstractSyntaxTree.AddLeafNode (node.Children[0].Children[0].NodeToken.Text);
-            HandleExpression (node.Children[2]);
-            AbstractSyntaxTree.Ascend (CurrentSession);
-        }
-        public void HandleIfStatement (TreeNode node) {
-            AbstractSyntaxTree.AddBranchNode (node.Type);
-            if (node.Children[1].Children[1].Children[0].Type == "Identifier") {
-                AbstractSyntaxTree.AddLeafNode (node.Children[1].Children[1].Children[0].Children[0].NodeToken.Text);
+        public void HandleVariableDeclaration () {
+            AbstractSyntaxTree.AddBranchNode ("VariableDeclaration");
+            if (CurrentToken.Kind == TokenKind.Type_BooleanToken) {
+                AbstractSyntaxTree.AddLeafNode ("Boolean");
+                NextToken ();
+                AbstractSyntaxTree.AddLeafNode (CurrentToken.Text);
+            } else if (CurrentToken.Kind == TokenKind.Type_IntegerToken) {
+                AbstractSyntaxTree.AddLeafNode ("Integer");
+                NextToken ();
+                AbstractSyntaxTree.AddLeafNode (CurrentToken.Text);
+            } else if (CurrentToken.Kind == TokenKind.Type_StringToken) {
+                AbstractSyntaxTree.AddLeafNode ("String");
+                NextToken ();
+                AbstractSyntaxTree.AddLeafNode (CurrentToken.Text);
             } else {
-                HandleExpression (node.Children[1].Children[1].Children[0]);
-                AbstractSyntaxTree.Ascend (CurrentSession);
+                // TODO diagnostics.Semantic_ReportInvalidType();
+                return;
             }
+            AbstractSyntaxTree.Ascend (CurrentSession);
         }
-        public void HandleWhileStatement (TreeNode node) {
-            AbstractSyntaxTree.AddBranchNode (node.Type);
-            if (node.Children[1].Children[1].Children[0].Type == "Identifier") {
-                AbstractSyntaxTree.AddLeafNode (node.Children[1].Children[1].Children[0].Children[0].NodeToken.Text);
+        public void HandleAssignmentStatement () {
+            AbstractSyntaxTree.AddBranchNode ("AssignmentStatement");
+            AbstractSyntaxTree.AddLeafNode (TokenStream[TokenCounter - 1].Text);
+            NextToken ();
+            if (CurrentToken.Kind == TokenKind.StringToken) {
+                HandleStringExpr ();
+            } else if (CurrentToken.Kind == TokenKind.DigitToken) {
+                HandleIntExpr ();
+            } else if (CurrentToken.Kind == TokenKind.TrueToken ||
+                CurrentToken.Kind == TokenKind.FalseToken ||
+                CurrentToken.Kind == TokenKind.LeftParenthesisToken) {
+                HandleBooleanExpr ();
+            }
+            AbstractSyntaxTree.Ascend (CurrentSession);
+
+        }
+        public void HandleStringExpr () {
+            AbstractSyntaxTree.AddLeafNode (CurrentToken.Text);
+            NextToken ();
+        }
+        public void HandleIntExpr () {
+            if (TokenStream[TokenCounter + 1].Kind == TokenKind.AdditionToken) {
+                AbstractSyntaxTree.AddBranchNode ("Add");
+                AbstractSyntaxTree.AddLeafNode (CurrentToken.Text);
+                NextToken ();
+                NextToken ();
+                HandleIntExpr ();
             } else {
-                HandleExpression (node.Children[1].Children[1].Children[0]);
-                AbstractSyntaxTree.Ascend (CurrentSession);
+                AbstractSyntaxTree.AddBranchNode (CurrentToken.Text);
+                NextToken ();
             }
-        }
-        public void HandlePrintStatement (TreeNode node) {
-            AbstractSyntaxTree.AddBranchNode (node.Type);
-            HandleExpression (node.Children[2]);
             AbstractSyntaxTree.Ascend (CurrentSession);
         }
-        public void HandleExpression (TreeNode node) {
-            Traverse (node, HandleCSTNode);
+        public void HandleBooleanExpr () {
+            if (CurrentToken.Kind == TokenKind.TrueToken || CurrentToken.Kind == TokenKind.FalseToken) {
+                AbstractSyntaxTree.AddLeafNode (CurrentToken.Text);
+                NextToken ();
+            } else {
+                NextToken ();
+            }
             AbstractSyntaxTree.Ascend (CurrentSession);
+        }
+        public void NextToken () {
+            TokenCounter++;
         }
     }
 }
+//         public void Traverse (TreeNode root, Action<TreeNode> checkFunction) {
+//             checkFunction (root);
+
+//             for (int i = 0; i < root.Children.Count; i++) {
+//                 Traverse (root.Children[i], checkFunction);
+//             }
+//         }
+//         public void BuildAST () {
+//             Traverse (ConcreteSyntaxTree.Root, HandleCSTNode);
+//             AbstractSyntaxTree.PrintTree (AbstractSyntaxTree.Root);
+//         }
+//         public void HandleCSTNode (TreeNode node) {
+//             switch (node.Type) {
+//                 case "Block":
+//                     HandleBlock (node);
+//                     break;
+//                 case "VariableDeclaration":
+//                     HandleVariableDeclaration (node);
+//                     break;
+//                 case "AssignmentStatement":
+//                     HandleAssignmentStatement (node);
+//                     break;
+//                 case "IfStatement":
+//                     HandleIfStatement (node);
+//                     break;
+//                 case "WhileStatement":
+//                     HandleWhileStatement (node);
+//                     break;
+//                 case "PrintStatement":
+//                     HandlePrintStatement (node);
+//                     break;
+//                 case "RightBraceToken":
+//                     AbstractSyntaxTree.Ascend (CurrentSession);
+//                     break;
+//             }
+//             //AbstractSyntaxTree.Ascend (CurrentSession);
+//         }
+//         public void HandleBlock (TreeNode node) {
+//             AbstractSyntaxTree.AddBranchNode (node.Type);
+//             //Traverse (node, HandleCSTNode);
+//             //AbstractSyntaxTree.Ascend (CurrentSession);
+//         }
+//         public void HandleVariableDeclaration (TreeNode node) {
+//             AbstractSyntaxTree.AddBranchNode (node.Type);
+//             AbstractSyntaxTree.AddLeafNode (node.Children[0].Children[0].NodeToken.Text);
+//             AbstractSyntaxTree.AddLeafNode (node.Children[1].Children[0].NodeToken.Text);
+//             AbstractSyntaxTree.Ascend (CurrentSession);
+//         }
+//         public void HandleAssignmentStatement (TreeNode node) {
+//             AbstractSyntaxTree.AddBranchNode (node.Type);
+//             AbstractSyntaxTree.AddLeafNode (node.Children[0].Children[0].NodeToken.Text);
+//             HandleExpression (node.Children[2]);
+//             AbstractSyntaxTree.Ascend (CurrentSession);
+//         }
+//         public void HandleIfStatement (TreeNode node) {
+//             AbstractSyntaxTree.AddBranchNode (node.Type);
+//             HandleExpression (node.Children[0]);
+//             AbstractSyntaxTree.Ascend (CurrentSession);
+//             if (node.Children[1].Children[1].Children[0].Type == "Identifier") {
+//                 AbstractSyntaxTree.AddLeafNode (node.Children[1].Children[1].Children[0].Children[0].NodeToken.Text);
+//             } else {
+//                 HandleExpression (node.Children[1].Children[1].Children[0]);
+//             }
+//         }
+//         public void HandleWhileStatement (TreeNode node) {
+//             AbstractSyntaxTree.AddBranchNode (node.Type);
+//             if (node.Children[1].Children[1].Children[0].Type == "Identifier") {
+//                 AbstractSyntaxTree.AddLeafNode (node.Children[1].Children[1].Children[0].Children[0].NodeToken.Text);
+//             } else {
+//                 HandleExpression (node.Children[1].Children[1].Children[0]);
+//                 AbstractSyntaxTree.Ascend (CurrentSession);
+//             }
+//         }
+//         public void HandlePrintStatement (TreeNode node) {
+//             AbstractSyntaxTree.AddBranchNode (node.Type);
+//             HandleExpression (node.Children[2]);
+//             AbstractSyntaxTree.Ascend (CurrentSession);
+//         }
+//         public void HandleExpression (TreeNode node) {
+//             Traverse (node, HandleCSTNode);
+//             AbstractSyntaxTree.Ascend (CurrentSession);
+//         }
+//     }
+// }
 
 // namespace Illumi_CLI {
 //     class SemanticAnalyser {
