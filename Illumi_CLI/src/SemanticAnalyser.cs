@@ -13,7 +13,6 @@ namespace Illumi_CLI {
         public Session CurrentSession { get; set; }
         public DiagnosticCollection Diagnostics { get; set; }
         public AbstractSyntaxTree AbstractSyntaxTree { get; set; }
-
         public SemanticAnalyser (Parser parser, Session currentSession, DiagnosticCollection diagnostics) {
             Parser = parser;
             ConcreteSyntaxTree = parser.Tree;
@@ -27,25 +26,25 @@ namespace Illumi_CLI {
             BuildAST ();
             AbstractSyntaxTree.PrintTree (AbstractSyntaxTree.Root);
         }
-        public void BuildAST () {
+        public void BuildAST (AbstractSyntaxTree tree = AbstractSyntaxTree) {
             while (TokenCounter < TokenStream.Count) {
                 switch (CurrentToken.Kind) {
                     case TokenKind.LeftBraceToken:
-                        HandleBlock ();
+                        HandleBlock (tree);
                         break;
                     case TokenKind.AssignmentToken:
-                        HandleAssignmentStatement ();
+                        HandleAssignmentStatement (tree);
                         break;
                     case TokenKind.Type_IntegerToken:
                     case TokenKind.Type_StringToken:
                     case TokenKind.Type_BooleanToken:
-                        HandleVariableDeclaration ();
+                        HandleVariableDeclaration (tree);
                         break;
                     case TokenKind.PrintToken:
-                        HandlePrintStatement ();
+                        HandlePrintStatement (tree);
                         break;
                     case TokenKind.IfToken:
-                        HandleIfStatement ();
+                        HandleIfStatement (tree);
                         break;
                     default:
                         NextToken ();
@@ -53,96 +52,117 @@ namespace Illumi_CLI {
                 }
             }
         }
-        public void HandleBlock () {
+        public void HandleBlock (AbstractSyntaxTree tree) {
             // Diagnostics.Semantic_ReportAddingASTNode()
-            AbstractSyntaxTree.AddBranchNode ("Block");
+            tree.AddBranchNode ("Block");
             NextToken ();
         }
-        public void HandleVariableDeclaration () {
-            AbstractSyntaxTree.AddBranchNode ("VariableDeclaration");
+        public void HandleVariableDeclaration (AbstractSyntaxTree tree) {
+            tree.AddBranchNode ("VariableDeclaration");
             if (CurrentToken.Kind == TokenKind.Type_BooleanToken) {
-                AbstractSyntaxTree.AddLeafNode ("Boolean");
+                tree.AddLeafNode ("Boolean");
                 NextToken ();
-                AbstractSyntaxTree.AddLeafNode (CurrentToken.Text);
+                tree.AddLeafNode (CurrentToken.Text);
             } else if (CurrentToken.Kind == TokenKind.Type_IntegerToken) {
-                AbstractSyntaxTree.AddLeafNode ("Integer");
+                tree.AddLeafNode ("Integer");
                 NextToken ();
-                AbstractSyntaxTree.AddLeafNode (CurrentToken.Text);
+                tree.AddLeafNode (CurrentToken.Text);
             } else if (CurrentToken.Kind == TokenKind.Type_StringToken) {
-                AbstractSyntaxTree.AddLeafNode ("String");
+                tree.AddLeafNode ("String");
                 NextToken ();
-                AbstractSyntaxTree.AddLeafNode (CurrentToken.Text);
+                tree.AddLeafNode (CurrentToken.Text);
             } else {
                 // TODO diagnostics.Semantic_ReportInvalidType();
                 return;
             }
-            AbstractSyntaxTree.Ascend (CurrentSession);
+            tree.Ascend (CurrentSession);
         }
-        public void HandleAssignmentStatement () {
-            AbstractSyntaxTree.AddBranchNode ("AssignmentStatement");
-            AbstractSyntaxTree.AddLeafNode (TokenStream[TokenCounter - 1].Text);
+        public void HandleAssignmentStatement (AbstractSyntaxTree tree) {
+            tree.AddBranchNode ("AssignmentStatement");
+            tree.AddLeafNode (TokenStream[TokenCounter - 1].Text);
             NextToken ();
             HandleExpression ();
-            AbstractSyntaxTree.Ascend (CurrentSession);
-
+            tree.Ascend (CurrentSession);
         }
-        public void HandleExpression () {
+        public void HandleExpression (AbstractSyntaxTree tree) {
             if (CurrentToken.Kind == TokenKind.StringToken) {
-                HandleStringExpr ();
+                HandleStringExpr (tree);
             } else if (CurrentToken.Kind == TokenKind.DigitToken) {
-                HandleIntExpr ();
+                HandleIntExpr (tree);
             } else if (CurrentToken.Kind == TokenKind.TrueToken ||
                 CurrentToken.Kind == TokenKind.FalseToken ||
                 CurrentToken.Kind == TokenKind.LeftParenthesisToken) {
-                HandleBooleanExpr ();
+                HandleBooleanExpr (tree);
             } else if (CurrentToken.Kind == TokenKind.IdentifierToken) {
-                HandleIdentifier ();
+                HandleIdentifier (tree);
             }
-            AbstractSyntaxTree.Ascend (CurrentSession);
+            tree.Ascend (CurrentSession);
         }
-        public void HandlePrintStatement () {
-            AbstractSyntaxTree.AddBranchNode ("Print");
+        public void HandlePrintStatement (AbstractSyntaxTree tree) {
+            tree.AddBranchNode ("Print");
             NextToken ();
             NextToken ();
             HandleExpression ();
             NextToken ();
-            AbstractSyntaxTree.Ascend (CurrentSession);
+            tree.Ascend (CurrentSession);
         }
-        public void HandleIfStatement () {
-            AbstractSyntaxTree.AddBranchNode ("IfStatement");
+        public void HandleIfStatement (AbstractSyntaxTree tree) {
+            tree.AddBranchNode ("IfStatement");
             NextToken ();
             HandleBooleanExpr ();
             HandleBlock ();
         }
-        public void HandleStringExpr () {
-            AbstractSyntaxTree.AddLeafNode (CurrentToken.Text);
+        public void HandleStringExpr (AbstractSyntaxTree tree) {
+            tree.AddLeafNode (CurrentToken.Text);
             NextToken ();
         }
-        public void HandleIntExpr () {
+        public void HandleIntExpr (AbstractSyntaxTree tree) {
             if (TokenStream[TokenCounter + 1].Kind == TokenKind.AdditionToken) {
-                AbstractSyntaxTree.AddBranchNode ("Add");
-                AbstractSyntaxTree.AddLeafNode (CurrentToken.Text);
+                tree.AddBranchNode ("Add");
+                tree.AddLeafNode (CurrentToken.Text);
                 NextToken ();
                 NextToken ();
                 HandleIntExpr ();
             } else {
-                AbstractSyntaxTree.AddBranchNode (CurrentToken.Text);
+                tree.AddBranchNode (CurrentToken.Text);
                 NextToken ();
             }
-            AbstractSyntaxTree.Ascend (CurrentSession);
+            tree.Ascend (CurrentSession);
         }
-        public void HandleBooleanExpr () {
+        public void HandleBooleanExpr (AbstractSyntaxTree tree) {
             if (CurrentToken.Kind == TokenKind.TrueToken || CurrentToken.Kind == TokenKind.FalseToken || CurrentToken.Kind == TokenKind.IdentifierToken) {
-                AbstractSyntaxTree.AddLeafNode (CurrentToken.Text);
+                tree.AddLeafNode (CurrentToken.Text);
                 NextToken ();
             } else {
                 NextToken ();
+                ASTNode leftExpr = HandleExprTree ();
+                tree.AddBranchNode (CurrentToken.Text);
+                ASTNode rightExpr = HandleExprTree ();
+                tree.AddLeafNode (leftExpr);
+                tree.AddLeafNode (rightExpr);
             }
-            AbstractSyntaxTree.Ascend (CurrentSession);
+            tree.Ascend (CurrentSession);
         }
         public void HandleIdentifier () {
             AbstractSyntaxTree.AddLeafNode (CurrentToken.Text);
             NextToken ();
+        }
+        public ASTNode HandleExprTree () {
+            AbstractSyntaxTree tree = new AbstractSyntaxTree ();
+            if (CurrentToken.Kind == TokenKind.StringToken) {
+                HandleStringExpr (tree);
+            } else if (CurrentToken.Kind == TokenKind.DigitToken) {
+                HandleIntExpr (tree);
+            } else if (CurrentToken.Kind == TokenKind.TrueToken ||
+                CurrentToken.Kind == TokenKind.FalseToken ||
+                CurrentToken.Kind == TokenKind.LeftParenthesisToken) {
+                HandleBooleanExpr (tree);
+            } else if (CurrentToken.Kind == TokenKind.IdentifierToken) {
+                HandleIdentifier (tree);
+            }
+            tree.Ascend (CurrentSession);
+            return tree.Root;
+
         }
         public void NextToken () {
             TokenCounter++;

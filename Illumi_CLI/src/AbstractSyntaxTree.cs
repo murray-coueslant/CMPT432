@@ -7,6 +7,15 @@ namespace Illumi_CLI {
             Root = root;
             CurrentNode = Root;
         }
+        public void AddBranchNode (ASTNode newNode) {
+            if (Root is null) {
+                Root = newNode;
+                CurrentNode = Root;
+            } else {
+                CurrentNode.AddDescendant (newNode);
+                CurrentNode = newNode;
+            }
+        }
         public void AddBranchNode (string nodeText) {
             ASTNode newNode = new ASTNode (nodeText);
             if (Root is null) {
@@ -15,6 +24,14 @@ namespace Illumi_CLI {
             } else {
                 CurrentNode.AddDescendant (newNode);
                 CurrentNode = newNode;
+            }
+        }
+        public void AddLeafNode (ASTNode newNode) {
+            if (Root is null) {
+                Root = newNode;
+                CurrentNode = Root;
+            } else {
+                CurrentNode.AddDescendant (newNode);
             }
         }
         public void AddLeafNode (string nodeText) {
@@ -28,6 +45,7 @@ namespace Illumi_CLI {
         }
         public void Ascend (Session session) {
             if (CurrentNode.Parent != null) {
+                //todo session.Diagnostics.Tree.Report_AscendingLevel();
                 System.Console.WriteLine ($"[ Info ] - [ Tree ] -> Ascending from node [ {CurrentNode.Text} ] to [ {CurrentNode.Parent.Text} ].");
                 CurrentNode = CurrentNode.Parent;
             }

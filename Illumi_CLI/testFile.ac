@@ -1,18 +1,4 @@
 {
     boolean a
-    int b
-    string c
-    c = "hello"
-    b = 1 + 2 + 3 + 4 + 5
-    a = false
-    a = true
-    print(1+2+3+4+5)
-    {
-        if(a){
-            print(a)
-        }
-        while(a==b){
-            print(b)
-        }
-    }
+    a = (((1 == 2) != (3 == 3)) == true)
 }$
