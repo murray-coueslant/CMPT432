@@ -20,13 +20,18 @@ namespace Illumi_CLI {
             CurrentSession = currentSession;
             Diagnostics = diagnostics;
             TokenCounter = 0;
-            AbstractSyntaxTree = new AbstractSyntaxTree ();
         }
         public void Analyse () {
-            BuildAST ();
+            AbstractSyntaxTree = BuildAST ();
             AbstractSyntaxTree.PrintTree (AbstractSyntaxTree.Root);
         }
-        public void BuildAST (AbstractSyntaxTree tree = AbstractSyntaxTree) {
+        public AbstractSyntaxTree BuildAST (AbstractSyntaxTree inputTree = null) {
+            AbstractSyntaxTree tree;
+            if (inputTree == null) {
+                tree = new AbstractSyntaxTree ();
+            } else {
+                tree = inputTree;
+            }
             while (TokenCounter < TokenStream.Count) {
                 switch (CurrentToken.Kind) {
                     case TokenKind.LeftBraceToken:
@@ -51,6 +56,7 @@ namespace Illumi_CLI {
                         break;
                 }
             }
+            return tree;
         }
         public void HandleBlock (AbstractSyntaxTree tree) {
             // Diagnostics.Semantic_ReportAddingASTNode()
@@ -81,7 +87,7 @@ namespace Illumi_CLI {
             tree.AddBranchNode ("AssignmentStatement");
             tree.AddLeafNode (TokenStream[TokenCounter - 1].Text);
             NextToken ();
-            HandleExpression ();
+            HandleExpression (tree);
             tree.Ascend (CurrentSession);
         }
         public void HandleExpression (AbstractSyntaxTree tree) {
@@ -102,15 +108,15 @@ namespace Illumi_CLI {
             tree.AddBranchNode ("Print");
             NextToken ();
             NextToken ();
-            HandleExpression ();
+            HandleExpression (tree);
             NextToken ();
             tree.Ascend (CurrentSession);
         }
         public void HandleIfStatement (AbstractSyntaxTree tree) {
             tree.AddBranchNode ("IfStatement");
             NextToken ();
-            HandleBooleanExpr ();
-            HandleBlock ();
+            HandleBooleanExpr (tree);
+            HandleBlock (tree);
         }
         public void HandleStringExpr (AbstractSyntaxTree tree) {
             tree.AddLeafNode (CurrentToken.Text);
@@ -122,7 +128,7 @@ namespace Illumi_CLI {
                 tree.AddLeafNode (CurrentToken.Text);
                 NextToken ();
                 NextToken ();
-                HandleIntExpr ();
+                HandleIntExpr (tree);
             } else {
                 tree.AddBranchNode (CurrentToken.Text);
                 NextToken ();
@@ -137,14 +143,15 @@ namespace Illumi_CLI {
                 NextToken ();
                 ASTNode leftExpr = HandleExprTree ();
                 tree.AddBranchNode (CurrentToken.Text);
+                NextToken ();
                 ASTNode rightExpr = HandleExprTree ();
                 tree.AddLeafNode (leftExpr);
                 tree.AddLeafNode (rightExpr);
             }
             tree.Ascend (CurrentSession);
         }
-        public void HandleIdentifier () {
-            AbstractSyntaxTree.AddLeafNode (CurrentToken.Text);
+        public void HandleIdentifier (AbstractSyntaxTree tree) {
+            tree.AddLeafNode (CurrentToken.Text);
             NextToken ();
         }
         public ASTNode HandleExprTree () {
