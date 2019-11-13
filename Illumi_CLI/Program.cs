@@ -123,12 +123,16 @@ namespace Illumi_CLI {
                             foreach (SemanticAnalyser sA in semanticAnalysers) {
                                 mainDiagnostics.Lexer_ReportLexStart (programCounter);
                                 LexProgram (sA.Parser.Lexer, currentSession);
+                                if (mainDiagnostics.ErrorCount > 0) {
+                                    sA.Parser.Lexer.Failed = true;
+                                }
                                 mainDiagnostics.Lexer_ReportLexEnd (programCounter);
 
                                 Console.WriteLine ();
 
-                                if (mainDiagnostics.ErrorCount > 0) {
+                                if (mainDiagnostics.ErrorCount > 0 || sA.Parser.Lexer.Failed) {
                                     mainDiagnostics.Parser_EncounteredLexError ();
+                                    sA.Parser.Failed = true;
                                 } else {
                                     mainDiagnostics.Parser_ReportStartOfParse (programCounter);
                                     ParseProgram (sA.Parser, currentSession);
@@ -137,7 +141,7 @@ namespace Illumi_CLI {
 
                                 Console.WriteLine ();
 
-                                if (mainDiagnostics.ErrorCount > 0) {
+                                if (mainDiagnostics.ErrorCount > 0 || sA.Parser.Failed) {
                                     mainDiagnostics.Semantic_EncounteredParseError ();
                                 } else {
                                     mainDiagnostics.Semantic_ReportStartOfSemantic (programCounter);

@@ -7,11 +7,19 @@
    {
        print(a)
    }
-   while(a == b){
+   while(1+2+3+4 == 1){
        b = a
        if(a != b){
            print(a)
        }
        print(a)
    }
+   a = 1 + 2 + 3 + 4
+   print(a)
+   if("string" != "other string"){
+       print("holy shit")
+   }
+   a = "ooo1ooh"
+   print()
+   if(){}
 }$

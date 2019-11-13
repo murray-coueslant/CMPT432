@@ -19,6 +19,7 @@ namespace Illumi_CLI {
         private TokenKind _kind;
         private char[] _allowablePunctuation = { '-', ':', ';', ',', '.' };
         private char[] _keywordFirstCharacters = { 'i', 'w', 'b', 'p', 's' };
+        public bool Failed { get; set; }
 
         public Lexer (string text, Session session, DiagnosticCollection diagnostics) {
             _text = text;

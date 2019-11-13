@@ -270,3 +270,26 @@ boolean a /* this is not fine */
     (a != b)
     a = 3 + b
 }$
+{
+   a = (((a != true) == ((false != false) == true)) == false)
+   b = (a == b)
+   if(a==b){
+       print(b)
+   }
+   {
+       print(a)
+   }
+   while(1+2+3+4 == 1){
+       b = a
+       if(a != b){
+           print(a)
+       }
+       print(a)
+   }
+   a = 1 + 2 + 3 + 4
+   print(a)
+   if("string" != "other string"){
+       print("holy shit")
+   }
+   a = "oooooh"
+}$

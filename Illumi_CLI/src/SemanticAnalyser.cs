@@ -13,6 +13,7 @@ namespace Illumi_CLI {
         public Session CurrentSession { get; set; }
         public DiagnosticCollection Diagnostics { get; set; }
         public AbstractSyntaxTree AbstractSyntaxTree { get; set; }
+        public SymbolTable Symbols { get; set; }
         public SemanticAnalyser (Parser parser, Session currentSession, DiagnosticCollection diagnostics) {
             Parser = parser;
             ConcreteSyntaxTree = parser.Tree;
@@ -20,10 +21,22 @@ namespace Illumi_CLI {
             CurrentSession = currentSession;
             Diagnostics = diagnostics;
             TokenCounter = 0;
+            Symbols = new SymbolTable (Diagnostics);
         }
         public void Analyse () {
-            AbstractSyntaxTree = BuildAST ();
-            AbstractSyntaxTree.PrintTree (AbstractSyntaxTree.Root);
+            if (Parser.Failed) {
+                Diagnostics.Semantic_ParserGaveNoTree ();
+            } else {
+                AbstractSyntaxTree = BuildAST ();
+                // ScopeAndTypeCheck ();
+                if (Diagnostics.ErrorCount == 0) {
+                    // todo Diagnostics.Semantic_DisplayingAST();
+                    AbstractSyntaxTree.PrintTree (AbstractSyntaxTree.Root);
+                    Diagnostics.Semantic_ReportDisplayingSymbolTables ();
+                    Console.WriteLine ();
+                    Symbols.DisplaySymbolTables (Symbols.RootScope);
+                }
+            }
         }
         public AbstractSyntaxTree BuildAST (AbstractSyntaxTree inputTree = null) {
             AbstractSyntaxTree tree;
@@ -139,7 +152,6 @@ namespace Illumi_CLI {
         }
         public void HandleStringExpr (AbstractSyntaxTree tree) {
             tree.AddLeafNode (CurrentToken.Text);
-            NextToken ();
         }
         public void HandleIntExpr (AbstractSyntaxTree tree) {
             if (TokenStream[TokenCounter + 1].Kind == TokenKind.AdditionToken) {
@@ -150,7 +162,7 @@ namespace Illumi_CLI {
                 HandleIntExpr (tree);
             } else {
                 tree.AddBranchNode (CurrentToken.Text);
-                NextToken ();
+                //NextToken ();
             }
             tree.Ascend (CurrentSession);
         }
