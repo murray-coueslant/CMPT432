@@ -139,9 +139,12 @@ namespace Illumi_CLI {
             switch (CurrentToken.Kind) {
                 case TokenKind.TrueToken:
                 case TokenKind.FalseToken:
+                    tree.AddLeafNode (CurrentToken.Text);
+                    // NextToken ();
+                    break;
                 case TokenKind.IdentifierToken:
                     tree.AddLeafNode (CurrentToken.Text);
-                    //NextToken ();
+                    NextToken ();
                     break;
                 default:
                     HandleParenthesisedExpression (tree);
@@ -161,7 +164,6 @@ namespace Illumi_CLI {
         }
         public void HandleIdentifier (AbstractSyntaxTree tree) {
             tree.AddLeafNode (CurrentToken.Text);
-            NextToken ();
         }
         public AbstractSyntaxTree HandleExprTree () {
             AbstractSyntaxTree tree = new AbstractSyntaxTree ();

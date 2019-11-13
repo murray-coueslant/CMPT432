@@ -1,3 +1,4 @@
 {
-   a = (((true != true) == ((false != false) == true)) == false)
+   a = (((a != true) == ((false != false) == true)) == false)
+   b = (a == false)
 }$
