@@ -8,12 +8,14 @@ namespace Illumi_CLI {
             CurrentNode = Root;
         }
         public void AddBranchNode (ASTNode newNode) {
-            if (Root is null) {
-                Root = newNode;
-                CurrentNode = Root;
-            } else {
-                CurrentNode.AddDescendant (newNode);
-                CurrentNode = newNode;
+            if (newNode != null) {
+                if (Root is null) {
+                    Root = newNode;
+                    CurrentNode = Root;
+                } else {
+                    CurrentNode.AddDescendant (newNode);
+                    CurrentNode = newNode;
+                }
             }
         }
         public void AddBranchNode (string nodeText) {
@@ -27,11 +29,13 @@ namespace Illumi_CLI {
             }
         }
         public void AddLeafNode (ASTNode newNode) {
-            if (Root is null) {
-                Root = newNode;
-                CurrentNode = Root;
-            } else {
-                CurrentNode.AddDescendant (newNode);
+            if (newNode != null) {
+                if (Root is null) {
+                    Root = newNode;
+                    CurrentNode = Root;
+                } else {
+                    CurrentNode.AddDescendant (newNode);
+                }
             }
         }
         public void AddLeafNode (string nodeText) {

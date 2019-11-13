@@ -136,39 +136,56 @@ namespace Illumi_CLI {
             tree.Ascend (CurrentSession);
         }
         public void HandleBooleanExpr (AbstractSyntaxTree tree) {
-            if (CurrentToken.Kind == TokenKind.TrueToken || CurrentToken.Kind == TokenKind.FalseToken || CurrentToken.Kind == TokenKind.IdentifierToken) {
-                tree.AddLeafNode (CurrentToken.Text);
-                NextToken ();
-            } else {
-                NextToken ();
-                ASTNode leftExpr = HandleExprTree ();
-                tree.AddBranchNode (CurrentToken.Text);
-                NextToken ();
-                ASTNode rightExpr = HandleExprTree ();
-                tree.AddLeafNode (leftExpr);
-                tree.AddLeafNode (rightExpr);
+            switch (CurrentToken.Kind) {
+                case TokenKind.TrueToken:
+                case TokenKind.FalseToken:
+                case TokenKind.IdentifierToken:
+                    tree.AddLeafNode (CurrentToken.Text);
+                    //NextToken ();
+                    break;
+                default:
+                    HandleParenthesisedExpression (tree);
+                    break;
             }
-            tree.Ascend (CurrentSession);
+        }
+        public void HandleParenthesisedExpression (AbstractSyntaxTree tree) {
+            NextToken ();
+            AbstractSyntaxTree leftExprTree = HandleExprTree ();
+            NextToken ();
+            tree.AddBranchNode (CurrentToken.Text);
+            tree.AddLeafNode (leftExprTree.Root);
+            NextToken ();
+            AbstractSyntaxTree rightExprTree = HandleExprTree ();
+            NextToken ();
+            tree.AddLeafNode (rightExprTree.Root);
         }
         public void HandleIdentifier (AbstractSyntaxTree tree) {
             tree.AddLeafNode (CurrentToken.Text);
             NextToken ();
         }
-        public ASTNode HandleExprTree () {
+        public AbstractSyntaxTree HandleExprTree () {
             AbstractSyntaxTree tree = new AbstractSyntaxTree ();
-            if (CurrentToken.Kind == TokenKind.StringToken) {
-                HandleStringExpr (tree);
-            } else if (CurrentToken.Kind == TokenKind.DigitToken) {
-                HandleIntExpr (tree);
-            } else if (CurrentToken.Kind == TokenKind.TrueToken ||
-                CurrentToken.Kind == TokenKind.FalseToken ||
-                CurrentToken.Kind == TokenKind.LeftParenthesisToken) {
-                HandleBooleanExpr (tree);
-            } else if (CurrentToken.Kind == TokenKind.IdentifierToken) {
-                HandleIdentifier (tree);
+            switch (CurrentToken.Kind) {
+                case TokenKind.StringToken:
+                    HandleStringExpr (tree);
+                    break;
+                case TokenKind.DigitToken:
+                    HandleIntExpr (tree);
+                    break;
+                case TokenKind.TrueToken:
+                case TokenKind.FalseToken:
+                case TokenKind.LeftParenthesisToken:
+                    HandleBooleanExpr (tree);
+                    break;
+                case TokenKind.IdentifierToken:
+                    HandleIdentifier (tree);
+                    break;
+                default:
+                    break;
             }
-            tree.Ascend (CurrentSession);
-            return tree.Root;
+            // tree.Ascend (CurrentSession);
+            System.Console.WriteLine ("Token after tree handling: " + CurrentToken.Text);
+            return tree;
 
         }
         public void NextToken () {
