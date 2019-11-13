@@ -10,13 +10,13 @@ namespace Illumi_CLI {
         public SymbolTable (DiagnosticCollection diagnostics) {
             Diagnostics = diagnostics;
         }
-        public void AddSymbol (TreeNode symbol, string type) {
-            if (!CurrentScope.AddSymbol (symbol.NodeToken.Text, type)) {
-                TextSpan errorSpan = new TextSpan (symbol.NodeToken.LinePosition, 1);
-                Diagnostics.Semantic_ReportSymbolAlreadyDeclared (symbol.NodeToken.Text, CurrentScope.Level, errorSpan, symbol.NodeToken.LineNumber, type);
+        public void AddSymbol (ASTNode symbol, string type) {
+            if (!CurrentScope.AddSymbol (symbol.Token.Text, type)) {
+                TextSpan errorSpan = new TextSpan (symbol.Token.LinePosition, 1);
+                Diagnostics.Semantic_ReportSymbolAlreadyDeclared (symbol.Token.Text, CurrentScope.Level, errorSpan, symbol.Token.LineNumber, type);
                 return;
             }
-            Diagnostics.Semantic_ReportAddingSymbol (symbol.NodeToken.Text, type, CurrentScope.Level);
+            Diagnostics.Semantic_ReportAddingSymbol (symbol.Token.Text, type, CurrentScope.Level);
         }
         public void AscendScope () {
             if (CurrentScope.ParentScope != null) {

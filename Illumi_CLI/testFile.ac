@@ -1,25 +1,10 @@
 {
-   a = (((a != true) == ((false != false) == true)) == false)
-   b = (a == b)
-   if(a==b){
-       print(b)
-   }
-   {
-       print(a)
-   }
-   while(1+2+3+4 == 1){
-       b = a
-       if(a != b){
-           print(a)
-       }
-       print(a)
-   }
-   a = 1 + 2 + 3 + 4
-   print(a)
-   if("string" != "other string"){
-       print("holy shit")
-   }
-   a = "ooo1ooh"
-   print()
-   if(){}
-}$
+    int a
+    a = 4
+    if(a == 4){
+        boolean a
+        a = false
+        print(a)
+    }
+    print(a)
+}

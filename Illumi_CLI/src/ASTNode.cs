@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 namespace Illumi_CLI {
     class ASTNode {
-        public string Text { get; set; }
         public List<ASTNode> Descendants { get; set; }
         public ASTNode Parent { get; set; }
-        public ASTNode (string text = "", List<ASTNode> descendants = null, ASTNode parent = null) {
-            Text = text;
+        public Token Token { get; set; }
+        public ASTNode (Token token = null, List<ASTNode> descendants = null, ASTNode parent = null) {
+            Token = token;
             if (descendants == null) {
                 Descendants = new List<ASTNode> ();
             } else {

@@ -23,6 +23,8 @@ namespace Illumi_CLI {
         EndOfProgramToken,
         NotEqualToken,
         CommentToken,
-        EndOfFileToken
+        EndOfFileToken,
+        Block,
+        VarDecl
     }
 }

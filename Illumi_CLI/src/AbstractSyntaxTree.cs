@@ -18,8 +18,8 @@ namespace Illumi_CLI {
                 }
             }
         }
-        public void AddBranchNode (string nodeText) {
-            ASTNode newNode = new ASTNode (nodeText);
+        public void AddBranchNode (Token token) {
+            ASTNode newNode = new ASTNode (token);
             if (Root is null) {
                 Root = newNode;
                 CurrentNode = Root;
@@ -38,8 +38,8 @@ namespace Illumi_CLI {
                 }
             }
         }
-        public void AddLeafNode (string nodeText) {
-            ASTNode newNode = new ASTNode (nodeText);
+        public void AddLeafNode (Token token) {
+            ASTNode newNode = new ASTNode (token);
             if (Root is null) {
                 Root = newNode;
                 CurrentNode = Root;
@@ -50,7 +50,7 @@ namespace Illumi_CLI {
         public void Ascend (Session session) {
             if (CurrentNode.Parent != null) {
                 //todo session.Diagnostics.Tree.Report_AscendingLevel();
-                System.Console.WriteLine ($"[ Info ] - [ Tree ] -> Ascending from node [ {CurrentNode.Text} ] to [ {CurrentNode.Parent.Text} ].");
+                System.Console.WriteLine ($"[ Info ] - [ Tree ] -> Ascending from node [ {CurrentNode.Token.Text} ] to [ {CurrentNode.Parent.Token.Text} ].");
                 CurrentNode = CurrentNode.Parent;
             }
         }
@@ -62,7 +62,7 @@ namespace Illumi_CLI {
 
             System.Console.Write (indent);
             System.Console.Write (marker);
-            System.Console.Write ($"{root.Text}");
+            System.Console.Write ($"{root.Token.Text}");
             System.Console.WriteLine ();
 
             indent += lastChild ? "    " : "│   ";
