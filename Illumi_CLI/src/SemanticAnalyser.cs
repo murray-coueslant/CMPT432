@@ -50,6 +50,15 @@ namespace Illumi_CLI {
                         break;
                     case TokenKind.IfToken:
                         HandleIfStatement (tree);
+                        // tree.Ascend (CurrentSession);
+                        break;
+                    case TokenKind.WhileToken:
+                        HandleWhileStatement (tree);
+                        // tree.Ascend (CurrentSession);
+                        break;
+                    case TokenKind.RightBraceToken:
+                        tree.Ascend (CurrentSession);
+                        NextToken ();
                         break;
                     default:
                         NextToken ();
@@ -116,7 +125,17 @@ namespace Illumi_CLI {
             tree.AddBranchNode ("IfStatement");
             NextToken ();
             HandleBooleanExpr (tree);
-            HandleBlock (tree);
+            NextToken ();
+            // HandleBlock (tree);
+            // tree.Ascend (CurrentSession);
+        }
+        public void HandleWhileStatement (AbstractSyntaxTree tree) {
+            tree.AddBranchNode ("WhileStatement");
+            NextToken ();
+            HandleBooleanExpr (tree);
+            NextToken ();
+            // HandleBlock (tree);
+            // tree.Ascend (CurrentSession);
         }
         public void HandleStringExpr (AbstractSyntaxTree tree) {
             tree.AddLeafNode (CurrentToken.Text);
@@ -140,7 +159,6 @@ namespace Illumi_CLI {
                 case TokenKind.TrueToken:
                 case TokenKind.FalseToken:
                     tree.AddLeafNode (CurrentToken.Text);
-                    // NextToken ();
                     break;
                 case TokenKind.IdentifierToken:
                     tree.AddLeafNode (CurrentToken.Text);
@@ -150,6 +168,7 @@ namespace Illumi_CLI {
                     HandleParenthesisedExpression (tree);
                     break;
             }
+            tree.Ascend (CurrentSession);
         }
         public void HandleParenthesisedExpression (AbstractSyntaxTree tree) {
             NextToken ();
@@ -161,6 +180,7 @@ namespace Illumi_CLI {
             AbstractSyntaxTree rightExprTree = HandleExprTree ();
             NextToken ();
             tree.AddLeafNode (rightExprTree.Root);
+            // tree.Ascend (CurrentSession);
         }
         public void HandleIdentifier (AbstractSyntaxTree tree) {
             tree.AddLeafNode (CurrentToken.Text);
@@ -185,8 +205,6 @@ namespace Illumi_CLI {
                 default:
                     break;
             }
-            // tree.Ascend (CurrentSession);
-            System.Console.WriteLine ("Token after tree handling: " + CurrentToken.Text);
             return tree;
 
         }

@@ -1,4 +1,17 @@
 {
    a = (((a != true) == ((false != false) == true)) == false)
-   b = (a == false)
+   b = (a == b)
+   if(a==b){
+       print(b)
+   }
+   {
+       print(a)
+   }
+   while(a == b){
+       b = a
+       if(a != b){
+           print(a)
+       }
+       print(a)
+   }
 }$
