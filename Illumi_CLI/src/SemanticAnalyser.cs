@@ -52,6 +52,7 @@ namespace Illumi_CLI {
                         break;
                     case TokenKind.AssignmentToken:
                         HandleAssignmentStatement (tree);
+                        tree.Ascend (CurrentSession);
                         break;
                     case TokenKind.Type_IntegerToken:
                     case TokenKind.Type_StringToken:
@@ -63,9 +64,11 @@ namespace Illumi_CLI {
                         break;
                     case TokenKind.IfToken:
                         HandleIfStatement (tree);
+                        // tree.Ascend (CurrentSession);
                         break;
                     case TokenKind.WhileToken:
                         HandleWhileStatement (tree);
+                        // tree.Ascend (CurrentSession);
                         break;
                     case TokenKind.RightBraceToken:
                         tree.Ascend (CurrentSession);
@@ -80,6 +83,7 @@ namespace Illumi_CLI {
         }
         public void ScopeAndTypeCheck () {
             Traverse (AbstractSyntaxTree.Root, CheckScope);
+            Traverse (AbstractSyntaxTree.Root, CheckType);
         }
         public void HandleBlock (AbstractSyntaxTree tree) {
             // Diagnostics.Semantic_ReportAddingASTNode()
@@ -111,7 +115,7 @@ namespace Illumi_CLI {
             tree.AddLeafNode (TokenStream[TokenCounter - 1]);
             NextToken ();
             HandleExpression (tree);
-            tree.Ascend (CurrentSession);
+            // tree.Ascend (CurrentSession);
         }
         public void HandleExpression (AbstractSyntaxTree tree) {
             if (CurrentToken.Kind == TokenKind.StringToken) {
@@ -140,6 +144,7 @@ namespace Illumi_CLI {
             NextToken ();
             HandleBooleanExpr (tree);
             NextToken ();
+            // tree.Ascend (CurrentSession);
         }
         public void HandleWhileStatement (AbstractSyntaxTree tree) {
             tree.AddBranchNode (CurrentToken);
@@ -191,7 +196,6 @@ namespace Illumi_CLI {
             // tree.Ascend (CurrentSession);
         }
         public void HandleIdentifier (AbstractSyntaxTree tree) {
-            tree.AddBranchNode (new Token (TokenKind.IdentifierToken, "Identifier", 0, 0));
             tree.AddLeafNode (CurrentToken);
         }
         public AbstractSyntaxTree HandleExprTree () {
@@ -250,14 +254,38 @@ namespace Illumi_CLI {
                 if (node.Token.Text == "VarDecl") {
                     Symbols.AddSymbol (node.Descendants[1], node.Descendants[0].Token.Text);
                 }
-                if (node.Token.Text == "Identifier") {
-                    Diagnostics.Semantic_ReportSymbolLookup (node.Descendants[0].Token.Text);
-                    bool success = SymbolExists (node.Descendants[0].Token.Text, Symbols.CurrentScope);
+                if (node.Token.Text.Length == 1 && char.IsLetter (node.Token.Text, 0)) {
+                    Diagnostics.Semantic_ReportSymbolLookup (node.Token.Text);
+                    bool success = SymbolExists (node.Token.Text, Symbols.CurrentScope);
                     if (!success) {
-                        Diagnostics.Semantic_ReportUndeclaredIdentifier (node.Descendants[0].Token, Symbols.CurrentScope.Level);
+                        Diagnostics.Semantic_ReportUndeclaredIdentifier (node.Token, Symbols.CurrentScope.Level);
                     }
                 }
             }
+        }
+        public void CheckType (ASTNode node) {
+            switch (node.Token.Text) {
+                case "=":
+                    CheckAssignmentTypes (node);
+                    break;
+                case "==":
+                case "!=":
+                    CheckBoolOpTypes (node);
+                    break;
+                case "+":
+                    CheckAdditionTypes (node);
+                    break;
+
+            }
+        }
+        public void CheckAssignmentTypes (ASTNode node) {
+
+        }
+        public void CheckBoolOpTypes (ASTNode node) {
+
+        }
+        public void CheckAdditionTypes (ASTNode node) {
+
         }
         public bool SymbolExists (string symbol, Scope searchScope) {
             if (searchScope.Symbols.ContainsKey (symbol)) {

@@ -319,3 +319,13 @@ boolean a /* this is not fine */
    }
    a = "oooooh"
 }$
+{
+    int a
+    a = 4
+    if(a == 4){
+        boolean a
+        a = false
+        print(a)
+    }
+    print(a)
+}$
