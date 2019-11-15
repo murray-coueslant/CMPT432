@@ -3,11 +3,14 @@ namespace Illumi_CLI {
     class AbstractSyntaxTree {
         public ASTNode Root { get; set; }
         public ASTNode CurrentNode { get; set; }
-        public AbstractSyntaxTree (ASTNode root = null) {
+        public Session CurrentSession { get; set; }
+        public AbstractSyntaxTree (Session currentSession, ASTNode root = null) {
             Root = root;
             CurrentNode = Root;
+            CurrentSession = currentSession;
         }
         public void AddBranchNode (ASTNode newNode) {
+            CurrentSession.Diagnostics.Semantic_ReportAddingASTNode (newNode.Token.Text);
             if (newNode != null) {
                 if (Root is null) {
                     Root = newNode;
@@ -19,6 +22,7 @@ namespace Illumi_CLI {
             }
         }
         public void AddBranchNode (Token token) {
+            CurrentSession.Diagnostics.Semantic_ReportAddingASTNode (token.Text);
             ASTNode newNode = new ASTNode (token);
             if (Root is null) {
                 Root = newNode;
@@ -30,6 +34,7 @@ namespace Illumi_CLI {
         }
         public void AddLeafNode (ASTNode newNode) {
             if (newNode != null) {
+                CurrentSession.Diagnostics.Semantic_ReportAddingASTNode (newNode.Token.Text);
                 if (Root is null) {
                     Root = newNode;
                     CurrentNode = Root;
@@ -39,6 +44,7 @@ namespace Illumi_CLI {
             }
         }
         public void AddLeafNode (Token token) {
+            CurrentSession.Diagnostics.Semantic_ReportAddingASTNode (token.Text);
             ASTNode newNode = new ASTNode (token);
             if (Root is null) {
                 Root = newNode;
@@ -49,8 +55,7 @@ namespace Illumi_CLI {
         }
         public void Ascend (Session session) {
             if (CurrentNode.Parent != null) {
-                // todo session.Diagnostics.Tree_ReportAscendingLevel();
-                System.Console.WriteLine ($"[ Info ] - [ Tree ] -> Ascending from node [ {CurrentNode.Token.Text} ] to [ {CurrentNode.Parent.Token.Text} ].");
+                session.Diagnostics.Tree_ReportAscendingLevel (CurrentNode);
                 CurrentNode = CurrentNode.Parent;
             }
         }

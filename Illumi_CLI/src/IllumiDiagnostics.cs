@@ -48,6 +48,7 @@ namespace Illumi_CLI {
         private const string Parser = "Parser";
         private const string Semantic = "Semantic Analyser";
         private const string FileReader = "File Reader";
+        private const string Tree = "Tree";
         private List<Diagnostic> _diagnostics = new List<Diagnostic> ();
         public int ErrorCount { get; internal set; }
         public int WarningCount { get; internal set; }
@@ -371,6 +372,38 @@ namespace Illumi_CLI {
             string type = Information;
             string originated = Semantic;
             string message = $"Checking type.";
+            ReportDiagnostic (type, originated, message);
+        }
+        internal void Tree_ReportAscendingLevel (ASTNode node) {
+            string type = Information;
+            string originated = Tree;
+            string message = $"Ascending from node [ {node.Token.Text} ] to [ {node.Parent.Token.Text} ].";
+            ReportDiagnostic (type, originated, message);
+        }
+        internal void Semantic_ReportInvalidType (Token token) {
+            string type = Error;
+            ErrorCount++;
+            string originated = Semantic;
+            TextSpan span = new TextSpan (token.LinePosition, token.Text.Length);
+            string message = $"An invalid type declaration was encountered due to token [ {token.Text} ].";
+            ReportDiagnostic (type, span, message, originated, token.LineNumber);
+        }
+        internal void Semantic_ReportAddingASTNode (string nodeType) {
+            string type = Information;
+            string originated = Semantic;
+            string message = $"Adding node of type [ {nodeType} ] to AST.";
+            ReportDiagnostic (type, originated, message);
+        }
+        internal void Semantic_ReportDisplayingAST () {
+            string type = Information;
+            string originated = Semantic;
+            string message = "No semantic errors, Displaying AST.";
+            ReportDiagnostic (type, originated, message);
+        }
+        internal void Semantic_ReportScopeError () {
+            string type = Warning;
+            string originated = Semantic;
+            string message = "Scope errors encountered, will not check type.";
             ReportDiagnostic (type, originated, message);
         }
     }

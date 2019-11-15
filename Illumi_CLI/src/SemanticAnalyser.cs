@@ -34,7 +34,7 @@ namespace Illumi_CLI {
             } else {
                 AbstractSyntaxTree = BuildAST ();
                 if (Diagnostics.ErrorCount == 0) {
-                    // todo Diagnostics.Semantic_DisplayingAST();
+                    Diagnostics.Semantic_ReportDisplayingAST ();
                     AbstractSyntaxTree.PrintTree (AbstractSyntaxTree.Root);
                     ScopeAndTypeCheck ();
                 }
@@ -43,7 +43,7 @@ namespace Illumi_CLI {
         public AbstractSyntaxTree BuildAST (AbstractSyntaxTree inputTree = null) {
             AbstractSyntaxTree tree;
             if (inputTree == null) {
-                tree = new AbstractSyntaxTree ();
+                tree = new AbstractSyntaxTree (CurrentSession);
             } else {
                 tree = inputTree;
             }
@@ -70,7 +70,7 @@ namespace Illumi_CLI {
             if (Diagnostics.ErrorCount == 0) {
                 Traverse (AbstractSyntaxTree.Root, CheckType);
             } else {
-                // todo Diagnostics.Semantic_ReportScopeError();
+                Diagnostics.Semantic_ReportScopeError ();
             }
 
             if (Diagnostics.ErrorCount == 0) {
@@ -82,7 +82,7 @@ namespace Illumi_CLI {
             }
         }
         public void HandleBlock (AbstractSyntaxTree tree) {
-            // todo Diagnostics.Semantic_ReportAddingASTNode()
+            Diagnostics.Semantic_ReportAddingASTNode ("Block");
             tree.AddBranchNode (new Token (TokenKind.Block, "Block", 0, 0));
             NextToken ();
             while (CurrentToken.Kind != TokenKind.RightBraceToken && TokenCounter != TokenStream.Count - 1) {
@@ -124,21 +124,17 @@ namespace Illumi_CLI {
         }
         public void HandleVariableDeclaration (AbstractSyntaxTree tree) {
             tree.AddBranchNode (new Token (TokenKind.VarDecl, "VarDecl", 0, 0));
-            if (CurrentToken.Kind == TokenKind.Type_BooleanToken) {
-                tree.AddLeafNode (CurrentToken);
-                NextToken ();
-                tree.AddLeafNode (CurrentToken);
-            } else if (CurrentToken.Kind == TokenKind.Type_IntegerToken) {
-                tree.AddLeafNode (CurrentToken);
-                NextToken ();
-                tree.AddLeafNode (CurrentToken);
-            } else if (CurrentToken.Kind == TokenKind.Type_StringToken) {
-                tree.AddLeafNode (CurrentToken);
-                NextToken ();
-                tree.AddLeafNode (CurrentToken);
-            } else {
-                // TODO diagnostics.Semantic_ReportInvalidType();
-                return;
+            switch (CurrentToken.Kind) {
+                case TokenKind.Type_StringToken:
+                case TokenKind.Type_IntegerToken:
+                case TokenKind.Type_BooleanToken:
+                    tree.AddLeafNode (CurrentToken);
+                    NextToken ();
+                    tree.AddLeafNode (CurrentToken);
+                    break;
+                default:
+                    Diagnostics.Semantic_ReportInvalidType (CurrentToken);
+                    return;
             }
             tree.Ascend (CurrentSession);
         }
@@ -235,7 +231,7 @@ namespace Illumi_CLI {
             tree.AddLeafNode (CurrentToken);
         }
         public AbstractSyntaxTree HandleExprTree () {
-            AbstractSyntaxTree tree = new AbstractSyntaxTree ();
+            AbstractSyntaxTree tree = new AbstractSyntaxTree (CurrentSession);
             switch (CurrentToken.Kind) {
                 case TokenKind.StringToken:
                     HandleStringExpr (tree);
