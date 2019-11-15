@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Dynamic;
 using System.IO;
 using System.Linq;
 
@@ -253,13 +254,6 @@ namespace Illumi_CLI {
             }
             return false;
         }
-        // public bool CheckSymbolType (ASTNode root) {
-        //     Traverse (root, CheckType);
-        //     if (Diagnostics.ErrorCount == 0) {
-        //         return true;
-        //     }
-        //     return false;
-        // }
         public void CheckScope (ASTNode node) {
             if (node.Token.Text == "Block") {
                 Symbols.NewScope ();
@@ -293,44 +287,60 @@ namespace Illumi_CLI {
                 case TokenKind.AdditionToken:
                     CheckAdditionTypes (node);
                     break;
-
             }
         }
         public void CheckAssignmentTypes (ASTNode node) {
             string leftIdentifierType = GetSymbolType (node.Descendants[0].Token.Text, Symbols.CurrentScope);
-            string rightExprType = "";
-            ASTNode rightExpr = node.Descendants[node.Descendants.Count - 1];
-            switch (rightExpr.Token.Kind) {
-                case TokenKind.StringToken:
-                    rightExprType = String;
-                    break;
-                case TokenKind.TrueToken:
-                case TokenKind.FalseToken:
-                case TokenKind.LeftParenthesisToken:
-                    if (HandleBooleanExprType (rightExpr)) {
-                        rightExprType = Boolean;
-                    }
-                    break;
-                case TokenKind.DigitToken:
-                case TokenKind.AdditionToken:
-                    if (HandleIntExprType (rightExpr)) {
-                        rightExprType = Integer;
-                    }
-                    break;
-            }
+            string rightExprType = GetExpressionType (node.Descendants[node.Descendants.Count - 1]);
             System.Console.WriteLine (leftIdentifierType == rightExprType);
         }
-        public void CheckBoolOpTypes (ASTNode node) {
-
+        public bool CheckBoolOpTypes (ASTNode node) {
+            return false;
         }
-        public void CheckAdditionTypes (ASTNode node) {
-
+        public bool CheckAdditionTypes (ASTNode node) {
+            string leftExprType = GetExpressionType (node.Descendants[0]);
+            string rightExprType = "";
+            switch (node.Descendants[1].Token.Kind) {
+                case TokenKind.DigitToken:
+                    rightExprType = GetExpressionType (node.Descendants[1]);
+                    break;
+                case TokenKind.IdentifierToken:
+                    rightExprType = GetSymbolType (node.Descendants[1].Token.Text, Symbols.CurrentScope);
+                    break;
+                default:
+                    return CheckAdditionTypes (node.Descendants[1]);
+            }
+            return leftExprType == rightExprType;
         }
         public bool HandleBooleanExprType (ASTNode node) {
             if (node.Descendants.Count == 0) {
                 return true;
             }
             return false;
+        }
+        public string GetExpressionType (ASTNode node) {
+            switch (node.Token.Kind) {
+                case TokenKind.StringToken:
+                    return String;
+                case TokenKind.TrueToken:
+                case TokenKind.FalseToken:
+                case TokenKind.LeftParenthesisToken:
+                    if (HandleBooleanExprType (node)) {
+                        return Boolean;
+                    }
+                    break;
+                case TokenKind.DigitToken:
+                case TokenKind.AdditionToken:
+                    if (HandleIntExprType (node)) {
+                        return Integer;
+                    }
+                    break;
+                case TokenKind.IdentifierToken:
+                    return GetSymbolType (node.Token.Text, Symbols.CurrentScope);
+                default:
+                    break;
+            }
+            return "";
         }
         public bool HandleIntExprType (ASTNode node) {
             if (node.Descendants.Count == 0 && node.Token.Kind == TokenKind.DigitToken) {
