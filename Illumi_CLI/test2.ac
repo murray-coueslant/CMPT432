@@ -367,3 +367,13 @@ boolean a /* this is not fine */
     boolean a
     a = (((a != true) == ((false != false) == true)) == false)
 }$
+{
+  boolean a
+  boolean b
+   while(a==b){
+       print(b)
+   }
+   if(a==b){
+       print(a)
+   }
+}$
