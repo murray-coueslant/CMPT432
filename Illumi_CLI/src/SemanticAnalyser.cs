@@ -101,6 +101,7 @@ namespace Illumi_CLI {
             // todo Diagnostics.Semantic_ReportAddingASTNode()
             tree.AddBranchNode (new Token (TokenKind.Block, "Block", 0, 0));
             NextToken ();
+            // tree.Ascend (CurrentSession);
         }
         public void HandleVariableDeclaration (AbstractSyntaxTree tree) {
             tree.AddBranchNode (new Token (TokenKind.VarDecl, "VarDecl", 0, 0));
@@ -238,7 +239,9 @@ namespace Illumi_CLI {
 
         }
         public void NextToken () {
-            TokenCounter++;
+            if (TokenCounter < TokenStream.Count) {
+                TokenCounter++;
+            }
         }
         public void Traverse (ASTNode root, Action<ASTNode> checkFunction) {
             checkFunction (root);
@@ -270,9 +273,9 @@ namespace Illumi_CLI {
                         Diagnostics.Semantic_ReportUndeclaredIdentifier (node.Token, Symbols.CurrentScope.Level);
                     }
                 }
-                if (node.Parent != null && node.Parent.Token.Kind == TokenKind.Block && node == node.Parent.Descendants[node.Parent.Descendants.Count - 1]) {
-                    Symbols.AscendScope ();
-                }
+            }
+            if (node.Parent != null && node.Parent.Token.Kind == TokenKind.Block && node == node.Parent.Descendants[node.Parent.Descendants.Count - 1]) {
+                Symbols.AscendScope ();
             }
         }
         public void CheckType (ASTNode node) {

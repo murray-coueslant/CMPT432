@@ -339,3 +339,16 @@ boolean a /* this is not fine */
     }
     print(a)
 }$
+{
+    int a
+    int b
+    a = 1 + 2 + 3 + 4 + b
+}$
+{
+    int a
+    {
+        boolean b 
+        a = 1
+    } 
+    print(b)
+}$
