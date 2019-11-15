@@ -5,6 +5,10 @@ using System.Linq;
 
 namespace Illumi_CLI {
     class SemanticAnalyser {
+        private const string String = "string";
+        private const string Boolean = "boolean";
+        private const string Integer = "int";
+
         public Parser Parser { get; set; }
         public Tree ConcreteSyntaxTree { get; }
         public List<Token> TokenStream { get; set; }
@@ -32,9 +36,6 @@ namespace Illumi_CLI {
                     // todo Diagnostics.Semantic_DisplayingAST();
                     AbstractSyntaxTree.PrintTree (AbstractSyntaxTree.Root);
                     ScopeAndTypeCheck ();
-                    Diagnostics.Semantic_ReportDisplayingSymbolTables ();
-                    Console.WriteLine ();
-                    Symbols.DisplaySymbolTables (Symbols.RootScope);
                 }
             }
         }
@@ -52,7 +53,6 @@ namespace Illumi_CLI {
                         break;
                     case TokenKind.AssignmentToken:
                         HandleAssignmentStatement (tree);
-                        tree.Ascend (CurrentSession);
                         break;
                     case TokenKind.Type_IntegerToken:
                     case TokenKind.Type_StringToken:
@@ -68,7 +68,6 @@ namespace Illumi_CLI {
                         break;
                     case TokenKind.WhileToken:
                         HandleWhileStatement (tree);
-                        // tree.Ascend (CurrentSession);
                         break;
                     case TokenKind.RightBraceToken:
                         tree.Ascend (CurrentSession);
@@ -83,10 +82,22 @@ namespace Illumi_CLI {
         }
         public void ScopeAndTypeCheck () {
             Traverse (AbstractSyntaxTree.Root, CheckScope);
-            Traverse (AbstractSyntaxTree.Root, CheckType);
+            if (Diagnostics.ErrorCount == 0) {
+                Traverse (AbstractSyntaxTree.Root, CheckType);
+            } else {
+                // todo Diagnostics.Semantic_ReportScopeError();
+            }
+
+            if (Diagnostics.ErrorCount == 0) {
+                Diagnostics.Semantic_ReportDisplayingSymbolTables ();
+                Console.WriteLine ();
+                Symbols.DisplaySymbolTables (Symbols.RootScope);
+            } else {
+                return;
+            }
         }
         public void HandleBlock (AbstractSyntaxTree tree) {
-            // Diagnostics.Semantic_ReportAddingASTNode()
+            // todo Diagnostics.Semantic_ReportAddingASTNode()
             tree.AddBranchNode (new Token (TokenKind.Block, "Block", 0, 0));
             NextToken ();
         }
@@ -115,21 +126,26 @@ namespace Illumi_CLI {
             tree.AddLeafNode (TokenStream[TokenCounter - 1]);
             NextToken ();
             HandleExpression (tree);
-            // tree.Ascend (CurrentSession);
+            NextToken ();
+            tree.Ascend (CurrentSession);
         }
         public void HandleExpression (AbstractSyntaxTree tree) {
-            if (CurrentToken.Kind == TokenKind.StringToken) {
-                HandleStringExpr (tree);
-            } else if (CurrentToken.Kind == TokenKind.DigitToken) {
-                HandleIntExpr (tree);
-            } else if (CurrentToken.Kind == TokenKind.TrueToken ||
-                CurrentToken.Kind == TokenKind.FalseToken ||
-                CurrentToken.Kind == TokenKind.LeftParenthesisToken) {
-                HandleBooleanExpr (tree);
-            } else if (CurrentToken.Kind == TokenKind.IdentifierToken) {
-                HandleIdentifier (tree);
+            switch (CurrentToken.Kind) {
+                case TokenKind.StringToken:
+                    HandleStringExpr (tree);
+                    break;
+                case TokenKind.DigitToken:
+                    HandleIntExpr (tree);
+                    break;
+                case TokenKind.TrueToken:
+                case TokenKind.FalseToken:
+                case TokenKind.LeftParenthesisToken:
+                    HandleBooleanExpr (tree);
+                    break;
+                case TokenKind.IdentifierToken:
+                    HandleIdentifier (tree);
+                    break;
             }
-            // tree.Ascend (CurrentSession);
         }
         public void HandlePrintStatement (AbstractSyntaxTree tree) {
             tree.AddBranchNode (CurrentToken);
@@ -138,13 +154,13 @@ namespace Illumi_CLI {
             HandleExpression (tree);
             NextToken ();
             tree.Ascend (CurrentSession);
+            NextToken ();
         }
         public void HandleIfStatement (AbstractSyntaxTree tree) {
             tree.AddBranchNode (CurrentToken);
             NextToken ();
             HandleBooleanExpr (tree);
             NextToken ();
-            // tree.Ascend (CurrentSession);
         }
         public void HandleWhileStatement (AbstractSyntaxTree tree) {
             tree.AddBranchNode (CurrentToken);
@@ -193,7 +209,6 @@ namespace Illumi_CLI {
             AbstractSyntaxTree rightExprTree = HandleExprTree ();
             NextToken ();
             tree.AddLeafNode (rightExprTree.Root);
-            // tree.Ascend (CurrentSession);
         }
         public void HandleIdentifier (AbstractSyntaxTree tree) {
             tree.AddLeafNode (CurrentToken);
@@ -261,31 +276,81 @@ namespace Illumi_CLI {
                         Diagnostics.Semantic_ReportUndeclaredIdentifier (node.Token, Symbols.CurrentScope.Level);
                     }
                 }
+                if (node.Parent != null && node.Parent.Token.Kind == TokenKind.Block && node == node.Parent.Descendants[node.Parent.Descendants.Count - 1]) {
+                    Symbols.AscendScope ();
+                }
             }
         }
         public void CheckType (ASTNode node) {
-            switch (node.Token.Text) {
-                case "=":
+            switch (node.Token.Kind) {
+                case TokenKind.AssignmentToken:
                     CheckAssignmentTypes (node);
                     break;
-                case "==":
-                case "!=":
+                case TokenKind.EquivalenceToken:
+                case TokenKind.NotEqualToken:
                     CheckBoolOpTypes (node);
                     break;
-                case "+":
+                case TokenKind.AdditionToken:
                     CheckAdditionTypes (node);
                     break;
 
             }
         }
         public void CheckAssignmentTypes (ASTNode node) {
-
+            string leftIdentifierType = GetSymbolType (node.Descendants[0].Token.Text, Symbols.CurrentScope);
+            string rightExprType = "";
+            ASTNode rightExpr = node.Descendants[node.Descendants.Count - 1];
+            switch (rightExpr.Token.Kind) {
+                case TokenKind.StringToken:
+                    rightExprType = String;
+                    break;
+                case TokenKind.TrueToken:
+                case TokenKind.FalseToken:
+                case TokenKind.LeftParenthesisToken:
+                    if (HandleBooleanExprType (rightExpr)) {
+                        rightExprType = Boolean;
+                    }
+                    break;
+                case TokenKind.DigitToken:
+                case TokenKind.AdditionToken:
+                    if (HandleIntExprType (rightExpr)) {
+                        rightExprType = Integer;
+                    }
+                    break;
+            }
+            System.Console.WriteLine (leftIdentifierType == rightExprType);
         }
         public void CheckBoolOpTypes (ASTNode node) {
 
         }
         public void CheckAdditionTypes (ASTNode node) {
 
+        }
+        public bool HandleBooleanExprType (ASTNode node) {
+            if (node.Descendants.Count == 0) {
+                return true;
+            }
+            return false;
+        }
+        public bool HandleIntExprType (ASTNode node) {
+            if (node.Descendants.Count == 0 && node.Token.Kind == TokenKind.DigitToken) {
+                return true;
+            } else {
+                return CheckAdditionTypes (node);
+            }
+        }
+        public string GetSymbolType (string symbol, Scope searchScope) {
+            if (searchScope.Symbols.ContainsKey (symbol)) {
+                Diagnostics.Semantic_ReportFoundSymbol (symbol, searchScope);
+                return searchScope.Symbols[symbol].ToString ();
+            } else {
+                if (searchScope.ParentScope != null) {
+                    Diagnostics.Semantic_ReportSymbolNotFound (symbol, searchScope);
+                    return GetSymbolType (symbol, searchScope.ParentScope);
+                }
+                Diagnostics.Semantic_ReportSymbolNotFound (symbol, searchScope);
+                return "";
+            }
         }
         public bool SymbolExists (string symbol, Scope searchScope) {
             if (searchScope.Symbols.ContainsKey (symbol)) {

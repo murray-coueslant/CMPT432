@@ -1,24 +1,4 @@
 {
-int a
-if(a==4){
-    print(a)
-    a=4
-    print(a)
-}
-while(a==4){
     int a
-    print(a)
-    a=4
-    print(a)
-}
-}$
-{
-    int a
-    a = 4
-    if(a == 4){
-        boolean a
-        a = false
-        print(a)
-    }
-    print(a)
+    a = 1 + 2 + 3
 }$

@@ -5,6 +5,7 @@ namespace Illumi_CLI {
     class SymbolTable {
         public Scope RootScope { get; set; }
         public Scope CurrentScope { get; set; }
+        public Scope PreviousScope { get; set; }
         public DiagnosticCollection Diagnostics { get; set; }
         public int ScopeCounter { get; set; }
         public SymbolTable (DiagnosticCollection diagnostics) {
@@ -32,12 +33,13 @@ namespace Illumi_CLI {
                 CurrentScope = RootScope;
                 ScopeCounter = 0;
             } else {
-                CurrentScope.AddDescendant (ScopeCounter);
+                CurrentScope.AddDescendant (ScopeCounter, CurrentScope);
                 ScopeCounter++;
             }
         }
         public void UpdateCurrentScope () {
             if (CurrentScope.MostRecentScope != null) {
+                PreviousScope = CurrentScope;
                 CurrentScope = CurrentScope.MostRecentScope;
             }
         }

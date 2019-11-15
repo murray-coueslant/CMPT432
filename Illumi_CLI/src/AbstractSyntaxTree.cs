@@ -49,7 +49,7 @@ namespace Illumi_CLI {
         }
         public void Ascend (Session session) {
             if (CurrentNode.Parent != null) {
-                //todo session.Diagnostics.Tree.Report_AscendingLevel();
+                // todo session.Diagnostics.Tree_ReportAscendingLevel();
                 System.Console.WriteLine ($"[ Info ] - [ Tree ] -> Ascending from node [ {CurrentNode.Token.Text} ] to [ {CurrentNode.Parent.Token.Text} ].");
                 CurrentNode = CurrentNode.Parent;
             }

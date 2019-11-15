@@ -329,3 +329,13 @@ boolean a /* this is not fine */
     }
     print(a)
 }$
+{
+    int a
+    a = 4
+    if(a == 4){
+        boolean a
+        a = false
+        print(a)
+    }
+    print(a)
+}$

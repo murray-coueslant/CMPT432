@@ -16,8 +16,8 @@ namespace Illumi_CLI {
             DescendantScopes = new List<Scope> ();
             ParentScope = parentScope;
         }
-        public void AddDescendant (int counter) {
-            Scope newScope = new Scope (counter + 1, this);
+        public void AddDescendant (int counter, Scope parent = null) {
+            Scope newScope = new Scope (counter + 1, parent);
             DescendantScopes.Add (newScope);
             MostRecentScope = newScope;
         }
