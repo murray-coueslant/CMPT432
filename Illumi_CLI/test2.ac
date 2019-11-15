@@ -352,3 +352,14 @@ boolean a /* this is not fine */
     } 
     print(b)
 }$
+{   
+    int a
+    boolean b
+    {  
+        string c
+        a = 5
+        b = true
+    }
+    print(b)
+    print(a) 
+}$

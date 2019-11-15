@@ -298,7 +298,10 @@ namespace Illumi_CLI {
             System.Console.WriteLine (leftIdentifierType == rightExprType);
         }
         public bool CheckBoolOpTypes (ASTNode node) {
-            return false;
+            string leftExprType = GetExpressionType (node.Descendants[0]);
+            string rightExprType = GetExpressionType (node.Descendants[1]);
+            System.Console.WriteLine (leftExprType == rightExprType);
+            return leftExprType == rightExprType;
         }
         public bool CheckAdditionTypes (ASTNode node) {
             string leftExprType = GetExpressionType (node.Descendants[0]);
@@ -316,10 +319,11 @@ namespace Illumi_CLI {
             return leftExprType == rightExprType;
         }
         public bool HandleBooleanExprType (ASTNode node) {
-            if (node.Descendants.Count == 0) {
+            if (node.Token.Kind == TokenKind.TrueToken || node.Token.Kind == TokenKind.FalseToken) {
                 return true;
+            } else {
+                return CheckBoolOpTypes (node);
             }
-            return false;
         }
         public string GetExpressionType (ASTNode node) {
             switch (node.Token.Kind) {
@@ -327,7 +331,8 @@ namespace Illumi_CLI {
                     return String;
                 case TokenKind.TrueToken:
                 case TokenKind.FalseToken:
-                case TokenKind.LeftParenthesisToken:
+                case TokenKind.EquivalenceToken:
+                case TokenKind.NotEqualToken:
                     if (HandleBooleanExprType (node)) {
                         return Boolean;
                     }

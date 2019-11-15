@@ -1,11 +1,4 @@
 {   
-    int a
-    boolean b
-    {  
-        string c
-        a = 5
-        b = true
-    }
-    print(b)
-    print(a) 
+    boolean a
+    a = (((a != true) == ((false != false) == true)) == false)
 }$
