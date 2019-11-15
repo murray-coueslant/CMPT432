@@ -1,4 +1,7 @@
-{   
-    boolean a
-    a = (((a != true) == ((false != false) == true)) == false)
+{
+  boolean a
+  boolean b
+   if(a==b){
+       print(b)
+   }
 }$

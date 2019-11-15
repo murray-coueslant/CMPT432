@@ -363,3 +363,7 @@ boolean a /* this is not fine */
     print(b)
     print(a) 
 }$
+{   
+    boolean a
+    a = (((a != true) == ((false != false) == true)) == false)
+}$

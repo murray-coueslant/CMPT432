@@ -65,7 +65,6 @@ namespace Illumi_CLI {
                         break;
                     case TokenKind.IfToken:
                         HandleIfStatement (tree);
-                        // tree.Ascend (CurrentSession);
                         break;
                     case TokenKind.WhileToken:
                         HandleWhileStatement (tree);
@@ -100,8 +99,37 @@ namespace Illumi_CLI {
         public void HandleBlock (AbstractSyntaxTree tree) {
             // todo Diagnostics.Semantic_ReportAddingASTNode()
             tree.AddBranchNode (new Token (TokenKind.Block, "Block", 0, 0));
-            NextToken ();
-            // tree.Ascend (CurrentSession);
+            while (CurrentToken.Kind != TokenKind.RightBraceToken) {
+                NextToken ();
+                HandleStatement (tree);
+            }
+            tree.Ascend (CurrentSession);
+        }
+        public void HandleStatement (AbstractSyntaxTree tree) {
+            switch (CurrentToken.Kind) {
+                case TokenKind.AssignmentToken:
+                    HandleAssignmentStatement (tree);
+                    break;
+                case TokenKind.Type_IntegerToken:
+                case TokenKind.Type_StringToken:
+                case TokenKind.Type_BooleanToken:
+                    HandleVariableDeclaration (tree);
+                    break;
+                case TokenKind.PrintToken:
+                    HandlePrintStatement (tree);
+                    break;
+                case TokenKind.IfToken:
+                    HandleIfStatement (tree);
+                    break;
+                case TokenKind.WhileToken:
+                    HandleWhileStatement (tree);
+                    break;
+                case TokenKind.LeftBraceToken:
+                    HandleBlock (tree);
+                    break;
+                default:
+                    break;
+            }
         }
         public void HandleVariableDeclaration (AbstractSyntaxTree tree) {
             tree.AddBranchNode (new Token (TokenKind.VarDecl, "VarDecl", 0, 0));
@@ -236,7 +264,6 @@ namespace Illumi_CLI {
                     break;
             }
             return tree;
-
         }
         public void NextToken () {
             if (TokenCounter < TokenStream.Count) {
@@ -384,3 +411,33 @@ namespace Illumi_CLI {
         }
     }
 }
+
+// class SemanticAnalyser {
+//     public Parser Parser { get; set; }
+//     public AbstractSyntaxTree AbstractSyntaxTree { get; set; }
+
+//     public SemanticAnalyser (Parser parser, Session session, DiagnosticCollection diagnostics) {
+//         Parser = parser;
+//         AbstractSyntaxTree = new AbstractSyntaxTree ();
+//     }
+
+//     public void Analyse () {
+//         TraverseCST (Parser.Tree);
+//     }
+
+//     public void TraverseCST (ConcreteSyntaxTree tree) {
+//         Tree.PrintTree (tree.Root);
+//     }
+
+//     public void Traverse (ASTNode root, Action<ASTNode> checkFunction) {
+//         checkFunction (root);
+
+//         for (int i = 0; i < root.Descendants.Count; i++) {
+//             Traverse (root.Descendants[i], checkFunction);
+//         }
+//     }
+// }
+
+// public enum SpecialNodes {
+
+// }
