@@ -50,20 +50,6 @@ namespace Illumi_CLI {
             while (TokenCounter < TokenStream.Count && CurrentToken.Kind != TokenKind.EndOfProgramToken) {
                 HandleStatement (tree);
                 NextToken ();
-                // switch (CurrentToken.Kind) {
-                //     case TokenKind.LeftBraceToken:
-                //         HandleBlock (tree);
-                //         break;
-                //     case TokenKind.RightBraceToken:
-                //         tree.Ascend (CurrentSession);
-                //         NextToken ();
-                //         break;
-                //     case TokenKind.EndOfProgramToken:
-                //         return tree;
-                //     default:
-                //         NextToken ();
-                //         break;
-                // }
             }
             return tree;
         }
@@ -86,13 +72,11 @@ namespace Illumi_CLI {
         public void HandleBlock (AbstractSyntaxTree tree) {
             tree.AddBranchNode (new Token (TokenKind.Block, "Block", 0, 0));
             NextToken ();
-            while (CurrentToken.Kind != TokenKind.RightBraceToken && TokenCounter != TokenStream.Count - 1) {
-                HandleStatement (tree);
-                NextToken ();
-                // tree.Ascend (CurrentSession);
+            HandleStatement (tree);
+            if (CurrentToken.Kind == TokenKind.RightBraceToken) {
+                tree.Ascend (CurrentSession);
+                return;
             }
-            NextToken ();
-            tree.Ascend (CurrentSession);
         }
         public void HandleStatement (AbstractSyntaxTree tree) {
             switch (CurrentToken.Kind) {
@@ -115,14 +99,15 @@ namespace Illumi_CLI {
                     break;
                 case TokenKind.LeftBraceToken:
                     HandleBlock (tree);
-                    tree.Ascend (CurrentSession);
                     break;
+                case TokenKind.RightBraceToken:
+                    tree.Ascend (CurrentSession);
+                    return;
                 case TokenKind.EndOfProgramToken:
                     return;
                 default:
                     break;
             }
-            //NextToken ();
         }
         public void HandleVariableDeclaration (AbstractSyntaxTree tree) {
             tree.AddBranchNode (new Token (TokenKind.VarDecl, "VarDecl", 0, 0));
@@ -197,8 +182,8 @@ namespace Illumi_CLI {
                 HandleIntExpr (tree);
             } else {
                 tree.AddBranchNode (CurrentToken);
+                tree.Ascend (CurrentSession);
             }
-            tree.Ascend (CurrentSession);
         }
         public void HandleBooleanExpr (AbstractSyntaxTree tree) {
             switch (CurrentToken.Kind) {
@@ -212,9 +197,9 @@ namespace Illumi_CLI {
                     break;
                 default:
                     HandleParenthesisedExpression (tree);
+                    tree.Ascend (CurrentSession);
                     break;
             }
-            tree.Ascend (CurrentSession);
         }
         public void HandleParenthesisedExpression (AbstractSyntaxTree tree) {
             NextToken ();
