@@ -10,7 +10,6 @@ namespace Illumi_CLI {
             CurrentSession = currentSession;
         }
         public void AddBranchNode (ASTNode newNode) {
-            CurrentSession.Diagnostics.Semantic_ReportAddingASTNode (newNode.Token.Text);
             if (newNode != null) {
                 if (Root is null) {
                     Root = newNode;
@@ -19,10 +18,10 @@ namespace Illumi_CLI {
                     CurrentNode.AddDescendant (newNode);
                     CurrentNode = newNode;
                 }
+                CurrentSession.Diagnostics.Semantic_ReportAddingASTNode (newNode);
             }
         }
         public void AddBranchNode (Token token) {
-            CurrentSession.Diagnostics.Semantic_ReportAddingASTNode (token.Text);
             ASTNode newNode = new ASTNode (token);
             if (Root is null) {
                 Root = newNode;
@@ -31,20 +30,20 @@ namespace Illumi_CLI {
                 CurrentNode.AddDescendant (newNode);
                 CurrentNode = newNode;
             }
+            CurrentSession.Diagnostics.Semantic_ReportAddingASTNode (newNode);
         }
         public void AddLeafNode (ASTNode newNode) {
             if (newNode != null) {
-                CurrentSession.Diagnostics.Semantic_ReportAddingASTNode (newNode.Token.Text);
                 if (Root is null) {
                     Root = newNode;
                     CurrentNode = Root;
                 } else {
                     CurrentNode.AddDescendant (newNode);
                 }
+                CurrentSession.Diagnostics.Semantic_ReportAddingASTNode (newNode);
             }
         }
         public void AddLeafNode (Token token) {
-            CurrentSession.Diagnostics.Semantic_ReportAddingASTNode (token.Text);
             ASTNode newNode = new ASTNode (token);
             if (Root is null) {
                 Root = newNode;
@@ -52,6 +51,7 @@ namespace Illumi_CLI {
             } else {
                 CurrentNode.AddDescendant (newNode);
             }
+            CurrentSession.Diagnostics.Semantic_ReportAddingASTNode (newNode);
         }
         public void Ascend (Session session) {
             if (CurrentNode.Parent != null) {

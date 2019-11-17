@@ -388,10 +388,10 @@ namespace Illumi_CLI {
             string message = $"An invalid type declaration was encountered due to token [ {token.Text} ].";
             ReportDiagnostic (type, span, message, originated, token.LineNumber);
         }
-        internal void Semantic_ReportAddingASTNode (string nodeType) {
+        internal void Semantic_ReportAddingASTNode (ASTNode node) {
             string type = Information;
             string originated = Semantic;
-            string message = $"Adding node of type [ {nodeType} ] to AST.";
+            string message = node.Parent == null ? $"Adding node [ {node.Token.Text} ] to AST." : $"Adding node [ {node.Token.Text} ] to AST. ( Parent : [ {node.Parent.Token.Text} ] )";
             ReportDiagnostic (type, originated, message);
         }
         internal void Semantic_ReportDisplayingAST () {
