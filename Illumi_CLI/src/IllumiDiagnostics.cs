@@ -406,5 +406,20 @@ namespace Illumi_CLI {
             string message = "Scope errors encountered, will not check type.";
             ReportDiagnostic (type, originated, message);
         }
+        internal void Semantic_ReportMatchedTypes (ASTNode node) {
+            string type = Information;
+            string originated = Semantic;
+            TextSpan span = new TextSpan (node.Token.LinePosition, node.Token.Text.Length);
+            string message = $"The types for operation [ {node.Token.Text} ] match.";
+            ReportDiagnostic (type, span, message, originated, node.Token.LineNumber);
+        }
+        internal void Semantic_ReportTypeMismatch (ASTNode node) {
+            string type = Error;
+            ErrorCount++;
+            string originated = Semantic;
+            TextSpan span = new TextSpan (node.Token.LinePosition, node.Token.Text.Length);
+            string message = $"Type mismatch around operation [ {node.Token.Text} ].";
+            ReportDiagnostic (type, span, message, originated, node.Token.LineNumber);
+        }
     }
 }

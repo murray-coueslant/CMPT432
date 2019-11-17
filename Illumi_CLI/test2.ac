@@ -370,10 +370,10 @@ boolean a /* this is not fine */
 {
   boolean a
   boolean b
-   while(a==b){
-       print(b)
-   }
-   if(a==b){
-       print(a)
+   a = false
+   a = true
+   {
+       a = false
+       b = a
    }
 }$

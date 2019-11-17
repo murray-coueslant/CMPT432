@@ -87,6 +87,7 @@ namespace Illumi_CLI {
             NextToken ();
             while (CurrentToken.Kind != TokenKind.RightBraceToken && TokenCounter != TokenStream.Count - 1) {
                 HandleStatement (tree);
+                tree.Ascend (CurrentSession);
             }
             NextToken ();
             tree.Ascend (CurrentSession);
@@ -112,7 +113,7 @@ namespace Illumi_CLI {
                     break;
                 case TokenKind.LeftBraceToken:
                     HandleBlock (tree);
-                    tree.Ascend (CurrentSession);
+                    // tree.Ascend (CurrentSession);
                     break;
                 case TokenKind.EndOfProgramToken:
                     return;
@@ -136,7 +137,7 @@ namespace Illumi_CLI {
                     Diagnostics.Semantic_ReportInvalidType (CurrentToken);
                     return;
             }
-            tree.Ascend (CurrentSession);
+            // tree.Ascend (CurrentSession);
         }
         public void HandleAssignmentStatement (AbstractSyntaxTree tree) {
             tree.AddBranchNode (CurrentToken);
@@ -144,7 +145,7 @@ namespace Illumi_CLI {
             NextToken ();
             HandleExpression (tree);
             NextToken ();
-            tree.Ascend (CurrentSession);
+            // tree.Ascend (CurrentSession);
         }
         public void HandleExpression (AbstractSyntaxTree tree) {
             switch (CurrentToken.Kind) {
@@ -170,7 +171,7 @@ namespace Illumi_CLI {
             NextToken ();
             HandleExpression (tree);
             NextToken ();
-            tree.Ascend (CurrentSession);
+            //tree.Ascend (CurrentSession);
             NextToken ();
         }
         public void HandleIfStatement (AbstractSyntaxTree tree) {
@@ -198,7 +199,7 @@ namespace Illumi_CLI {
             } else {
                 tree.AddBranchNode (CurrentToken);
             }
-            tree.Ascend (CurrentSession);
+            // tree.Ascend (CurrentSession);
         }
         public void HandleBooleanExpr (AbstractSyntaxTree tree) {
             switch (CurrentToken.Kind) {
@@ -214,7 +215,7 @@ namespace Illumi_CLI {
                     HandleParenthesisedExpression (tree);
                     break;
             }
-            tree.Ascend (CurrentSession);
+            // tree.Ascend (CurrentSession);
         }
         public void HandleParenthesisedExpression (AbstractSyntaxTree tree) {
             NextToken ();
@@ -309,12 +310,20 @@ namespace Illumi_CLI {
         public void CheckAssignmentTypes (ASTNode node) {
             string leftIdentifierType = GetSymbolType (node.Descendants[0].Token.Text, Symbols.CurrentScope);
             string rightExprType = GetExpressionType (node.Descendants[node.Descendants.Count - 1]);
-            System.Console.WriteLine (leftIdentifierType == rightExprType);
+            if (leftIdentifierType == rightExprType) {
+                Diagnostics.Semantic_ReportMatchedTypes (node);
+            } else {
+                Diagnostics.Semantic_ReportTypeMismatch (node);
+            }
         }
         public bool CheckBoolOpTypes (ASTNode node) {
             string leftExprType = GetExpressionType (node.Descendants[0]);
             string rightExprType = GetExpressionType (node.Descendants[1]);
-            System.Console.WriteLine (leftExprType == rightExprType);
+            if (leftExprType == rightExprType) {
+                Diagnostics.Semantic_ReportMatchedTypes (node);
+            } else {
+                Diagnostics.Semantic_ReportTypeMismatch (node);
+            }
             return leftExprType == rightExprType;
         }
         public bool CheckAdditionTypes (ASTNode node) {
@@ -329,6 +338,11 @@ namespace Illumi_CLI {
                     break;
                 default:
                     return CheckAdditionTypes (node.Descendants[1]);
+            }
+            if (leftExprType == rightExprType) {
+                Diagnostics.Semantic_ReportMatchedTypes (node);
+            } else {
+                Diagnostics.Semantic_ReportTypeMismatch (node);
             }
             return leftExprType == rightExprType;
         }
