@@ -129,7 +129,6 @@ namespace Illumi_CLI {
             tree.AddLeafNode (TokenStream[TokenCounter - 1]);
             NextToken ();
             HandleExpression (tree);
-            NextToken ();
             tree.Ascend (CurrentSession);
         }
         public void HandleExpression (AbstractSyntaxTree tree) {
@@ -182,8 +181,8 @@ namespace Illumi_CLI {
                 HandleIntExpr (tree);
             } else {
                 tree.AddBranchNode (CurrentToken);
-                tree.Ascend (CurrentSession);
             }
+            tree.Ascend (CurrentSession);
         }
         public void HandleBooleanExpr (AbstractSyntaxTree tree) {
             switch (CurrentToken.Kind) {
@@ -209,7 +208,6 @@ namespace Illumi_CLI {
             tree.AddLeafNode (leftExprTree.Root);
             NextToken ();
             AbstractSyntaxTree rightExprTree = HandleExprTree ();
-            // NextToken ();
             tree.AddLeafNode (rightExprTree.Root);
         }
         public void HandleIdentifier (AbstractSyntaxTree tree) {
@@ -249,32 +247,35 @@ namespace Illumi_CLI {
                 Traverse (root.Descendants[i], checkFunction);
             }
         }
-        public bool CheckSymbolScope (ASTNode root) {
-            Traverse (root, CheckScope);
-            if (Diagnostics.ErrorCount == 0) {
-                return true;
-            }
-            return false;
-        }
         public void CheckScope (ASTNode node) {
             if (node.Token.Text == "Block") {
                 Symbols.NewScope ();
                 Symbols.UpdateCurrentScope ();
-            }
-            if (Symbols.CurrentScope != null) {
-                if (node.Token.Text == "VarDecl") {
-                    Symbols.AddSymbol (node.Descendants[1], node.Descendants[0].Token.Text);
-                }
-                if (node.Token.Text.Length == 1 && char.IsLetter (node.Token.Text, 0)) {
-                    Diagnostics.Semantic_ReportSymbolLookup (node.Token.Text);
-                    bool success = SymbolExists (node.Token.Text, Symbols.CurrentScope);
-                    if (!success) {
-                        Diagnostics.Semantic_ReportUndeclaredIdentifier (node.Token, Symbols.CurrentScope.Level);
+            } else if (node.Parent != null && node.Parent.Token.Kind == TokenKind.Block && node == node.Parent.Descendants[node.Parent.Descendants.Count - 1]) {
+                if (Symbols.CurrentScope != null) {
+                    if (node.Token.Text == "VarDecl") {
+                        Symbols.AddSymbol (node.Descendants[1], node.Descendants[0].Token.Text);
+                    } else if (node.Token.Text.Length == 1 && char.IsLetter (node.Token.Text, 0) && node.Parent.Token.Text != "VarDecl") {
+                        Diagnostics.Semantic_ReportSymbolLookup (node.Token.Text);
+                        bool success = SymbolExists (node.Token.Text, Symbols.CurrentScope);
+                        if (!success) {
+                            Diagnostics.Semantic_ReportUndeclaredIdentifier (node.Token, Symbols.CurrentScope.Level);
+                        }
                     }
                 }
-            }
-            if (node.Parent != null && node.Parent.Token.Kind == TokenKind.Block && node == node.Parent.Descendants[node.Parent.Descendants.Count - 1]) {
                 Symbols.AscendScope ();
+            } else {
+                if (Symbols.CurrentScope != null) {
+                    if (node.Token.Text == "VarDecl") {
+                        Symbols.AddSymbol (node.Descendants[1], node.Descendants[0].Token.Text);
+                    } else if (node.Token.Text.Length == 1 && char.IsLetter (node.Token.Text, 0) && node.Parent.Token.Text != "VarDecl") {
+                        Diagnostics.Semantic_ReportSymbolLookup (node.Token.Text);
+                        bool success = SymbolExists (node.Token.Text, Symbols.CurrentScope);
+                        if (!success) {
+                            Diagnostics.Semantic_ReportUndeclaredIdentifier (node.Token, Symbols.CurrentScope.Level);
+                        }
+                    }
+                }
             }
         }
         public void CheckType (ASTNode node) {

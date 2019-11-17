@@ -31,6 +31,7 @@ namespace Illumi_CLI {
             if (RootScope is null) {
                 RootScope = new Scope (0);
                 CurrentScope = RootScope;
+                CurrentScope.MostRecentScope = RootScope;
                 ScopeCounter = 0;
             } else {
                 CurrentScope.AddDescendant (ScopeCounter, CurrentScope);
