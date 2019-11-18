@@ -421,5 +421,11 @@ namespace Illumi_CLI {
             string message = $"Type mismatch around operation [ {node.Token.Text} ].";
             ReportDiagnostic (type, span, message, originated, node.Token.LineNumber);
         }
+        internal void Semantic_ReportAddingNewScope (int scopeCounter) {
+            string type = Information;
+            string originated = Semantic;
+            string message = $"Adding new scope [ {scopeCounter} ].";
+            ReportDiagnostic (type, originated, message);
+        }
     }
 }

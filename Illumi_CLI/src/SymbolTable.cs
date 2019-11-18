@@ -37,6 +37,7 @@ namespace Illumi_CLI {
                 CurrentScope.AddDescendant (ScopeCounter, CurrentScope);
                 ScopeCounter++;
             }
+            Diagnostics.Semantic_ReportAddingNewScope (ScopeCounter);
         }
         public void UpdateCurrentScope () {
             if (CurrentScope.MostRecentScope != null) {

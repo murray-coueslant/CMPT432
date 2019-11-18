@@ -248,34 +248,25 @@ namespace Illumi_CLI {
             }
         }
         public void CheckScope (ASTNode node) {
-            if (node.Token.Text == "Block") {
-                Symbols.NewScope ();
-                Symbols.UpdateCurrentScope ();
-            } else if (node.Parent != null && node.Parent.Token.Kind == TokenKind.Block && node == node.Parent.Descendants[node.Parent.Descendants.Count - 1]) {
-                if (Symbols.CurrentScope != null) {
-                    if (node.Token.Text == "VarDecl") {
-                        Symbols.AddSymbol (node.Descendants[1], node.Descendants[0].Token.Text);
-                    } else if (node.Token.Text.Length == 1 && char.IsLetter (node.Token.Text, 0) && node.Parent.Token.Text != "VarDecl") {
+            switch (node.Token.Kind) {
+                case TokenKind.Block:
+                    Symbols.NewScope ();
+                    Symbols.UpdateCurrentScope ();
+                    break;
+                case TokenKind.IdentifierToken:
+                    if (node.Parent.Token.Kind == TokenKind.VarDecl) {
+                        Symbols.AddSymbol (node.Parent.Descendants[1], node.Parent.Descendants[0].Token.Text);
+                    } else {
                         Diagnostics.Semantic_ReportSymbolLookup (node.Token.Text);
                         bool success = SymbolExists (node.Token.Text, Symbols.CurrentScope);
                         if (!success) {
                             Diagnostics.Semantic_ReportUndeclaredIdentifier (node.Token, Symbols.CurrentScope.Level);
                         }
                     }
-                }
+                    break;
+            }
+            if (node.Parent != null && node.Token.Kind != TokenKind.Block && node == node.Parent.Descendants.Last ()) {
                 Symbols.AscendScope ();
-            } else {
-                if (Symbols.CurrentScope != null) {
-                    if (node.Token.Text == "VarDecl") {
-                        Symbols.AddSymbol (node.Descendants[1], node.Descendants[0].Token.Text);
-                    } else if (node.Token.Text.Length == 1 && char.IsLetter (node.Token.Text, 0) && node.Parent.Token.Text != "VarDecl") {
-                        Diagnostics.Semantic_ReportSymbolLookup (node.Token.Text);
-                        bool success = SymbolExists (node.Token.Text, Symbols.CurrentScope);
-                        if (!success) {
-                            Diagnostics.Semantic_ReportUndeclaredIdentifier (node.Token, Symbols.CurrentScope.Level);
-                        }
-                    }
-                }
             }
         }
         public void CheckType (ASTNode node) {
