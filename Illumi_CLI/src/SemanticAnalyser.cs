@@ -54,20 +54,32 @@ namespace Illumi_CLI {
             return tree;
         }
         public void ScopeAndTypeCheck () {
-            TraverseForScope (AbstractSyntaxTree.Root, CheckScope);
-            if (Diagnostics.ErrorCount == 0) {
-                Traverse (AbstractSyntaxTree.Root, CheckType);
+            ScopeChecker scopeChecker = new ScopeChecker (AbstractSyntaxTree, Symbols);
+            TypeChecker typeChecker = new TypeChecker (AbstractSyntaxTree);
+
+            Diagnostics.Semantic_ReportCheckingScope ();
+            scopeChecker.ScopeCheck ();
+            if (scopeChecker.Passed) {
+                Diagnostics.Semantic_ReportCheckingType ();
+                typeChecker.TypeCheck ();
             } else {
                 Diagnostics.Semantic_ReportScopeError ();
             }
 
-            if (Diagnostics.ErrorCount == 0) {
-                Diagnostics.Semantic_ReportDisplayingSymbolTables ();
-                Console.WriteLine ();
-                Symbols.DisplaySymbolTables (Symbols.RootScope);
-            } else {
-                return;
-            }
+            // TraverseForScope (AbstractSyntaxTree.Root, CheckScope);
+            // if (Diagnostics.ErrorCount == 0) {
+            //     Traverse (AbstractSyntaxTree.Root, CheckType);
+            // } else {
+            //     Diagnostics.Semantic_ReportScopeError ();
+            // }
+
+            // if (Diagnostics.ErrorCount == 0) {
+            //     Diagnostics.Semantic_ReportDisplayingSymbolTables ();
+            //     Console.WriteLine ();
+            //     Symbols.DisplaySymbolTables (Symbols.RootScope);
+            // } else {
+            //     return;
+            // }
         }
         public void HandleBlock (AbstractSyntaxTree tree) {
             tree.AddBranchNode (new Token (TokenKind.Block, "Block", 0, 0));
