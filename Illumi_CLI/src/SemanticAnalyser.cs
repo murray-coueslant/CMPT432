@@ -54,7 +54,7 @@ namespace Illumi_CLI {
             return tree;
         }
         public void ScopeAndTypeCheck () {
-            Traverse (AbstractSyntaxTree.Root, CheckScope);
+            TraverseForScope (AbstractSyntaxTree.Root, CheckScope);
             if (Diagnostics.ErrorCount == 0) {
                 Traverse (AbstractSyntaxTree.Root, CheckType);
             } else {
@@ -247,28 +247,41 @@ namespace Illumi_CLI {
                 Traverse (root.Descendants[i], checkFunction);
             }
         }
+
+        public void TraverseForScope (ASTNode root, Action<ASTNode> checkFunction) {
+            checkFunction (root);
+
+            for (int i = 0; i < root.Descendants.Count; i++) {
+                TraverseForScope (root.Descendants[i], checkFunction);
+            }
+            if (root.Parent != null && root == root.Parent.Descendants.Last () && root.Parent.Token.Kind == TokenKind.Block) {
+                Symbols.AscendScope ();
+            }
+        }
+
         public void CheckScope (ASTNode node) {
             switch (node.Token.Kind) {
                 case TokenKind.Block:
                     Symbols.NewScope ();
-                    Symbols.UpdateCurrentScope ();
+                    if (node.Descendants.Count == 0) {
+                        Symbols.AscendScope ();
+                    }
                     break;
                 case TokenKind.IdentifierToken:
                     if (node.Parent.Token.Kind == TokenKind.VarDecl) {
-                        Symbols.AddSymbol (node.Parent.Descendants[1], node.Parent.Descendants[0].Token.Text);
+                        Symbols.AddSymbol (node, node.Parent.Descendants[0].Token.Text);
                     } else {
-                        Diagnostics.Semantic_ReportSymbolLookup (node.Token.Text);
                         bool success = SymbolExists (node.Token.Text, Symbols.CurrentScope);
                         if (!success) {
                             Diagnostics.Semantic_ReportUndeclaredIdentifier (node.Token, Symbols.CurrentScope.Level);
                         }
                     }
                     break;
-            }
-            if (node.Parent != null && node.Token.Kind != TokenKind.Block && node == node.Parent.Descendants.Last ()) {
-                Symbols.AscendScope ();
+                default:
+                    break;
             }
         }
+
         public void CheckType (ASTNode node) {
             switch (node.Token.Kind) {
                 case TokenKind.AssignmentToken:
@@ -389,32 +402,32 @@ namespace Illumi_CLI {
     }
 }
 
-// class SemanticAnalyser {
-//     public Parser Parser { get; set; }
-//     public AbstractSyntaxTree AbstractSyntaxTree { get; set; }
-
-//     public SemanticAnalyser (Parser parser, Session session, DiagnosticCollection diagnostics) {
-//         Parser = parser;
-//         AbstractSyntaxTree = new AbstractSyntaxTree ();
+// public void CheckScope (ASTNode node) {
+//     CheckNodeScope (node);
+//     if (node.Parent != null && node.Parent.Token.Kind == TokenKind.Block && node == node.Parent.Descendants.Last ()) {
+//         Symbols.AscendScope ();
 //     }
-
-//     public void Analyse () {
-//         TraverseCST (Parser.Tree);
-//     }
-
-//     public void TraverseCST (ConcreteSyntaxTree tree) {
-//         Tree.PrintTree (tree.Root);
-//     }
-
-//     public void Traverse (ASTNode root, Action<ASTNode> checkFunction) {
-//         checkFunction (root);
-
-//         for (int i = 0; i < root.Descendants.Count; i++) {
-//             Traverse (root.Descendants[i], checkFunction);
-//         }
+//     if (node.Token.Kind == TokenKind.Block && node.Descendants.Count == 0) {
+//         Symbols.AscendScope ();
 //     }
 // }
-
-// public enum SpecialNodes {
+// public void CheckNodeScope (ASTNode node) {
+//     switch (node.Token.Kind) {
+//         case TokenKind.Block:
+//             Symbols.NewScope ();
+//             Symbols.UpdateCurrentScope ();
+//             break;
+//         case TokenKind.IdentifierToken:
+//             if (node.Parent.Token.Kind == TokenKind.VarDecl) {
+//                 Symbols.AddSymbol (node.Parent.Descendants[1], node.Parent.Descendants[0].Token.Text);
+//             } else {
+//                 Diagnostics.Semantic_ReportSymbolLookup (node.Token.Text);
+//                 bool success = SymbolExists (node.Token.Text, Symbols.CurrentScope);
+//                 if (!success) {
+//                     Diagnostics.Semantic_ReportUndeclaredIdentifier (node.Token, Symbols.CurrentScope.Level);
+//                 }
+//             }
+//             break;
+//     }
 
 // }

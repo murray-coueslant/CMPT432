@@ -359,7 +359,7 @@ namespace Illumi_CLI {
         internal void Semantic_ReportSymbolNotFound (string symbol, Scope searchScope) {
             string type = Information;
             string originated = Semantic;
-            string message = $"Could not find symbol [ {symbol} ] in scope [ {searchScope.Level} ]. Searching [ {searchScope.ParentScope.Level} ]";
+            string message = searchScope.ParentScope == null ? $"Could not find symbol [ {symbol} ] in root scope." : $"Could not find symbol [ {symbol} ] in scope [ {searchScope.Level} ]. Searching [ {searchScope.ParentScope.Level} ]";
             ReportDiagnostic (type, originated, message);
         }
         internal void Semantic_ReportCheckingScope () {
@@ -421,10 +421,10 @@ namespace Illumi_CLI {
             string message = $"Type mismatch around operation [ {node.Token.Text} ].";
             ReportDiagnostic (type, span, message, originated, node.Token.LineNumber);
         }
-        internal void Semantic_ReportAddingNewScope (int scopeCounter) {
+        internal void Semantic_ReportAddingNewScope (int scopeCounter, Scope currentScope) {
             string type = Information;
             string originated = Semantic;
-            string message = $"Adding new scope [ {scopeCounter} ].";
+            string message = currentScope.ParentScope == null ? $"Adding new scope [ {scopeCounter} ]." : $"Adding new scope [ {scopeCounter} ]. ( Parent : [ {currentScope.ParentScope.Level} ] )";
             ReportDiagnostic (type, originated, message);
         }
     }
