@@ -69,7 +69,14 @@ namespace Illumi_CLI {
             HandleStatement (tree);
             if (CurrentToken.Kind == TokenKind.RightBraceToken) {
                 tree.Ascend (CurrentSession);
-                return;
+                switch (tree.CurrentNode.Token.Kind) {
+                    case TokenKind.IfToken:
+                    case TokenKind.WhileToken:
+                        tree.Ascend (CurrentSession);
+                        break;
+                    default:
+                        break;
+                }
             }
         }
         public void HandleStatement (AbstractSyntaxTree tree) {
@@ -96,6 +103,14 @@ namespace Illumi_CLI {
                     break;
                 case TokenKind.RightBraceToken:
                     tree.Ascend (CurrentSession);
+                    switch (tree.CurrentNode.Token.Kind) {
+                        case TokenKind.IfToken:
+                        case TokenKind.WhileToken:
+                            tree.Ascend (CurrentSession);
+                            break;
+                        default:
+                            break;
+                    }
                     return;
                 case TokenKind.EndOfProgramToken:
                     return;

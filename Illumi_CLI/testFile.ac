@@ -2,3 +2,18 @@
     boolean a
     a = (((a != true) == ((false != false) == true)) == false)
 }$
+{
+    int a
+    int b
+    a = 1 + 2 + 3 + 4 + b
+}$
+{
+    int a
+    a = 4
+    while(a == 4){
+        boolean a
+        a = false
+        print(a)
+    }
+    print(a)
+}$
