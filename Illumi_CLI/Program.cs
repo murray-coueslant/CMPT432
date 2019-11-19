@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection.PortableExecutable;
+using System.Xml.Serialization;
 
 namespace Illumi_CLI {
     class Program {
@@ -153,6 +155,79 @@ namespace Illumi_CLI {
                             }
                         }
                         break;
+                    case "codegen":
+                        if (command.Length != 2) {
+                            mainDiagnostics.EntryPoint_MalformedCommand ();
+                            break;
+                        }
+
+                        IList<string> programs = openFile (command[1], currentSession);
+
+                        if (programs.Count >= 1) {
+                            IList<Lexer> lexers = new List<Lexer> ();
+                            IList<Parser> parsers = new List<Parser> ();
+                            IList<SemanticAnalyser> semanticAnalysers = new List<SemanticAnalyser> ();
+
+                            int programCounter = 0;
+
+                            foreach (string program in programs) {
+                                lexers.Add (new Lexer (program, currentSession, mainDiagnostics));
+                            }
+
+                            foreach (Lexer lexer in lexers) {
+                                parsers.Add (new Parser (lexer, currentSession, mainDiagnostics));
+                            }
+
+                            foreach (Parser parser in parsers) {
+                                semanticAnalysers.Add (new SemanticAnalyser (parser, currentSession, mainDiagnostics));
+                            }
+
+                            foreach (SemanticAnalyser sA in semanticAnalysers) {
+                                codeGenerators.Add (new CodeGenerator (sA, currentSession, mainDiagnostics));
+                            }
+
+                            foreach (CodeGenerator cG in CodeGenerators) {
+                                mainDiagnostics.Lexer_ReportLexStart (programCounter);
+                                LexProgram (cG.SemanticAnalyser.Parser.Lexer, currentSession);
+                                if (mainDiagnostics.ErrorCount > 0) {
+                                    cG.SemanticAnalyser.Parser.Lexer.Failed = true;
+                                }
+                                mainDiagnostics.Lexer_ReportLexEnd (programCounter);
+
+                                Console.WriteLine ();
+
+                                if (mainDiagnostics.ErrorCount > 0 || cG.SemanticAnalyser.Parser.Lexer.Failed) {
+                                    mainDiagnostics.Parser_EncounteredLexError ();
+                                    cG.SemanticAnalyser.Parser.Failed = true;
+                                } else {
+                                    mainDiagnostics.Parser_ReportStartOfParse (programCounter);
+                                    ParseProgram (cG.SemanticAnalyser.Parser, currentSession);
+                                    mainDiagnostics.Parser_ReportEndOfParse (programCounter);
+                                }
+
+                                Console.WriteLine ();
+
+                                if (mainDiagnostics.ErrorCount > 0 || cG.SemanticAnalyser.Parser.Failed) {
+                                    mainDiagnostics.Semantic_EncounteredParseError ();
+                                } else {
+                                    mainDiagnostics.Semantic_ReportStartOfSemantic (programCounter);
+                                    SemanticProgram (cG.SemanticAnalyser);
+                                    mainDiagnostics.Semantic_ReportEndOfSemantic (programCounter);
+                                }
+
+                                if (mainDiagnostics.ErrorCount > 0 || cG.SemanticAnalyser.Failed) {
+                                    // todo mainDiagnostics.CodeGen_EncounteredSemanticError();
+                                } else {
+                                    // todo mainDiagnostics.CodeGen_ReportStartOfCodeGen();
+                                    CodeGen (cG);
+                                    // todo mainDiagnostics.CodeGen_ReportEndOfCodeGen();
+                                }
+
+                                Console.WriteLine ();
+                                programCounter++;
+                            }
+                        }
+                        break;
                     case "settings":
                     case "options":
                     case "setup":
@@ -205,6 +280,10 @@ namespace Illumi_CLI {
 
         private static void SemanticProgram (SemanticAnalyser sA) {
             sA.Analyse ();
+        }
+
+        private static void CodeGen (CodeGenerator cG) {
+            cG.Generate ();
         }
 
         public static string[] getCommand (Session session) {

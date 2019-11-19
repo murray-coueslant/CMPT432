@@ -19,7 +19,7 @@ namespace Illumi_CLI {
         internal void setDebugMode () {
             debugMode = !debugMode;
 
-            Console.WriteLine ($"Debug mode changed from {(!debugMode).ToString().ToUpper()} to {debugMode.ToString().ToUpper()}.");
+            Console.WriteLine ($"Debug mode changed from [ {(!debugMode).ToString().ToUpper()} ] to [ {debugMode.ToString().ToUpper()} ].");
         }
     }
 
