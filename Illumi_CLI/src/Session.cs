@@ -8,7 +8,7 @@ namespace Illumi_CLI {
     class Session {
         public Session () {
             Diagnostics = new DiagnosticCollection ();
-            debugMode = false;
+            debugMode = true;
             setupMode = false;
         }
 

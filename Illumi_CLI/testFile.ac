@@ -1,44 +1,22 @@
 {
   int a
+  int b
+  a = 3
+  b = 4
   {
-    boolean b
-    {
-      string c
-      {     
-        a = 5
-        b = false
-      }
-    }
+    string a
+    a = "hey"
+    print(a)
     print(b)
   }
-  print(a)
-}$
-{
-  boolean a
-  boolean b
-   a = (((a != true) == ((false != false) == true)) == false)
-   b = (a == b)
-   if(a==b){
-       print(b)
-   }
-   {
-       int a
-       print(a)
-   }
-   while(1+2+3+4 == 1){
-       b = a
-       if(a != b){
-           print(a)
-       }
-       print(a)
-   }
-   print(a)
-   if("string" != "other string"){
-       print("holy shit")
-   }
-}$
-{
-    int a
-    int b
-    a = 1 + 2 + 3 + 4 + b
+  print(b)
+  string s
+  {
+    boolean b
+    b = false
+  }
+  r = "hey"
+  int d
+  print(d)
+  d = 3
 }$

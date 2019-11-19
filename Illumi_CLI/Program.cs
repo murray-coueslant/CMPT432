@@ -5,9 +5,8 @@ using System.Linq;
 
 namespace Illumi_CLI {
     class Program {
-
-        static DiagnosticCollection mainDiagnostics = new DiagnosticCollection ();
         public static Session currentSession = new Session ();
+        static DiagnosticCollection mainDiagnostics = new DiagnosticCollection ();
 
         static void Main (string[] args) {
             Console.ForegroundColor = ConsoleColor.Green;
@@ -229,6 +228,8 @@ namespace Illumi_CLI {
             Console.WriteLine ("\t  - This command will invoke the Illumi lexer on the specified file. You can specify additional settings for the lexer in setup mode.");
             Console.WriteLine ("\t- parse [file]");
             Console.WriteLine ("\t  - This command will invoke syntactical analysis on the given source file using the Illumi parser. You may specify additional settings \n\t    in the setup mode.");
+            Console.WriteLine ("\t- semantic [file]");
+            Console.WriteLine ("\t  - This command will invoke the semantic analyser on the given source file. This includes semantic analysis, and variable scope and type checking.");
             Console.WriteLine ("\t- settings, options, setup");
             Console.WriteLine ("\t  - Enter into setup mode, to alter some settings for the compiler.");
             Console.WriteLine ("\t- help, h, or ?");
