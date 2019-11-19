@@ -48,14 +48,14 @@ namespace Illumi_CLI {
             string leftExprType = GetExpressionType (node.Descendants[0]);
             string rightExprType = "";
             switch (node.Descendants[1].Token.Kind) {
-                case TokenKind.DigitToken:
-                    rightExprType = GetExpressionType (node.Descendants[1]);
-                    break;
                 case TokenKind.IdentifierToken:
                     rightExprType = GetSymbolType (node.Descendants[1].Token.Text, Symbols.CurrentScope);
                     break;
-                default:
+                case TokenKind.AdditionToken:
                     return CheckAdditionTypes (node.Descendants[1]);
+                default:
+                    rightExprType = GetExpressionType (node.Descendants[1]);
+                    break;
             }
             if (leftExprType == rightExprType) {
                 Symbols.Diagnostics.Semantic_ReportMatchedTypes (node);

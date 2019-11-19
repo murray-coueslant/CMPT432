@@ -433,3 +433,103 @@ boolean a /* this is not fine */
         }
     }
 }$
+{   
+    boolean a
+    a = (((a != true) == ((false != false) == true)) == false)
+}$
+{
+    int a
+    int b
+    a = 1 + 2 + 3 + 4 + b
+}$
+{
+    int a
+    a = 4
+    while(a == 4){
+        boolean a
+        a = false
+        print(a)
+    }
+    print(a)
+}$
+{
+   a = (((a != true) == ((false != false) == true)) == false)
+   b = (a == b)
+   if(a==b){
+       print(b)
+   }
+   {
+       print(a)
+   }
+   while(1+2+3+4 == 1){
+       b = a
+       if(a != b){
+           print(a)
+       }
+       print(a)
+   }
+   a = 1 + 2 + 3 + 4
+   print(a)
+   if("string" != "other string"){
+       print("holy shit")
+   }
+   a = "oooooh"
+}$
+{
+  boolean a
+  boolean b
+   a = (((a != true) == ((false != false) == true)) == false)
+   b = (a == b)
+   if(a==b){
+       print(b)
+   }
+   {
+       int a
+       print(a)
+   }
+   while(1+2+3+4 == 1){
+       b = a
+       if(a != b){
+           print(a)
+       }
+       print(a)
+   }
+   print(a)
+   if("string" != "other string"){
+       print("holy shit")
+   }
+}$
+{
+int a
+b = 4
+}$
+{
+int a
+{
+string a
+a = "this is fine"
+}
+boolean a /* this is not fine */
+}$
+{
+string s
+s = 4 + 3
+}$
+{
+if(4 == false){
+print("this no good")
+}
+if(4 == "hey"){
+print("int to string")
+}
+if(false != "hey"){
+print("bool to string")
+}
+if(4 != 3){
+print("int to int")
+}
+}$
+{
+int a
+a = 4 + false
+}$
