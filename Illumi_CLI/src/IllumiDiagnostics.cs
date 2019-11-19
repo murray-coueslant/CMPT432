@@ -430,8 +430,9 @@ namespace Illumi_CLI {
         internal void Semantic_ReportUnusedVariable (Symbol variable) {
             string type = Warning;
             string originated = Semantic;
-            string message = $"The variable [ {variable.Token.Text} ] was declared on line [ {variable.Token.LineNumber} ] but was never used.";
-            ReportDiagnostic (type, originated, message);
+            TextSpan span = new TextSpan (variable.Token.LinePosition, variable.Token.Text.Length);
+            string message = $"The variable [ {variable.Token.Text} ] was declared but was never used.";
+            ReportDiagnostic (type, span, message, originated, variable.Token.LineNumber);
         }
     }
 }
