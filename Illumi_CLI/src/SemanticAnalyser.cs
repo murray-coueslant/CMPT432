@@ -203,6 +203,7 @@ namespace Illumi_CLI {
             NextToken ();
             AbstractSyntaxTree rightExprTree = HandleExprTree ();
             tree.AddLeafNode (rightExprTree.Root);
+            NextToken ();
         }
         public void HandleIdentifier (AbstractSyntaxTree tree) {
             tree.AddLeafNode (CurrentToken);
