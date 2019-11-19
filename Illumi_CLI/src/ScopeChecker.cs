@@ -6,10 +6,12 @@ namespace Illumi_CLI {
         internal AbstractSyntaxTree Tree { get; set; }
         internal SymbolTable Symbols { get; set; }
         public bool Passed { get; set; }
+        public TypeChecker TypeChecker { get; set; }
         public ScopeChecker (AbstractSyntaxTree tree, SymbolTable symbols) {
             Tree = tree;
             Symbols = symbols;
             Passed = false;
+            TypeChecker = new TypeChecker (Tree, Symbols);
         }
 
         public void ScopeCheck () {
@@ -33,6 +35,13 @@ namespace Illumi_CLI {
                         }
                     }
                     break;
+                case TokenKind.AssignmentToken:
+                case TokenKind.EquivalenceToken:
+                case TokenKind.NotEqualToken:
+                case TokenKind.AdditionToken:
+                    TypeChecker.CheckTypes (node);
+                    break;
+
             }
         }
 

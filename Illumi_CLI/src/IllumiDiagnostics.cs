@@ -371,7 +371,7 @@ namespace Illumi_CLI {
         internal void Semantic_ReportCheckingType () {
             string type = Information;
             string originated = Semantic;
-            string message = $"Checking type.";
+            string message = $"Scope check passed, checking type.";
             ReportDiagnostic (type, originated, message);
         }
         internal void Tree_ReportAscendingLevel (ASTNode node) {
