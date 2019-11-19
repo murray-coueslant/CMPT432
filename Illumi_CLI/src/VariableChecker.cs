@@ -19,6 +19,7 @@ namespace Illumi_CLI {
             if (Symbols.Diagnostics.ErrorCount == 0) {
                 Passed = true;
             }
+            GenerateWarnings (Symbols.RootScope);
         }
 
         public void CheckASTScopeAndType (ASTNode node) {
@@ -44,10 +45,10 @@ namespace Illumi_CLI {
 
             }
         }
-
         public bool FindSymbol (ASTNode node, Scope searchScope) {
             if (searchScope.Symbols.ContainsKey (node.Token.Text)) {
                 Symbols.Diagnostics.Semantic_ReportFoundSymbol (node.Token.Text, searchScope);
+                searchScope.Symbols[node.Token.Text].Used = true;
                 return true;
             } else {
                 if (searchScope.ParentScope != null) {
@@ -68,6 +69,16 @@ namespace Illumi_CLI {
                 Symbols.AscendScope ();
             } else if (node.Token.Kind == TokenKind.Block && node.Descendants.Count == 0) {
                 Symbols.AscendScope ();
+            }
+        }
+        public void GenerateWarnings (Scope rootScope) {
+            foreach (var variable in rootScope.Symbols) {
+                if (variable.Value.Used == false) {
+                    Symbols.Diagnostics.Semantic_ReportUnusedVariable (variable.Value);
+                }
+            }
+            foreach (Scope scope in rootScope.DescendantScopes) {
+                GenerateWarnings (scope);
             }
         }
     }

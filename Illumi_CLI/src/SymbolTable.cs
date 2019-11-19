@@ -12,7 +12,7 @@ namespace Illumi_CLI {
             Diagnostics = diagnostics;
         }
         public void AddSymbol (ASTNode symbol, string type) {
-            if (!CurrentScope.AddSymbol (symbol.Token.Text, type)) {
+            if (!CurrentScope.AddSymbol (symbol.Token, type)) {
                 TextSpan errorSpan = new TextSpan (symbol.Token.LinePosition, 1);
                 Diagnostics.Semantic_ReportSymbolAlreadyDeclared (symbol.Token.Text, CurrentScope.Level, errorSpan, symbol.Token.LineNumber, type);
                 return;

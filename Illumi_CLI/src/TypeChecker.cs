@@ -106,7 +106,7 @@ namespace Illumi_CLI {
         public string GetSymbolType (string symbol, Scope searchScope) {
             if (searchScope.Symbols.ContainsKey (symbol)) {
                 Symbols.Diagnostics.Semantic_ReportFoundSymbol (symbol, searchScope);
-                return searchScope.Symbols[symbol].ToString ();
+                return searchScope.Symbols[symbol].Type;
             } else {
                 if (searchScope.ParentScope != null) {
                     Symbols.Diagnostics.Semantic_ReportSymbolNotFound (symbol, searchScope);

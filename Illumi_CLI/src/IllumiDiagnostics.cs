@@ -427,5 +427,11 @@ namespace Illumi_CLI {
             string message = currentScope.ParentScope == null ? $"Adding new scope [ {scopeCounter} ]." : $"Adding new scope [ {scopeCounter} ]. ( Parent : [ {currentScope.ParentScope.Level} ] )";
             ReportDiagnostic (type, originated, message);
         }
+        internal void Semantic_ReportUnusedVariable (Symbol variable) {
+            string type = Warning;
+            string originated = Semantic;
+            string message = $"The variable [ {variable.Token.Text} ] was declared on line [ {variable.Token.LineNumber} ] but was never used.";
+            ReportDiagnostic (type, originated, message);
+        }
     }
 }

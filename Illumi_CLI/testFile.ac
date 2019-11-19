@@ -1,18 +1,15 @@
 {
-    int a
+  int a
+  {
+    boolean b
     {
-        {
-            {
-                {
-                    {
-                        a=1+2+3+4+5
-                        {
-                            int a
-                            print(4+a)
-                        }
-                    }
-                }
-            }
-        }
+      string c
+      {     
+        a = 5
+        b = false
+      }
     }
+    print(b)
+  }
+  print(a)
 }$
