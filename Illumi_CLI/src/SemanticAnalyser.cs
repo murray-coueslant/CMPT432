@@ -54,11 +54,14 @@ namespace Illumi_CLI {
             return tree;
         }
         public void ScopeAndTypeCheck () {
-            ScopeChecker scopeChecker = new ScopeChecker (AbstractSyntaxTree, Symbols);
-            TypeChecker typeChecker = new TypeChecker (AbstractSyntaxTree, Symbols);
+            VariableChecker variableChecker = new VariableChecker (AbstractSyntaxTree, Symbols);
 
             Diagnostics.Semantic_ReportCheckingScope ();
-            scopeChecker.ScopeCheck ();
+            variableChecker.CheckVariables ();
+            if (variableChecker.Passed) {
+                Diagnostics.Semantic_ReportDisplayingSymbolTables ();
+                Symbols.DisplaySymbolTables (Symbols.RootScope);
+            }
         }
         public void HandleBlock (AbstractSyntaxTree tree) {
             tree.AddBranchNode (new Token (TokenKind.Block, "Block", 0, 0));

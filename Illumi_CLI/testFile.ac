@@ -30,12 +30,9 @@
         b = false
         c = "inta"
       }
-      int b
       print(c)
     }
-    string a
     print(b)
   }
-  boolean c
   print(a)
 }$
