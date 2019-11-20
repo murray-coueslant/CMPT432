@@ -6,6 +6,7 @@ namespace Illumi_CLI {
         public List<ASTNode> Descendants { get; set; }
         public ASTNode Parent { get; set; }
         public Token Token { get; set; }
+        public bool Visited { get; set; }
         public ASTNode (Token token = null, List<ASTNode> descendants = null, ASTNode parent = null) {
             Token = token;
             if (descendants == null) {
@@ -14,6 +15,7 @@ namespace Illumi_CLI {
                 Descendants = descendants;
             }
             Parent = Parent;
+            Visited = false;
         }
         public void AddDescendant (ASTNode node) {
             Descendants.Add (node);

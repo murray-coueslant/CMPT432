@@ -9,17 +9,22 @@ namespace Illumi_CLI {
         internal static IList<string> ReadFile (FileInfo filePath, Session currentSession) {
             if (filePath.Exists) {
                 string fullFileText = File.ReadAllText (filePath.FullName);
+                if (fullFileText != string.Empty) {
+                    if (fullFileText[fullFileText.Length - 1] != '$') {
+                        TextSpan span = new TextSpan (fullFileText.Length - 1, 1);
+                        int lineNumber = fullFileText.Count (c => c == '\n') + 1;
+                        currentSession.Diagnostics.FileReader_ReportNoFinalEndOfProgramToken (span, lineNumber);
+                        currentSession.Diagnostics.WarningCount++;
+                        currentSession.Diagnostics.DisplayDiagnostics ();
+                        fullFileText = fullFileText + "$";
+                    }
 
-                if (fullFileText[fullFileText.Length - 1] != '$') {
-                    TextSpan span = new TextSpan (fullFileText.Length - 1, 1);
-                    int lineNumber = fullFileText.Count (c => c == '\n') + 1;
-                    currentSession.Diagnostics.FileReader_ReportNoFinalEndOfProgramToken (span, lineNumber);
-                    currentSession.Diagnostics.WarningCount++;
-                    currentSession.Diagnostics.DisplayDiagnostics ();
-                    fullFileText = fullFileText + "$";
+                    return ExtractPrograms (fullFileText.Replace ("\r", string.Empty), currentSession);
+                } else {
+                    // todo Diagnostics.FileReader_ReportEmptySource();
+                    return ExtractPrograms ("", currentSession);
                 }
 
-                return ExtractPrograms (fullFileText.Replace ("\r", string.Empty), currentSession);
             } else {
 
                 currentSession.Diagnostics.FileReader_ReportNoFileFound (filePath.Name);

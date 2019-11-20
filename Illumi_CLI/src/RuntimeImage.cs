@@ -1,6 +1,6 @@
 namespace Illumi_CLI {
-    string[, ] Image { get; set; }
     class RuntimeImage {
+        string[, ] Image { get; set; }
         public RuntimeImage () {
             Image = new string[32, 8];
         }

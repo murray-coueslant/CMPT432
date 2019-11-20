@@ -100,16 +100,16 @@ namespace Illumi_CLI {
                             break;
                         }
 
-                        IList<string> programs = openFile (command[1], currentSession);
+                        IList<string> semanticPrograms = openFile (command[1], currentSession);
 
-                        if (programs.Count >= 1) {
+                        if (semanticPrograms.Count >= 1) {
                             IList<Lexer> lexers = new List<Lexer> ();
                             IList<Parser> parsers = new List<Parser> ();
                             IList<SemanticAnalyser> semanticAnalysers = new List<SemanticAnalyser> ();
 
                             int programCounter = 0;
 
-                            foreach (string program in programs) {
+                            foreach (string program in semanticPrograms) {
                                 lexers.Add (new Lexer (program, currentSession, mainDiagnostics));
                             }
 
@@ -161,16 +161,17 @@ namespace Illumi_CLI {
                             break;
                         }
 
-                        IList<string> programs = openFile (command[1], currentSession);
+                        IList<string> codeGenPrograms = openFile (command[1], currentSession);
 
-                        if (programs.Count >= 1) {
+                        if (codeGenPrograms.Count >= 1) {
                             IList<Lexer> lexers = new List<Lexer> ();
                             IList<Parser> parsers = new List<Parser> ();
                             IList<SemanticAnalyser> semanticAnalysers = new List<SemanticAnalyser> ();
+                            IList<CodeGenerator> codeGenerators = new List<CodeGenerator> ();
 
                             int programCounter = 0;
 
-                            foreach (string program in programs) {
+                            foreach (string program in codeGenPrograms) {
                                 lexers.Add (new Lexer (program, currentSession, mainDiagnostics));
                             }
 
@@ -183,10 +184,10 @@ namespace Illumi_CLI {
                             }
 
                             foreach (SemanticAnalyser sA in semanticAnalysers) {
-                                codeGenerators.Add (new CodeGenerator (sA, currentSession, mainDiagnostics));
+                                codeGenerators.Add (new CodeGenerator (sA, mainDiagnostics, currentSession));
                             }
 
-                            foreach (CodeGenerator cG in CodeGenerators) {
+                            foreach (CodeGenerator cG in codeGenerators) {
                                 mainDiagnostics.Lexer_ReportLexStart (programCounter);
                                 LexProgram (cG.SemanticAnalyser.Parser.Lexer, currentSession);
                                 if (mainDiagnostics.ErrorCount > 0) {

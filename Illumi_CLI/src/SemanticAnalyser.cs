@@ -19,6 +19,7 @@ namespace Illumi_CLI {
         public DiagnosticCollection Diagnostics { get; set; }
         public AbstractSyntaxTree AbstractSyntaxTree { get; set; }
         public SymbolTable Symbols { get; set; }
+        public bool Failed { get; set; }
         public SemanticAnalyser (Parser parser, Session currentSession, DiagnosticCollection diagnostics) {
             Parser = parser;
             ConcreteSyntaxTree = parser.Tree;
@@ -27,6 +28,7 @@ namespace Illumi_CLI {
             Diagnostics = diagnostics;
             TokenCounter = 0;
             Symbols = new SymbolTable (Diagnostics);
+            Failed = false;
         }
         public void Analyse () {
             if (Parser.Failed) {
@@ -38,6 +40,9 @@ namespace Illumi_CLI {
                     AbstractSyntaxTree.PrintTree (AbstractSyntaxTree.Root);
                     ScopeAndTypeCheck ();
                 }
+            }
+            if (Diagnostics.ErrorCount > 0) {
+                Failed = true;
             }
         }
         public AbstractSyntaxTree BuildAST (AbstractSyntaxTree inputTree = null) {
@@ -252,33 +257,3 @@ namespace Illumi_CLI {
         }
     }
 }
-
-// public void CheckScope (ASTNode node) {
-//     CheckNodeScope (node);
-//     if (node.Parent != null && node.Parent.Token.Kind == TokenKind.Block && node == node.Parent.Descendants.Last ()) {
-//         Symbols.AscendScope ();
-//     }
-//     if (node.Token.Kind == TokenKind.Block && node.Descendants.Count == 0) {
-//         Symbols.AscendScope ();
-//     }
-// }
-// public void CheckNodeScope (ASTNode node) {
-//     switch (node.Token.Kind) {
-//         case TokenKind.Block:
-//             Symbols.NewScope ();
-//             Symbols.UpdateCurrentScope ();
-//             break;
-//         case TokenKind.IdentifierToken:
-//             if (node.Parent.Token.Kind == TokenKind.VarDecl) {
-//                 Symbols.AddSymbol (node.Parent.Descendants[1], node.Parent.Descendants[0].Token.Text);
-//             } else {
-//                 Diagnostics.Semantic_ReportSymbolLookup (node.Token.Text);
-//                 bool success = SymbolExists (node.Token.Text, Symbols.CurrentScope);
-//                 if (!success) {
-//                     Diagnostics.Semantic_ReportUndeclaredIdentifier (node.Token, Symbols.CurrentScope.Level);
-//                 }
-//             }
-//             break;
-//     }
-
-// }
