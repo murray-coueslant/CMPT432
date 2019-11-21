@@ -139,7 +139,7 @@ namespace Illumi_CLI {
             tree.Ascend (CurrentSession);
         }
         public void HandleAssignmentStatement (AbstractSyntaxTree tree) {
-            tree.AddBranchNode (CurrentToken);
+            tree.AddBranchNode (new Token (TokenKind.AssignmentToken, "Assign", CurrentToken.LineNumber, CurrentToken.LinePosition));
             tree.AddLeafNode (TokenStream[TokenCounter - 1]);
             NextToken ();
             HandleExpression (tree);

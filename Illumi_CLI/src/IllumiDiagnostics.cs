@@ -33,7 +33,7 @@ namespace Illumi_CLI {
             if (shortDiagnostic) {
                 return $"[ {Type} ] - [ {Originated} ] -> {Message}";
             } else {
-                return $"[ {Type} ] - [ {Originated}]  ( {Span.Start} : {LineNumber} ) -> {Message}";
+                return $"[ {Type} ] - [ {Originated} ]  ( {Span.Start} : {LineNumber} ) -> {Message}";
             }
         }
     }
@@ -402,6 +402,7 @@ namespace Illumi_CLI {
         }
         internal void Semantic_ReportScopeError () {
             string type = Warning;
+            WarningCount++;
             string originated = Semantic;
             string message = "Scope errors encountered, will not check type.";
             ReportDiagnostic (type, originated, message);
@@ -429,9 +430,26 @@ namespace Illumi_CLI {
         }
         internal void Semantic_ReportUnusedVariable (Symbol variable) {
             string type = Warning;
+            WarningCount++;
             string originated = Semantic;
             TextSpan span = new TextSpan (variable.Token.LinePosition, variable.Token.Text.Length);
-            string message = $"The variable [ {variable.Token.Text} ] was declared but was never used.";
+            string message = $"The variable [ {variable.Token.Text} ] was declared and initialized but was never used.";
+            ReportDiagnostic (type, span, message, originated, variable.Token.LineNumber);
+        }
+        internal void Semantic_ReportUninitializedVariable (Symbol variable) {
+            string type = Warning;
+            WarningCount++;
+            string originated = Semantic;
+            TextSpan span = new TextSpan (variable.Token.LinePosition, variable.Token.Text.Length);
+            string message = $"The variable [ {variable.Token.Text} ] was declared but was never initialized.";
+            ReportDiagnostic (type, span, message, originated, variable.Token.LineNumber);
+        }
+        internal void Semantic_ReportUnusedUninitializedVariable (Symbol variable) {
+            string type = Warning;
+            WarningCount++;
+            string originated = Semantic;
+            TextSpan span = new TextSpan (variable.Token.LinePosition, variable.Token.Text.Length);
+            string message = $"The variable [ {variable.Token.Text} ] was declared but was never initialized or used.";
             ReportDiagnostic (type, span, message, originated, variable.Token.LineNumber);
         }
     }

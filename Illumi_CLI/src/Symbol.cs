@@ -4,10 +4,12 @@ namespace Illumi_CLI {
         public Token Token { get; set; }
         public string Type { get; set; }
         public Boolean Used { get; set; }
-        public Symbol (Token token, string type, Boolean used = false) {
+        public Boolean Initialized { get; set; }
+        public Symbol (Token token, string type, Boolean used = false, Boolean initialized = false) {
             Token = token;
             Type = type;
             Used = used;
+            Initialized = initialized;
         }
     }
 }

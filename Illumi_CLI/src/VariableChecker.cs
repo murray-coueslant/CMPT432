@@ -48,7 +48,11 @@ namespace Illumi_CLI {
         public bool FindSymbol (ASTNode node, Scope searchScope) {
             if (searchScope.Symbols.ContainsKey (node.Token.Text)) {
                 Symbols.Diagnostics.Semantic_ReportFoundSymbol (node.Token.Text, searchScope);
-                searchScope.Symbols[node.Token.Text].Used = true;
+                if (node.Parent.Token.Kind == TokenKind.AssignmentToken) {
+                    searchScope.Symbols[node.Token.Text].Initialized = true;
+                } else {
+                    searchScope.Symbols[node.Token.Text].Used = true;
+                }
                 return true;
             } else {
                 if (searchScope.ParentScope != null) {
@@ -73,8 +77,12 @@ namespace Illumi_CLI {
         }
         public void GenerateWarnings (Scope rootScope) {
             foreach (var variable in rootScope.Symbols) {
-                if (variable.Value.Used == false) {
+                if (variable.Value.Initialized == false && variable.Value.Used == false) {
+                    Symbols.Diagnostics.Semantic_ReportUnusedUninitializedVariable (variable.Value);
+                } else if (variable.Value.Used == false) {
                     Symbols.Diagnostics.Semantic_ReportUnusedVariable (variable.Value);
+                } else if (variable.Value.Initialized == false) {
+                    Symbols.Diagnostics.Semantic_ReportUninitializedVariable (variable.Value);
                 }
             }
             foreach (Scope scope in rootScope.DescendantScopes) {
