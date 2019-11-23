@@ -6,7 +6,7 @@ namespace Illumi_CLI {
         public int Scope { get; set; }
         public int Offset { get; set; }
 
-        public TempTableEntry (string tempAddress, string var, string type, int scope, int offset) {
+        public TempTableEntry (string tempAddress, string var, string type, int scope, int offset = 0) {
             TempAddress = tempAddress;
             Var = var;
             Type = type;

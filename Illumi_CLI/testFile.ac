@@ -1,23 +1,8 @@
 {
     int a
     int b
-    b = 2
-    print(b)
-}$
-{
-    int a
-    int b
-    b = a
-}$
-{
-    int a
-    {
-        a = 5
-        string a
-        a = "lalala"
-    }
-}$
-{
-    string c
-    c = "init but unused"
+    boolean c
+    string d
+    string e
+    string f
 }$

@@ -30,6 +30,7 @@ namespace Illumi_CLI {
                 case TokenKind.IdentifierToken:
                     if (node.Parent.Token.Kind == TokenKind.VarDecl) {
                         Symbols.AddSymbol (node, node.Parent.Descendants[0].Token.Text);
+                        node.Scope = Symbols.CurrentScope.Level;
                     } else {
                         if (!FindSymbol (node, Symbols.CurrentScope)) {
                             Symbols.Diagnostics.Semantic_ReportUndeclaredIdentifier (node.Token, Symbols.CurrentScope.Level);
