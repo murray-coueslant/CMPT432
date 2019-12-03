@@ -1,7 +1,6 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
-using System.Security.Cryptography;
 using System.Text;
 namespace Illumi_CLI {
     class CodeGenerator {
@@ -15,6 +14,8 @@ namespace Illumi_CLI {
         public string TrueAddress { get; set; }
         public string FalseAddress { get; set; }
         public string AdditionAddress { get; set; }
+        public string TermAddress { get; set; }
+        public List<int> AdditionTreeStream { get; set; }
         public CodeGenerator (SemanticAnalyser semanticAnalyser, DiagnosticCollection diagnostics, Session session) {
             SemanticAnalyser = semanticAnalyser;
             Diagnostics = diagnostics;
@@ -55,6 +56,8 @@ namespace Illumi_CLI {
             StaticTemp.NewStaticEntry ("false", FalseAddress, "pointer", 0);
             AdditionAddress = "F4 00";
             StaticTemp.NewStaticEntry ("addition", AdditionAddress, "pointer", 0);
+            TermAddress = "F3 00";
+            StaticTemp.NewStaticEntry ("term", TermAddress, "pointer", 0);
         }
         public void HandleSubtree (ASTNode node) {
             if (node.Visited == false) {
@@ -174,12 +177,14 @@ namespace Illumi_CLI {
         }
         public void HandleInteger (ASTNode node, string[] tempAddressBytes) {
             int value = HandleIntegerExpression (node.Descendants[1]);
-            StaticTemp.GetTempTableEntry (node.Descendants[0].Token.Text, node.Scope.Level).Value = value.ToString ("X2");
-            Image.WriteByte ("A9");
-            Image.WriteByte (value.ToString ("X2"));
-            Image.WriteByte ("8D");
-            Image.WriteByte (tempAddressBytes[0]);
-            Image.WriteByte (tempAddressBytes[1]);
+            if (value != -1) {
+                StaticTemp.GetTempTableEntry (node.Descendants[0].Token.Text, node.Scope.Level).Value = value.ToString ("X2");
+                Image.WriteByte ("A9");
+                Image.WriteByte (value.ToString ("X2"));
+                Image.WriteByte ("8D");
+                Image.WriteByte (tempAddressBytes[0]);
+                Image.WriteByte (tempAddressBytes[1]);
+            }
         }
         public int HandleIntegerExpression (ASTNode node) {
             int outInteger;
@@ -192,27 +197,41 @@ namespace Illumi_CLI {
                     return outInteger;
                 case TokenKind.AdditionToken:
                     HandleAddition (node);
-                    break;
+                    return -1;
                 default:
-                    return 0;
+                    return -1;
             }
         }
         public void HandleAddition (ASTNode node) {
-            switch (node.Descendants[0].Token.Kind) {
-                case TokenKind.DigitToken:
-                    string[] valueAddress = StaticTemp.GetTempTableEntry ("addition", 0).Address.Split (" ");
-                    Image.WriteByte ("A9");
-                    Image.WriteByte (node.Token.Text.ToString ("X2"));
-                    Image.WriteByte ("8D");
-                    Image.WriteByte (valueAddress[0]);
-                    Image.WriteByte (valueAddress[1]);
-                    break;
-                default:
-                    break;
+            AdditionTreeStream = new List<int> ();
+            string[] splitAdditionAddress = AdditionAddress.Split (" ");
+            string[] splitTermAddress = TermAddress.Split (" ");
+            Traverse (node, CreateAdditionTreeStream);
+            foreach (var item in AdditionTreeStream) {
+                Image.WriteByte ("A9");
+                Image.WriteByte (item.ToString ("X2"));
+                Image.WriteByte ("8D");
+                Image.WriteByte (splitTermAddress[0]);
+                Image.WriteByte (splitTermAddress[1]);
+                Image.WriteByte ("AD");
+                Image.WriteByte (splitAdditionAddress[0]);
+                Image.WriteByte (splitAdditionAddress[1]);
+                Image.WriteByte ("6D");
+                Image.WriteByte (splitTermAddress[0]);
+                Image.WriteByte (splitTermAddress[1]);
+                Image.WriteByte ("8D");
+                Image.WriteByte (splitAdditionAddress[0]);
+                Image.WriteByte (splitAdditionAddress[1]);
             }
-            switch (node.Descendants[1].Token.Kind) {
-                case TokenKind.AdditionToken:
-                    HandleAddition (node.Descendants[0]);
+        }
+        public void CreateAdditionTreeStream (ASTNode node) {
+            switch (node.Token.Kind) {
+                case TokenKind.DigitToken:
+                    AdditionTreeStream.Add (int.Parse (node.Token.Text));
+                    break;
+                case TokenKind.IdentifierToken:
+                    string value = StaticTemp.GetTempTableEntry (node.Token.Text, node.Scope.Level).Value;
+                    AdditionTreeStream.Add (int.Parse (value));
                     break;
             }
         }
