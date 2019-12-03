@@ -6,7 +6,7 @@ namespace Illumi_CLI {
         public List<ASTNode> Descendants { get; set; }
         public ASTNode Parent { get; set; }
         public Token Token { get; set; }
-        public int Scope { get; set; }
+        public Scope Scope { get; set; }
         public bool Visited { get; set; }
         public ASTNode (Token token = null, List<ASTNode> descendants = null, ASTNode parent = null) {
             Token = token;

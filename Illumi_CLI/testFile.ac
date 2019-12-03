@@ -1,8 +1,10 @@
 {
     int a
+    a = 3
     int b
-    boolean c
-    string d
-    string e
-    string f
+    b = 5
+    {
+        int a
+        a = 4
+    }
 }$

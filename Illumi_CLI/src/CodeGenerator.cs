@@ -1,4 +1,5 @@
 using System;
+using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
 namespace Illumi_CLI {
@@ -36,6 +37,11 @@ namespace Illumi_CLI {
                     case TokenKind.VarDecl:
                         HandleVarDecl (node);
                         break;
+                    case TokenKind.AssignmentToken:
+                        HandleAssignment (node);
+                        break;
+                    default:
+                        break;
                 }
                 node.Visited = true;
             }
@@ -44,7 +50,7 @@ namespace Illumi_CLI {
             Image.WriteByte ("A9");
             string varType = node.Descendants[0].Token.Text;
             string varName = node.Descendants[1].Token.Text;
-            int varScope = node.Descendants[1].Scope;
+            Scope varScope = node.Descendants[1].Scope;
             node.Visited = true;
             node.Descendants[0].Visited = true;
             node.Descendants[1].Visited = true;
@@ -52,17 +58,28 @@ namespace Illumi_CLI {
             switch (varType) {
                 case "int":
                 case "boolean":
-                    StaticTemp.NewEntry (varName, varType, varScope);
-                    tempAddressBytes = StaticTemp.MostRecentEntry.TempAddress.Split (" ");
+                    StaticTemp.NewStaticEntry (varName, varType, varScope.Level);
+                    tempAddressBytes = StaticTemp.MostRecentEntry.Address.Split (" ");
                     Image.WriteByte ("00");
                     break;
                 default:
                     // todo work out logic for adding strings to the heap and their pointers to the temp table
-                    HeapTemp.NewEntry (varName, varType, varScope);
-                    tempAddressBytes = HeapTemp.MostRecentEntry.TempAddress.Split (" ");
-                    Image.WriteByte ()
+                    HeapTemp.NewHeapEntry (varName, varScope.Level);
+                    // tempAddressBytes = HeapTemp.MostRecentEntry.TempAddress.Split (" ");
+                    // Image.WriteByte ();
                     break;
             }
+            Image.WriteByte ("8D");
+            Image.WriteByte (tempAddressBytes[0]);
+            Image.WriteByte (tempAddressBytes[1]);
+        }
+        public void HandleAssignment (ASTNode node) {
+            string variableName = node.Descendants[0].Token.Text;
+            string value = $"0{node.Descendants[1].Token.Text}";
+            string type = node.Scope.Symbols[variableName].Type;
+            string[] tempAddressBytes = StaticTemp.GetTempTableEntry (variableName, node.Scope).Address.Split (" ");
+            Image.WriteByte ("A9");
+            Image.WriteByte (value);
             Image.WriteByte ("8D");
             Image.WriteByte (tempAddressBytes[0]);
             Image.WriteByte (tempAddressBytes[1]);
@@ -71,6 +88,7 @@ namespace Illumi_CLI {
             foreach (var entry in StaticTemp.Rows) {
                 int counter = 0;
                 do {
+                    Image.BackPatch (entry, Image.GetCurrentAddress ());
                     Image.WriteByte ("SS");
                     counter++;
                 } while (counter < entry.Offset);

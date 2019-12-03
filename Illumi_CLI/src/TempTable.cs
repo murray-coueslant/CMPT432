@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 namespace Illumi_CLI {
     class TempTable {
         public List<TempTableEntry> Rows { get; set; }
@@ -39,14 +40,17 @@ namespace Illumi_CLI {
             Heap = heap;
         }
         public TempTableEntry GetTempTableEntry (string tempAddress) {
-            return Rows.Where (r => r.TempAddress == tempAddress).ToList ().FirstOrDefault ();
+            return Rows.Where (r => r.Address == tempAddress).ToList ().FirstOrDefault ();
+        }
+        public TempTableEntry GetTempTableEntry (string variableName, Scope variableScope) {
+            return Rows.Where (r => r.Var == variableName && r.Scope == variableScope.Level).ToList ().FirstOrDefault ();
         }
         public void NewStaticEntry (string var, string type, int scope) {
             Rows.Add (new TempTableEntry (NextTempAddress, var, type, scope));
             Rows.Last ().Offset = Offset;
             MostRecentEntry = Rows.Last ();
         }
-        public void NewHeapEntry (string data) {
+        public void NewHeapEntry (string var, int scope) {
             // todo work out the pointer logic for this and make it nice
         }
     }
