@@ -27,12 +27,8 @@ namespace Illumi_CLI {
 
         public string GetCurrentAddress () {
             int currentByte = (CurrentRow * 8) + CurrentCol;
-            string hexVal = currentByte.ToString ("X");
-            if (hexVal.Length == 2) {
-                return $"{hexVal} 00";
-            } else {
-                return $"0{hexVal} 00";
-            }
+            string hexVal = currentByte.ToString ("X2");
+            return $"{hexVal} 00";
         }
 
         public void BackPatch (TempTableEntry variable, string address) {

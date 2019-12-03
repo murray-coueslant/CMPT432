@@ -43,7 +43,7 @@ namespace Illumi_CLI {
                         HandleAssignment (node);
                         break;
                     case TokenKind.PrintToken:
-                        // HandlePrint(node);
+                        HandlePrint (node);
                         break;
                     default:
                         break;
@@ -94,14 +94,58 @@ namespace Illumi_CLI {
                     break;
             }
         }
+        public void HandlePrint (ASTNode node) {
+            switch (node.Descendants[0].Token.Kind) {
+                case TokenKind.IdentifierToken:
+                    HandlePrintIdentifier (node.Descendants[0]);
+                    break;
+                case TokenKind.AdditionToken:
+                case TokenKind.DigitToken:
+                    HandlePrintIntegerExpression (node.Descendants[0]);
+                    break;
+            }
+        }
+        public void HandlePrintIdentifier (ASTNode node) {
+            string[] tempAddressBytes = StaticTemp.GetTempTableEntry (node.Token.Text, node.Scope).Address.Split (" ");
+            Image.WriteByte ("AC");
+            Image.WriteByte (tempAddressBytes[0]);
+            Image.WriteByte (tempAddressBytes[1]);
+            Image.WriteByte ("A2");
+            Image.WriteByte ("01");
+            Image.WriteByte ("FF");
+        }
+        public void HandlePrintIntegerExpression (ASTNode node) {
+            int expressionValue = HandleIntegerExpression (node);
+            string hexValue = expressionValue.ToString ("X2");
+            Image.WriteByte ("A0");
+            Image.WriteByte (hexValue);
+            Image.WriteByte ("A2");
+            Image.WriteByte ("01");
+            Image.WriteByte ("FF");
+        }
         public void HandleInteger (ASTNode node, string[] tempAddressBytes) {
-            string value = $"0{node.Descendants[1].Token.Text}";
-            StaticTemp.GetTempTableEntry (node.Descendants[0].Token.Text, node.Scope).Value = value;
+            int value = HandleIntegerExpression (node.Descendants[1]);
+            StaticTemp.GetTempTableEntry (node.Descendants[0].Token.Text, node.Scope).Value = value.ToString ();
             Image.WriteByte ("A9");
-            Image.WriteByte (value);
+            Image.WriteByte (value.ToString ());
             Image.WriteByte ("8D");
             Image.WriteByte (tempAddressBytes[0]);
             Image.WriteByte (tempAddressBytes[1]);
+        }
+        public int HandleIntegerExpression (ASTNode node) {
+            int outInteger;
+            switch (node.Token.Kind) {
+                case TokenKind.DigitToken:
+                    int.TryParse (node.Token.Text, out outInteger);
+                    return outInteger;
+                case TokenKind.IdentifierToken:
+                    int.TryParse (StaticTemp.GetTempTableEntry (node.Token.Text, node.Scope).Value, out outInteger);
+                    return outInteger;
+                case TokenKind.AdditionToken:
+                    return HandleIntegerExpression (node.Descendants[0]) + HandleIntegerExpression (node.Descendants[1]);
+                default:
+                    return 0;
+            }
         }
         public void HandleBoolean (ASTNode node, string[] tempAddressBytes) {
             int boolVal = EvaluateBooleanSubtree (node.Descendants[1]);
