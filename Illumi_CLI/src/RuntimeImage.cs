@@ -1,3 +1,5 @@
+using System;
+using System.Globalization;
 using System.Reflection;
 namespace Illumi_CLI {
     class RuntimeImage {
@@ -8,6 +10,12 @@ namespace Illumi_CLI {
             CurrentRow = 0;
             CurrentCol = 0;
             Bytes = new string[32, 8];
+            Initialise ("00");
+        }
+        public void Initialise (string initialValue) {
+            for (int i = 0; i < Bytes.GetLength (1) * Bytes.GetLength (0); i++) {
+                Bytes[i / Bytes.GetLength (1), i % Bytes.GetLength (1)] = initialValue;
+            }
         }
 
         public void WriteByte (string newByte) {
@@ -23,6 +31,12 @@ namespace Illumi_CLI {
             } else {
                 CurrentCol++;
             }
+        }
+        public void WriteByte (string newByte, string address) {
+            int addressInteger = int.Parse (address, NumberStyles.HexNumber);
+            int addressRow = addressInteger / 8;
+            int addressCol = addressInteger % 8;
+            Bytes[addressRow, addressCol] = newByte;
         }
 
         public string GetCurrentAddress () {

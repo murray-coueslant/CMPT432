@@ -42,16 +42,14 @@ namespace Illumi_CLI {
         public TempTableEntry GetTempTableEntry (string tempAddress) {
             return Rows.Where (r => r.Address == tempAddress).ToList ().FirstOrDefault ();
         }
-        public TempTableEntry GetTempTableEntry (string variableName, Scope variableScope) {
-            return Rows.Where (r => r.Var == variableName && r.Scope == variableScope.Level).ToList ().FirstOrDefault ();
+        public TempTableEntry GetTempTableEntry (string variableName, int variableScope) {
+            return Rows.Where (r => r.Var == variableName && r.Scope == variableScope).ToList ().FirstOrDefault ();
         }
         public void NewStaticEntry (string var, string value, string type, int scope) {
             Rows.Add (new TempTableEntry (NextTempAddress, var, type, scope, value));
             Rows.Last ().Offset = Offset;
             MostRecentEntry = Rows.Last ();
         }
-        public void NewHeapEntry (string var, int scope) {
-            // todo work out the pointer logic for this and make it nice
-        }
+        public void NewHeapEntry (string var, int scope) { }
     }
 }

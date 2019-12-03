@@ -12,6 +12,8 @@ namespace Illumi_CLI {
         public RuntimeImage Image { get; set; }
         public TempTable StaticTemp { get; set; }
         public TempTable HeapTemp { get; set; }
+        public string TrueAddress { get; set; }
+        public string FalseAddress { get; set; }
         public CodeGenerator (SemanticAnalyser semanticAnalyser, DiagnosticCollection diagnostics, Session session) {
             SemanticAnalyser = semanticAnalyser;
             Diagnostics = diagnostics;
@@ -22,6 +24,7 @@ namespace Illumi_CLI {
             Image = new RuntimeImage ();
         }
         public void Generate () {
+            InsertConstants ();
             Traverse (SemanticAnalyser.AbstractSyntaxTree.Root, HandleSubtree);
             Image.WriteByte ("00");
             HandleStaticVariables ();
@@ -32,6 +35,23 @@ namespace Illumi_CLI {
                 }
                 Console.WriteLine ();
             }
+        }
+        public void InsertConstants () {
+            TrueAddress = "F5 00";
+            Image.WriteByte (char.ConvertToUtf32 ("t", 0).ToString ("X2"), "F5");
+            Image.WriteByte (char.ConvertToUtf32 ("r", 0).ToString ("X2"), "F6");
+            Image.WriteByte (char.ConvertToUtf32 ("u", 0).ToString ("X2"), "F7");
+            Image.WriteByte (char.ConvertToUtf32 ("e", 0).ToString ("X2"), "F8");
+            Image.WriteByte ("00", "F9");
+            StaticTemp.NewStaticEntry ("true", TrueAddress, "pointer", 0);
+            FalseAddress = "FA 00";
+            Image.WriteByte (char.ConvertToUtf32 ("f", 0).ToString ("X2"), "FA");
+            Image.WriteByte (char.ConvertToUtf32 ("a", 0).ToString ("X2"), "FB");
+            Image.WriteByte (char.ConvertToUtf32 ("l", 0).ToString ("X2"), "FC");
+            Image.WriteByte (char.ConvertToUtf32 ("s", 0).ToString ("X2"), "FD");
+            Image.WriteByte (char.ConvertToUtf32 ("e", 0).ToString ("X2"), "FE");
+            Image.WriteByte ("00", "FF");
+            StaticTemp.NewStaticEntry ("false", FalseAddress, "pointer", 0);
         }
         public void HandleSubtree (ASTNode node) {
             if (node.Visited == false) {
@@ -81,7 +101,7 @@ namespace Illumi_CLI {
         public void HandleAssignment (ASTNode node) {
             string variableName = node.Descendants[0].Token.Text;
             string type = node.Scope.Symbols[variableName].Type;
-            string[] tempAddressBytes = StaticTemp.GetTempTableEntry (variableName, node.Scope).Address.Split (" ");
+            string[] tempAddressBytes = StaticTemp.GetTempTableEntry (variableName, node.Scope.Level).Address.Split (" ");
             switch (type) {
                 case "int":
                     HandleInteger (node, tempAddressBytes);
@@ -103,10 +123,21 @@ namespace Illumi_CLI {
                 case TokenKind.DigitToken:
                     HandlePrintIntegerExpression (node.Descendants[0]);
                     break;
+                case TokenKind.TrueToken:
+                case TokenKind.FalseToken:
+                case TokenKind.EquivalenceToken:
+                case TokenKind.NotEqualToken:
+                    HandlePrintBoolean (node.Descendants[0]);
+                    break;
+                case TokenKind.StringToken:
+                    // todo again this will need some heap memory that will have to be allocated at the end of compile time
+                    // todo through backpatching
+                    // HandlePrintString();
+                    break;
             }
         }
         public void HandlePrintIdentifier (ASTNode node) {
-            string[] tempAddressBytes = StaticTemp.GetTempTableEntry (node.Token.Text, node.Scope).Address.Split (" ");
+            string[] tempAddressBytes = StaticTemp.GetTempTableEntry (node.Token.Text, node.Scope.Level).Address.Split (" ");
             Image.WriteByte ("AC");
             Image.WriteByte (tempAddressBytes[0]);
             Image.WriteByte (tempAddressBytes[1]);
@@ -123,11 +154,26 @@ namespace Illumi_CLI {
             Image.WriteByte ("01");
             Image.WriteByte ("FF");
         }
+        public void HandlePrintBoolean (ASTNode node) {
+            string[] valueAddress;
+            int booleanValue = EvaluateBooleanSubtree (node);
+            if (booleanValue == 1) {
+                valueAddress = StaticTemp.GetTempTableEntry ("true", 0).Address.Split (" ");
+            } else {
+                valueAddress = StaticTemp.GetTempTableEntry ("false", 0).Address.Split (" ");
+            }
+            Image.WriteByte ("AC");
+            Image.WriteByte (valueAddress[0]);
+            Image.WriteByte (valueAddress[1]);
+            Image.WriteByte ("A2");
+            Image.WriteByte ("02");
+            Image.WriteByte ("FF");
+        }
         public void HandleInteger (ASTNode node, string[] tempAddressBytes) {
             int value = HandleIntegerExpression (node.Descendants[1]);
-            StaticTemp.GetTempTableEntry (node.Descendants[0].Token.Text, node.Scope).Value = value.ToString ();
+            StaticTemp.GetTempTableEntry (node.Descendants[0].Token.Text, node.Scope.Level).Value = value.ToString ("X2");
             Image.WriteByte ("A9");
-            Image.WriteByte (value.ToString ());
+            Image.WriteByte (value.ToString ("X2"));
             Image.WriteByte ("8D");
             Image.WriteByte (tempAddressBytes[0]);
             Image.WriteByte (tempAddressBytes[1]);
@@ -139,7 +185,7 @@ namespace Illumi_CLI {
                     int.TryParse (node.Token.Text, out outInteger);
                     return outInteger;
                 case TokenKind.IdentifierToken:
-                    int.TryParse (StaticTemp.GetTempTableEntry (node.Token.Text, node.Scope).Value, out outInteger);
+                    int.TryParse (StaticTemp.GetTempTableEntry (node.Token.Text, node.Scope.Level).Value, out outInteger);
                     return outInteger;
                 case TokenKind.AdditionToken:
                     return HandleIntegerExpression (node.Descendants[0]) + HandleIntegerExpression (node.Descendants[1]);
@@ -149,7 +195,7 @@ namespace Illumi_CLI {
         }
         public void HandleBoolean (ASTNode node, string[] tempAddressBytes) {
             int boolVal = EvaluateBooleanSubtree (node.Descendants[1]);
-            StaticTemp.GetTempTableEntry (node.Descendants[0].Token.Text, node.Scope).Value = boolVal.ToString ();
+            StaticTemp.GetTempTableEntry (node.Descendants[0].Token.Text, node.Scope.Level).Value = boolVal.ToString ();
             Image.WriteByte ("A9");
             if (boolVal == 1) {
                 Image.WriteByte ("01");
@@ -203,9 +249,9 @@ namespace Illumi_CLI {
         public void HandleStaticVariables () {
             foreach (var entry in StaticTemp.Rows) {
                 int counter = 0;
+                Image.BackPatch (entry, Image.GetCurrentAddress ());
                 do {
-                    Image.BackPatch (entry, Image.GetCurrentAddress ());
-                    Image.WriteByte ("SS");
+                    Image.WriteByte (entry.Value.Split (" ") [counter]);
                     counter++;
                 } while (counter < entry.Offset);
             }
@@ -224,6 +270,15 @@ namespace Illumi_CLI {
 
             foreach (var descendant in root.Descendants) {
                 Traverse (descendant, visitor);
+            }
+        }
+        public void FillEmptyBytes () {
+            for (int i = 0; i < Image.Bytes.GetLength (0); i++) {
+                for (int j = 0; j < Image.Bytes.GetLength (1); j++) {
+                    if (Image.Bytes[i, j] == String.Empty) {
+                        Image.Bytes[i, j] = "00";
+                    }
+                }
             }
         }
     }
