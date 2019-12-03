@@ -14,6 +14,7 @@ namespace Illumi_CLI {
         public TempTable HeapTemp { get; set; }
         public string TrueAddress { get; set; }
         public string FalseAddress { get; set; }
+        public string AdditionAddress { get; set; }
         public CodeGenerator (SemanticAnalyser semanticAnalyser, DiagnosticCollection diagnostics, Session session) {
             SemanticAnalyser = semanticAnalyser;
             Diagnostics = diagnostics;
@@ -52,6 +53,8 @@ namespace Illumi_CLI {
             Image.WriteByte (char.ConvertToUtf32 ("e", 0).ToString ("X2"), "FE");
             Image.WriteByte ("00", "FF");
             StaticTemp.NewStaticEntry ("false", FalseAddress, "pointer", 0);
+            AdditionAddress = "F4 00";
+            StaticTemp.NewStaticEntry ("addition", AdditionAddress, "pointer", 0);
         }
         public void HandleSubtree (ASTNode node) {
             if (node.Visited == false) {
@@ -151,7 +154,7 @@ namespace Illumi_CLI {
             Image.WriteByte ("A0");
             Image.WriteByte (hexValue);
             Image.WriteByte ("A2");
-            Image.WriteByte ("01");
+            Image.WriteByte ("02");
             Image.WriteByte ("FF");
         }
         public void HandlePrintBoolean (ASTNode node) {
@@ -188,9 +191,29 @@ namespace Illumi_CLI {
                     int.TryParse (StaticTemp.GetTempTableEntry (node.Token.Text, node.Scope.Level).Value, out outInteger);
                     return outInteger;
                 case TokenKind.AdditionToken:
-                    return HandleIntegerExpression (node.Descendants[0]) + HandleIntegerExpression (node.Descendants[1]);
+                    HandleAddition (node);
+                    break;
                 default:
                     return 0;
+            }
+        }
+        public void HandleAddition (ASTNode node) {
+            switch (node.Descendants[0].Token.Kind) {
+                case TokenKind.DigitToken:
+                    string[] valueAddress = StaticTemp.GetTempTableEntry ("addition", 0).Address.Split (" ");
+                    Image.WriteByte ("A9");
+                    Image.WriteByte (node.Token.Text.ToString ("X2"));
+                    Image.WriteByte ("8D");
+                    Image.WriteByte (valueAddress[0]);
+                    Image.WriteByte (valueAddress[1]);
+                    break;
+                default:
+                    break;
+            }
+            switch (node.Descendants[1].Token.Kind) {
+                case TokenKind.AdditionToken:
+                    HandleAddition (node.Descendants[0]);
+                    break;
             }
         }
         public void HandleBoolean (ASTNode node, string[] tempAddressBytes) {

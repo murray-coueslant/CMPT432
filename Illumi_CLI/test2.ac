@@ -821,3 +821,12 @@ a = 4 + false
   }
   }
 }
+{
+   int a
+   a = 1 + 1
+   print(a)
+   print((a == a))
+   print(true)
+   print(false)
+   print((((true != true) == ((false != false) == true)) == false))
+}$
