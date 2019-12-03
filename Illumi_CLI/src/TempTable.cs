@@ -45,8 +45,8 @@ namespace Illumi_CLI {
         public TempTableEntry GetTempTableEntry (string variableName, Scope variableScope) {
             return Rows.Where (r => r.Var == variableName && r.Scope == variableScope.Level).ToList ().FirstOrDefault ();
         }
-        public void NewStaticEntry (string var, string type, int scope) {
-            Rows.Add (new TempTableEntry (NextTempAddress, var, type, scope));
+        public void NewStaticEntry (string var, string value, string type, int scope) {
+            Rows.Add (new TempTableEntry (NextTempAddress, var, type, scope, value));
             Rows.Last ().Offset = Offset;
             MostRecentEntry = Rows.Last ();
         }

@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
@@ -22,6 +23,7 @@ namespace Illumi_CLI {
         }
         public void Generate () {
             Traverse (SemanticAnalyser.AbstractSyntaxTree.Root, HandleSubtree);
+            Image.WriteByte ("00");
             HandleStaticVariables ();
             HandleHeapVariables ();
             for (int i = 0; i < Image.Bytes.GetLength (0); i++) {
@@ -39,6 +41,9 @@ namespace Illumi_CLI {
                         break;
                     case TokenKind.AssignmentToken:
                         HandleAssignment (node);
+                        break;
+                    case TokenKind.PrintToken:
+                        // HandlePrint(node);
                         break;
                     default:
                         break;
@@ -58,7 +63,7 @@ namespace Illumi_CLI {
             switch (varType) {
                 case "int":
                 case "boolean":
-                    StaticTemp.NewStaticEntry (varName, varType, varScope.Level);
+                    StaticTemp.NewStaticEntry (varName, "00", varType, varScope.Level);
                     tempAddressBytes = StaticTemp.MostRecentEntry.Address.Split (" ");
                     Image.WriteByte ("00");
                     break;
@@ -75,14 +80,81 @@ namespace Illumi_CLI {
         }
         public void HandleAssignment (ASTNode node) {
             string variableName = node.Descendants[0].Token.Text;
-            string value = $"0{node.Descendants[1].Token.Text}";
             string type = node.Scope.Symbols[variableName].Type;
             string[] tempAddressBytes = StaticTemp.GetTempTableEntry (variableName, node.Scope).Address.Split (" ");
+            switch (type) {
+                case "int":
+                    HandleInteger (node, tempAddressBytes);
+                    break;
+                case "boolean":
+                    HandleBoolean (node, tempAddressBytes);
+                    break;
+                case "string":
+                    //HandleString (tempAddressBytes);
+                    break;
+            }
+        }
+        public void HandleInteger (ASTNode node, string[] tempAddressBytes) {
+            string value = $"0{node.Descendants[1].Token.Text}";
+            StaticTemp.GetTempTableEntry (node.Descendants[0].Token.Text, node.Scope).Value = value;
             Image.WriteByte ("A9");
             Image.WriteByte (value);
             Image.WriteByte ("8D");
             Image.WriteByte (tempAddressBytes[0]);
             Image.WriteByte (tempAddressBytes[1]);
+        }
+        public void HandleBoolean (ASTNode node, string[] tempAddressBytes) {
+            int boolVal = EvaluateBooleanSubtree (node.Descendants[1]);
+            StaticTemp.GetTempTableEntry (node.Descendants[0].Token.Text, node.Scope).Value = boolVal.ToString ();
+            Image.WriteByte ("A9");
+            if (boolVal == 1) {
+                Image.WriteByte ("01");
+            } else {
+                Image.WriteByte ("00");
+            }
+            Image.WriteByte ("8D");
+            Image.WriteByte (tempAddressBytes[0]);
+            Image.WriteByte (tempAddressBytes[1]);
+        }
+        public int EvaluateBooleanSubtree (ASTNode node) {
+            if (node.Descendants.Count == 0) {
+                if (node.Token.Kind == TokenKind.TrueToken) {
+                    return 1;
+                } else if (node.Token.Kind == TokenKind.FalseToken) {
+                    return 0;
+                } else {
+                    return GetBoolVarValue (node.Token.Text, node.Scope);
+                }
+            } else {
+                if (node.Token.Kind == TokenKind.EquivalenceToken || node.Token.Kind == TokenKind.NotEqualToken) {
+                    if (node.Token.Kind == TokenKind.EquivalenceToken) {
+                        return HandleEquivalence (node);
+                    } else {
+                        return HandleNotEqual (node);
+                    }
+                } else {
+                    return 0;
+                }
+            }
+        }
+        public int HandleEquivalence (ASTNode node) {
+            if (EvaluateBooleanSubtree (node.Descendants[0]) == EvaluateBooleanSubtree (node.Descendants[1])) {
+                return 1;
+            } else {
+                return 0;
+            }
+        }
+        public int HandleNotEqual (ASTNode node) {
+            if (EvaluateBooleanSubtree (node.Descendants[0]) != EvaluateBooleanSubtree (node.Descendants[1])) {
+                return 1;
+            } else {
+                return 0;
+            }
+        }
+        public int GetBoolVarValue (string variableName, Scope variableScope) {
+            int outInteger;
+            int.TryParse (StaticTemp.Rows.Where (r => r.Scope == variableScope.Level && r.Var == variableName).ToList ().FirstOrDefault ().Value, out outInteger);
+            return outInteger;
         }
         public void HandleStaticVariables () {
             foreach (var entry in StaticTemp.Rows) {
