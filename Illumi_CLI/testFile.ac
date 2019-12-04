@@ -1,15 +1,7 @@
 {
-   {
-       int a
-       a = 7
-       print(a)
-       {
-           {
-               int a
-               a = 5
-               print(a)
-               print(7 + 3)
-           }
-       }
-   }
+    boolean a
+    a = true
+    print(a)
+    print(true)
+    print(false)
 }$

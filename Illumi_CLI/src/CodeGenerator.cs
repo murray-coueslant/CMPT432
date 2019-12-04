@@ -144,16 +144,25 @@ namespace Illumi_CLI {
             }
         }
         public void HandlePrintIdentifier (ASTNode node) {
-            string[] tempAddressBytes = StaticTemp.GetTempTableEntry (node.Token.Text, node.ReferenceScope).Address.Split (" ");
-            Image.WriteByte ("AC");
-            Image.WriteByte (tempAddressBytes[0]);
-            Image.WriteByte (tempAddressBytes[1]);
-            Image.WriteByte ("A2");
-            Image.WriteByte ("01");
-            Image.WriteByte ("FF");
+            TempTableEntry staticEntry = StaticTemp.GetTempTableEntry (node.Token.Text, node.ReferenceScope);
+            string variableType = staticEntry.Type;
+            string[] tempAddressBytes = staticEntry.Address.Split (" ");
+            switch (variableType) {
+                case "int":
+                    Image.WriteByte ("AC");
+                    Image.WriteByte (tempAddressBytes[0]);
+                    Image.WriteByte (tempAddressBytes[1]);
+                    Image.WriteByte ("A2");
+                    Image.WriteByte ("01");
+                    Image.WriteByte ("FF");
+                    break;
+                case "boolean":
+                    HandlePrintBoolean (EvaluateBooleanSubtree (node));
+                    break;
+            }
+
         }
         public void HandlePrintIntegerExpression (ASTNode node) {
-            // todo integer expressions are fundamentally broken for now...
             int expressionValue = HandleIntegerExpression (node);
             if (expressionValue != -1) {
                 string hexValue = expressionValue.ToString ("X2");
@@ -175,6 +184,20 @@ namespace Illumi_CLI {
         public void HandlePrintBoolean (ASTNode node) {
             string[] valueAddress;
             int booleanValue = EvaluateBooleanSubtree (node);
+            if (booleanValue == 1) {
+                valueAddress = StaticTemp.GetTempTableEntry ("true", 0).Address.Split (" ");
+            } else {
+                valueAddress = StaticTemp.GetTempTableEntry ("false", 0).Address.Split (" ");
+            }
+            Image.WriteByte ("AC");
+            Image.WriteByte (valueAddress[0]);
+            Image.WriteByte (valueAddress[1]);
+            Image.WriteByte ("A2");
+            Image.WriteByte ("02");
+            Image.WriteByte ("FF");
+        }
+        public void HandlePrintBoolean (int booleanValue) {
+            string[] valueAddress;
             if (booleanValue == 1) {
                 valueAddress = StaticTemp.GetTempTableEntry ("true", 0).Address.Split (" ");
             } else {
@@ -249,7 +272,7 @@ namespace Illumi_CLI {
         }
         public void HandleBooleanAssignment (ASTNode node, int variableScope, string[] tempAddressBytes) {
             int boolVal = EvaluateBooleanSubtree (node.Descendants[1]);
-            StaticTemp.GetTempTableEntry (node.Descendants[0].Token.Text, variableScope).Value = boolVal.ToString ();
+            StaticTemp.GetTempTableEntry (node.Descendants[0].Token.Text, variableScope).Value = boolVal.ToString ("X2");
             Image.WriteByte ("A9");
             if (boolVal == 1) {
                 Image.WriteByte ("01");
