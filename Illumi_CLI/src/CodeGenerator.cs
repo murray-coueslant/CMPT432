@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Microsoft.Win32.SafeHandles;
 namespace Illumi_CLI {
     class CodeGenerator {
         public DiagnosticCollection Diagnostics { get; set; }
@@ -28,6 +29,9 @@ namespace Illumi_CLI {
             Traverse (SemanticAnalyser.AbstractSyntaxTree.Root, HandleSubtree);
             Image.WriteByte ("00");
             HandleStaticVariables ();
+            DisplayRuntimeImage ();
+        }
+        public void DisplayRuntimeImage () {
             for (int i = 0; i < Image.Bytes.GetLength (0); i++) {
                 for (int j = 0; j < Image.Bytes.GetLength (1); j++) {
                     Console.Write (Image.Bytes[i, j] + " ");
@@ -78,7 +82,7 @@ namespace Illumi_CLI {
             Image.WriteByte ("A9");
             string varType = node.Descendants[0].Token.Text;
             string varName = node.Descendants[1].Token.Text;
-            Scope varScope = node.Descendants[1].Scope;
+            int varScope = SemanticAnalyser.VariableChecker.FindSymbol (node.Descendants[1], node.AppearsInScope);
             node.Visited = true;
             node.Descendants[0].Visited = true;
             node.Descendants[1].Visited = true;
@@ -86,8 +90,8 @@ namespace Illumi_CLI {
             switch (varType) {
                 case "int":
                 case "boolean":
-                    StaticTemp.NewStaticEntry (varName, "00", varType, varScope.Level);
-                    tempAddressBytes = StaticTemp.MostRecentEntry.Address.Split (" ");
+                    StaticTemp.NewStaticEntry (varName, "00", varType, varScope);
+                    tempAddressBytes = StaticTemp.GetTempTableEntry (varName, varScope).Address.Split (" ");
                     Image.WriteByte ("00");
                     break;
                 default:
@@ -100,14 +104,16 @@ namespace Illumi_CLI {
         }
         public void HandleAssignment (ASTNode node) {
             string variableName = node.Descendants[0].Token.Text;
-            string type = node.Scope.Symbols[variableName].Type;
-            string[] tempAddressBytes = StaticTemp.GetTempTableEntry (variableName, node.Scope.Level).Address.Split (" ");
+            int variableScope = SemanticAnalyser.VariableChecker.FindSymbol (node.Descendants[0], node.AppearsInScope);
+            TempTableEntry variableTemp = StaticTemp.GetTempTableEntry (variableName, variableScope);
+            string type = variableTemp.Type;
+            string[] tempAddressBytes = variableTemp.Address.Split (" ");
             switch (type) {
                 case "int":
-                    HandleInteger (node, tempAddressBytes);
+                    HandleIntegerAssignment (node, variableScope, tempAddressBytes);
                     break;
                 case "boolean":
-                    HandleBoolean (node, tempAddressBytes);
+                    HandleBooleanAssignment (node, variableScope, tempAddressBytes);
                     break;
                 case "string":
                     //HandleString (tempAddressBytes);
@@ -132,13 +138,13 @@ namespace Illumi_CLI {
                     // case TokenKind.If
                 case TokenKind.StringToken:
                     // todo again this will need some heap memory that will have to be allocated at the end of compile time
-                    // todo through backpatching
+                    // todo whilst backpatching
                     // HandlePrintString();
                     break;
             }
         }
         public void HandlePrintIdentifier (ASTNode node) {
-            string[] tempAddressBytes = StaticTemp.GetTempTableEntry (node.Token.Text, node.Scope.Level).Address.Split (" ");
+            string[] tempAddressBytes = StaticTemp.GetTempTableEntry (node.Token.Text, node.ReferenceScope).Address.Split (" ");
             Image.WriteByte ("AC");
             Image.WriteByte (tempAddressBytes[0]);
             Image.WriteByte (tempAddressBytes[1]);
@@ -155,6 +161,14 @@ namespace Illumi_CLI {
                 Image.WriteByte (hexValue);
                 Image.WriteByte ("A2");
                 Image.WriteByte ("02");
+                Image.WriteByte ("FF");
+            } else if (expressionValue == -1) {
+                string[] splitAddress = AdditionAddress.Split (" ");
+                Image.WriteByte ("AC");
+                Image.WriteByte (splitAddress[0]);
+                Image.WriteByte (splitAddress[1]);
+                Image.WriteByte ("A2");
+                Image.WriteByte ("01");
                 Image.WriteByte ("FF");
             }
         }
@@ -173,10 +187,10 @@ namespace Illumi_CLI {
             Image.WriteByte ("02");
             Image.WriteByte ("FF");
         }
-        public void HandleInteger (ASTNode node, string[] tempAddressBytes) {
+        public void HandleIntegerAssignment (ASTNode node, int variableScope, string[] tempAddressBytes) {
             int value = HandleIntegerExpression (node.Descendants[1]);
             if (value != -1) {
-                StaticTemp.GetTempTableEntry (node.Descendants[0].Token.Text, node.Scope.Level).Value = value.ToString ("X2");
+                StaticTemp.GetTempTableEntry (node.Descendants[0].Token.Text, variableScope).Value = value.ToString ("X2");
                 Image.WriteByte ("A9");
                 Image.WriteByte (value.ToString ("X2"));
                 Image.WriteByte ("8D");
@@ -191,13 +205,13 @@ namespace Illumi_CLI {
                     int.TryParse (node.Token.Text, out outInteger);
                     return outInteger;
                 case TokenKind.IdentifierToken:
-                    int.TryParse (StaticTemp.GetTempTableEntry (node.Token.Text, node.Scope.Level).Value, out outInteger);
+                    int.TryParse (StaticTemp.GetTempTableEntry (node.Token.Text, node.ReferenceScope).Value, out outInteger);
                     return outInteger;
                 case TokenKind.AdditionToken:
                     HandleAddition (node);
                     return -1;
                 default:
-                    return -1;
+                    return -2;
             }
         }
         public void HandleAddition (ASTNode node) {
@@ -228,14 +242,14 @@ namespace Illumi_CLI {
                     AdditionTreeStream.Add (int.Parse (node.Token.Text));
                     break;
                 case TokenKind.IdentifierToken:
-                    string value = StaticTemp.GetTempTableEntry (node.Token.Text, node.Scope.Level).Value;
+                    string value = StaticTemp.GetTempTableEntry (node.Token.Text, node.ReferenceScope).Value;
                     AdditionTreeStream.Add (int.Parse (value));
                     break;
             }
         }
-        public void HandleBoolean (ASTNode node, string[] tempAddressBytes) {
+        public void HandleBooleanAssignment (ASTNode node, int variableScope, string[] tempAddressBytes) {
             int boolVal = EvaluateBooleanSubtree (node.Descendants[1]);
-            StaticTemp.GetTempTableEntry (node.Descendants[0].Token.Text, node.Scope.Level).Value = boolVal.ToString ();
+            StaticTemp.GetTempTableEntry (node.Descendants[0].Token.Text, variableScope).Value = boolVal.ToString ();
             Image.WriteByte ("A9");
             if (boolVal == 1) {
                 Image.WriteByte ("01");
@@ -253,7 +267,7 @@ namespace Illumi_CLI {
                 } else if (node.Token.Kind == TokenKind.FalseToken) {
                     return 0;
                 } else {
-                    return GetBoolVarValue (node.Token.Text, node.Scope);
+                    return GetBoolVarValue (node.Token.Text, node.AppearsInScope);
                 }
             } else {
                 if (node.Token.Kind == TokenKind.EquivalenceToken || node.Token.Kind == TokenKind.NotEqualToken) {
@@ -288,12 +302,12 @@ namespace Illumi_CLI {
         }
         public void HandleStaticVariables () {
             foreach (var entry in StaticTemp.Rows) {
-                int counter = 0;
+                // int counter = 0;
                 Image.BackPatch (entry, Image.GetCurrentAddress ());
-                do {
-                    Image.WriteByte (entry.Value.Split (" ") [counter]);
-                    counter++;
-                } while (counter < entry.Offset);
+                // do {
+                //     Image.WriteByte (entry.Value.Split (" ") [counter]);
+                //     counter++;
+                // } while (counter < entry.Offset);
             }
         }
         public void Traverse (ASTNode root, Action<ASTNode> visitor) {

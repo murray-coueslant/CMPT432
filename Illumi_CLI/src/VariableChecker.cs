@@ -23,6 +23,7 @@ namespace Illumi_CLI {
         }
 
         public void CheckASTScopeAndType (ASTNode node) {
+            node.AppearsInScope = Symbols.CurrentScope;
             switch (node.Token.Kind) {
                 case TokenKind.Block:
                     Symbols.NewScope ();
@@ -31,9 +32,12 @@ namespace Illumi_CLI {
                     if (node.Parent.Token.Kind == TokenKind.VarDecl) {
                         Symbols.AddSymbol (node, node.Parent.Descendants[0].Token.Text);
                     } else {
-                        if (!FindSymbol (node, Symbols.CurrentScope)) {
+                        int symbolScope = FindSymbol (node, Symbols.CurrentScope);
+                        if (symbolScope == -1) {
                             Symbols.Diagnostics.Semantic_ReportUndeclaredIdentifier (node.Token, Symbols.CurrentScope.Level);
                             return;
+                        } else {
+                            node.ReferenceScope = symbolScope;
                         }
                     }
                     break;
@@ -44,9 +48,8 @@ namespace Illumi_CLI {
                     TypeChecker.CheckTypes (node);
                     break;
             }
-            node.Scope = Symbols.CurrentScope;
         }
-        public bool FindSymbol (ASTNode node, Scope searchScope) {
+        public int FindSymbol (ASTNode node, Scope searchScope) {
             if (searchScope.Symbols.ContainsKey (node.Token.Text)) {
                 Symbols.Diagnostics.Semantic_ReportFoundSymbol (node.Token.Text, searchScope);
                 if (node.Parent.Token.Kind == TokenKind.AssignmentToken) {
@@ -54,13 +57,13 @@ namespace Illumi_CLI {
                 } else {
                     searchScope.Symbols[node.Token.Text].Used = true;
                 }
-                return true;
+                return searchScope.Level;
             } else {
                 if (searchScope.ParentScope != null) {
                     Symbols.Diagnostics.Semantic_ReportSymbolNotFound (node.Token.Text, searchScope);
                     return FindSymbol (node, searchScope.ParentScope);
                 }
-                return false;
+                return -1;
             }
         }
 

@@ -1,6 +1,15 @@
 {
-   int a
-   if(a == 0){
+   {
+       int a
+       a = 7
        print(a)
+       {
+           {
+               int a
+               a = 5
+               print(a)
+               print(7 + 3)
+           }
+       }
    }
 }$

@@ -20,6 +20,8 @@ namespace Illumi_CLI {
         public AbstractSyntaxTree AbstractSyntaxTree { get; set; }
         public SymbolTable Symbols { get; set; }
         public bool Failed { get; set; }
+        public VariableChecker VariableChecker { get; set; }
+
         public SemanticAnalyser (Parser parser, Session currentSession, DiagnosticCollection diagnostics) {
             Parser = parser;
             ConcreteSyntaxTree = parser.Tree;
@@ -38,6 +40,7 @@ namespace Illumi_CLI {
                 if (Diagnostics.ErrorCount == 0) {
                     Diagnostics.Semantic_ReportDisplayingAST ();
                     AbstractSyntaxTree.PrintTree (AbstractSyntaxTree.Root);
+                    VariableChecker = new VariableChecker (AbstractSyntaxTree, Symbols);
                     ScopeAndTypeCheck ();
                 }
             }
@@ -59,11 +62,9 @@ namespace Illumi_CLI {
             return tree;
         }
         public void ScopeAndTypeCheck () {
-            VariableChecker variableChecker = new VariableChecker (AbstractSyntaxTree, Symbols);
-
             Diagnostics.Semantic_ReportCheckingScope ();
-            variableChecker.CheckVariables ();
-            if (variableChecker.Passed) {
+            VariableChecker.CheckVariables ();
+            if (VariableChecker.Passed) {
                 Diagnostics.Semantic_ReportDisplayingSymbolTables ();
                 Symbols.DisplaySymbolTables (Symbols.RootScope);
             }

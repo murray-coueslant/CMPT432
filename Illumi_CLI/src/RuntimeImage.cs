@@ -1,5 +1,6 @@
 using System;
 using System.Globalization;
+using System.Net.Mime;
 using System.Reflection;
 namespace Illumi_CLI {
     class RuntimeImage {
@@ -63,6 +64,11 @@ namespace Illumi_CLI {
                         }
                     }
                 }
+            }
+            // handle inserting the value of the variable into the stack once backpatching has been performed
+            string[] splitValue = variable.Value.Split (" ");
+            for (int i = 0; i < splitValue.Length; i++) {
+                this.WriteByte (splitValue[i]);
             }
             variable.BackPatch (address);
         }
