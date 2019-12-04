@@ -10,7 +10,6 @@ namespace Illumi_CLI {
         public StringBuilder CodeString { get; set; }
         public RuntimeImage Image { get; set; }
         public TempTable StaticTemp { get; set; }
-        public TempTable HeapTemp { get; set; }
         public string TrueAddress { get; set; }
         public string FalseAddress { get; set; }
         public string AdditionAddress { get; set; }
@@ -22,7 +21,6 @@ namespace Illumi_CLI {
             CurrentSession = session;
             CodeString = new StringBuilder ();
             StaticTemp = new TempTable ();
-            HeapTemp = new TempTable (null, true);
             Image = new RuntimeImage ();
         }
         public void Generate () {
@@ -30,7 +28,6 @@ namespace Illumi_CLI {
             Traverse (SemanticAnalyser.AbstractSyntaxTree.Root, HandleSubtree);
             Image.WriteByte ("00");
             HandleStaticVariables ();
-            HandleHeapVariables ();
             for (int i = 0; i < Image.Bytes.GetLength (0); i++) {
                 for (int j = 0; j < Image.Bytes.GetLength (1); j++) {
                     Console.Write (Image.Bytes[i, j] + " ");
@@ -95,9 +92,6 @@ namespace Illumi_CLI {
                     break;
                 default:
                     // todo work out logic for adding strings to the heap and their pointers to the temp table
-                    HeapTemp.NewHeapEntry (varName, varScope.Level);
-                    // tempAddressBytes = HeapTemp.MostRecentEntry.TempAddress.Split (" ");
-                    // Image.WriteByte ();
                     break;
             }
             Image.WriteByte ("8D");
@@ -135,6 +129,7 @@ namespace Illumi_CLI {
                 case TokenKind.NotEqualToken:
                     HandlePrintBoolean (node.Descendants[0]);
                     break;
+                    // case TokenKind.If
                 case TokenKind.StringToken:
                     // todo again this will need some heap memory that will have to be allocated at the end of compile time
                     // todo through backpatching
@@ -152,13 +147,16 @@ namespace Illumi_CLI {
             Image.WriteByte ("FF");
         }
         public void HandlePrintIntegerExpression (ASTNode node) {
+            // todo integer expressions are fundamentally broken for now...
             int expressionValue = HandleIntegerExpression (node);
-            string hexValue = expressionValue.ToString ("X2");
-            Image.WriteByte ("A0");
-            Image.WriteByte (hexValue);
-            Image.WriteByte ("A2");
-            Image.WriteByte ("02");
-            Image.WriteByte ("FF");
+            if (expressionValue != -1) {
+                string hexValue = expressionValue.ToString ("X2");
+                Image.WriteByte ("A0");
+                Image.WriteByte (hexValue);
+                Image.WriteByte ("A2");
+                Image.WriteByte ("02");
+                Image.WriteByte ("FF");
+            }
         }
         public void HandlePrintBoolean (ASTNode node) {
             string[] valueAddress;
@@ -294,15 +292,6 @@ namespace Illumi_CLI {
                 Image.BackPatch (entry, Image.GetCurrentAddress ());
                 do {
                     Image.WriteByte (entry.Value.Split (" ") [counter]);
-                    counter++;
-                } while (counter < entry.Offset);
-            }
-        }
-        public void HandleHeapVariables () {
-            foreach (var entry in HeapTemp.Rows) {
-                int counter = 0;
-                do {
-                    Image.WriteByte ("HH");
                     counter++;
                 } while (counter < entry.Offset);
             }

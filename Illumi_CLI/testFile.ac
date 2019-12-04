@@ -1,5 +1,6 @@
 {
    int a
-   a = 9 + 9 + 9 + 9
-   print(a)
+   if(a == 0){
+       print(a)
+   }
 }$
