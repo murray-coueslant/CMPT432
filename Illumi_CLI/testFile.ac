@@ -1,7 +1,5 @@
 {
-    boolean a
-    a = true
+    string a
+    a = "test"
     print(a)
-    print(true)
-    print(false)
 }$

@@ -40,24 +40,17 @@ namespace Illumi_CLI {
             }
         }
         public void InsertConstants () {
-            TrueAddress = "F5 00";
-            Image.WriteByte (char.ConvertToUtf32 ("t", 0).ToString ("X2"), "F5");
-            Image.WriteByte (char.ConvertToUtf32 ("r", 0).ToString ("X2"), "F6");
-            Image.WriteByte (char.ConvertToUtf32 ("u", 0).ToString ("X2"), "F7");
-            Image.WriteByte (char.ConvertToUtf32 ("e", 0).ToString ("X2"), "F8");
-            Image.WriteByte ("00", "F9");
+            InsertStringInHeap ("true");
+            TrueAddress = Image.GetLastHeapAddress ();
             StaticTemp.NewStaticEntry ("true", TrueAddress, "pointer", 0);
-            FalseAddress = "FA 00";
-            Image.WriteByte (char.ConvertToUtf32 ("f", 0).ToString ("X2"), "FA");
-            Image.WriteByte (char.ConvertToUtf32 ("a", 0).ToString ("X2"), "FB");
-            Image.WriteByte (char.ConvertToUtf32 ("l", 0).ToString ("X2"), "FC");
-            Image.WriteByte (char.ConvertToUtf32 ("s", 0).ToString ("X2"), "FD");
-            Image.WriteByte (char.ConvertToUtf32 ("e", 0).ToString ("X2"), "FE");
-            Image.WriteByte ("00", "FF");
+            InsertStringInHeap ("false");
+            FalseAddress = Image.GetLastHeapAddress ();
             StaticTemp.NewStaticEntry ("false", FalseAddress, "pointer", 0);
-            AdditionAddress = "F4 00";
+            Image.AllocateBytesInHeap (1);
+            AdditionAddress = Image.GetLastHeapAddress ();
             StaticTemp.NewStaticEntry ("addition", AdditionAddress, "pointer", 0);
-            TermAddress = "F3 00";
+            Image.AllocateBytesInHeap (1);
+            TermAddress = Image.GetLastHeapAddress ();
             StaticTemp.NewStaticEntry ("term", TermAddress, "pointer", 0);
         }
         public void HandleSubtree (ASTNode node) {
@@ -94,6 +87,11 @@ namespace Illumi_CLI {
                     tempAddressBytes = StaticTemp.GetTempTableEntry (varName, varScope).Address.Split (" ");
                     Image.WriteByte ("00");
                     break;
+                case "string":
+                    StaticTemp.NewStaticEntry (varName, "00", varType, varScope);
+                    tempAddressBytes = StaticTemp.GetTempTableEntry (varName, varScope).Address.Split (" ");
+                    Image.WriteByte ("00");
+                    break;
                 default:
                     // todo work out logic for adding strings to the heap and their pointers to the temp table
                     break;
@@ -116,7 +114,7 @@ namespace Illumi_CLI {
                     HandleBooleanAssignment (node, variableScope, tempAddressBytes);
                     break;
                 case "string":
-                    //HandleString (tempAddressBytes);
+                    HandleStringAssignment (node, variableScope, tempAddressBytes);
                     break;
             }
         }
@@ -135,11 +133,10 @@ namespace Illumi_CLI {
                 case TokenKind.NotEqualToken:
                     HandlePrintBoolean (node.Descendants[0]);
                     break;
-                    // case TokenKind.If
                 case TokenKind.StringToken:
                     // todo again this will need some heap memory that will have to be allocated at the end of compile time
                     // todo whilst backpatching
-                    // HandlePrintString();
+                    HandlePrintString (node.Descendants[0]);
                     break;
             }
         }
@@ -158,6 +155,9 @@ namespace Illumi_CLI {
                     break;
                 case "boolean":
                     HandlePrintBoolean (EvaluateBooleanSubtree (node));
+                    break;
+                case "string":
+                    HandlePrintString (node);
                     break;
             }
 
@@ -210,6 +210,40 @@ namespace Illumi_CLI {
             Image.WriteByte ("02");
             Image.WriteByte ("FF");
         }
+        public void HandlePrintString (ASTNode node) {
+            switch (node.Token.Kind) {
+                case TokenKind.IdentifierToken:
+                    string[] valueAddress = StaticTemp.GetTempTableEntry (node.Token.Text, node.ReferenceScope).Address.Split (" ");
+                    Image.WriteByte ("AC");
+                    Image.WriteByte (valueAddress[0]);
+                    Image.WriteByte (valueAddress[1]);
+                    Image.WriteByte ("A2");
+                    Image.WriteByte ("02");
+                    Image.WriteByte ("FF");
+                    break;
+                case TokenKind.StringToken:
+                    InsertStringInHeap (node.Token.Text);
+                    string[] stringAddress = Image.GetLastHeapAddress ().Split (" ");
+                    Image.WriteByte ("AC");
+                    Image.WriteByte (stringAddress[0]);
+                    Image.WriteByte (stringAddress[1]);
+                    Image.WriteByte ("A2");
+                    Image.WriteByte ("02");
+                    Image.WriteByte ("FF");
+                    break;
+                default:
+                    break;
+            }
+        }
+        public void HandlePrintString (string startAddress) {
+            string[] splitAddress = startAddress.Split (" ");
+            Image.WriteByte ("AC");
+            Image.WriteByte (splitAddress[0]);
+            Image.WriteByte (splitAddress[1]);
+            Image.WriteByte ("A2");
+            Image.WriteByte ("02");
+            Image.WriteByte ("FF");
+        }
         public void HandleIntegerAssignment (ASTNode node, int variableScope, string[] tempAddressBytes) {
             int value = HandleIntegerExpression (node.Descendants[1]);
             if (value != -1) {
@@ -219,7 +253,41 @@ namespace Illumi_CLI {
                 Image.WriteByte ("8D");
                 Image.WriteByte (tempAddressBytes[0]);
                 Image.WriteByte (tempAddressBytes[1]);
+            } else if (value == -1) {
+                string[] splitAdditionAddress = AdditionAddress.Split (" ");
+                Image.WriteByte ("AD");
+                Image.WriteByte (splitAdditionAddress[0]);
+                Image.WriteByte (splitAdditionAddress[1]);
+                Image.WriteByte ("8D");
+                Image.WriteByte (tempAddressBytes[0]);
+                Image.WriteByte (tempAddressBytes[1]);
+                ResetAdditionMemory ();
             }
+        }
+        public void HandleStringAssignment (ASTNode node, int variableScope, string[] tempAddressBytes) {
+            // write string in heap
+            // store heap address in temp pointer position
+            InsertStringInHeap (node.Descendants[1].Token.Text);
+            StaticTemp.GetTempTableEntry (tempAddressBytes[0] + " " + tempAddressBytes[1]).Value = Image.GetLastHeapAddress ();
+            Image.WriteByte ("A9");
+            Image.WriteByte (StaticTemp.GetTempTableEntry (tempAddressBytes[0] + " " + tempAddressBytes[1]).Value.Split (" ") [0]);
+            Image.WriteByte ("8D");
+            Image.WriteByte (tempAddressBytes[0]);
+            Image.WriteByte (tempAddressBytes[1]);
+        }
+        public void ResetAdditionMemory () {
+            string[] splitAdditionAddress = AdditionAddress.Split (" ");
+            string[] splitTermAddress = TermAddress.Split (" ");
+            Image.WriteByte ("A9");
+            Image.WriteByte ("00");
+            Image.WriteByte ("8D");
+            Image.WriteByte (splitAdditionAddress[0]);
+            Image.WriteByte (splitAdditionAddress[1]);
+            Image.WriteByte ("A9");
+            Image.WriteByte ("00");
+            Image.WriteByte ("8D");
+            Image.WriteByte (splitTermAddress[0]);
+            Image.WriteByte (splitTermAddress[1]);
         }
         public int HandleIntegerExpression (ASTNode node) {
             int outInteger;
@@ -289,8 +357,12 @@ namespace Illumi_CLI {
                     return 1;
                 } else if (node.Token.Kind == TokenKind.FalseToken) {
                     return 0;
+                } else if (node.Token.Kind == TokenKind.IdentifierToken) {
+                    return GetBoolVarValue (node, node.AppearsInScope);
+                } else if (node.Token.Kind == TokenKind.DigitToken) {
+                    return int.Parse (node.Token.Text);
                 } else {
-                    return GetBoolVarValue (node.Token.Text, node.AppearsInScope);
+                    return 0;
                 }
             } else {
                 if (node.Token.Kind == TokenKind.EquivalenceToken || node.Token.Kind == TokenKind.NotEqualToken) {
@@ -318,19 +390,15 @@ namespace Illumi_CLI {
                 return 0;
             }
         }
-        public int GetBoolVarValue (string variableName, Scope variableScope) {
+        public int GetBoolVarValue (ASTNode variableNode, Scope variableScope) {
             int outInteger;
-            int.TryParse (StaticTemp.Rows.Where (r => r.Scope == variableScope.Level && r.Var == variableName).ToList ().FirstOrDefault ().Value, out outInteger);
+            int varScope = SemanticAnalyser.VariableChecker.FindSymbol (variableNode, variableScope);
+            int.TryParse (StaticTemp.GetTempTableEntry (variableNode.Token.Text, varScope).Value, out outInteger);
             return outInteger;
         }
         public void HandleStaticVariables () {
             foreach (var entry in StaticTemp.Rows) {
-                // int counter = 0;
                 Image.BackPatch (entry, Image.GetCurrentAddress ());
-                // do {
-                //     Image.WriteByte (entry.Value.Split (" ") [counter]);
-                //     counter++;
-                // } while (counter < entry.Offset);
             }
         }
         public void Traverse (ASTNode root, Action<ASTNode> visitor) {
@@ -347,6 +415,12 @@ namespace Illumi_CLI {
                         Image.Bytes[i, j] = "00";
                     }
                 }
+            }
+        }
+        public void InsertStringInHeap (string value) {
+            Image.WriteHeapByte ("00");
+            foreach (char c in value.Reverse ()) {
+                Image.WriteHeapByte (char.ConvertToUtf32 (c.ToString (), 0).ToString ("X2"));
             }
         }
     }

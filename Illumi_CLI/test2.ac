@@ -851,3 +851,15 @@ a = 4 + false
        }
    }
 }$
+{
+    boolean a
+    a = true
+    boolean b
+    b = true
+    print(a == b)
+}$
+{
+    string a
+    a = "test"
+    print(a)
+}$

@@ -189,39 +189,45 @@ namespace Illumi_CLI {
 
                             foreach (CodeGenerator cG in codeGenerators) {
                                 mainDiagnostics.Lexer_ReportLexStart (programCounter);
+
                                 LexProgram (cG.SemanticAnalyser.Parser.Lexer, currentSession);
+
+                                Console.WriteLine ();
+
                                 if (mainDiagnostics.ErrorCount > 0) {
                                     cG.SemanticAnalyser.Parser.Lexer.Failed = true;
                                 }
-                                mainDiagnostics.Lexer_ReportLexEnd (programCounter);
-
-                                Console.WriteLine ();
 
                                 if (mainDiagnostics.ErrorCount > 0 || cG.SemanticAnalyser.Parser.Lexer.Failed) {
                                     mainDiagnostics.Parser_EncounteredLexError ();
                                     cG.SemanticAnalyser.Parser.Failed = true;
+                                    break;
                                 } else {
+                                    mainDiagnostics.Lexer_ReportLexEnd (programCounter);
                                     mainDiagnostics.Parser_ReportStartOfParse (programCounter);
                                     ParseProgram (cG.SemanticAnalyser.Parser, currentSession);
-                                    mainDiagnostics.Parser_ReportEndOfParse (programCounter);
                                 }
 
                                 Console.WriteLine ();
 
                                 if (mainDiagnostics.ErrorCount > 0 || cG.SemanticAnalyser.Parser.Failed) {
                                     mainDiagnostics.Semantic_EncounteredParseError ();
+                                    cG.SemanticAnalyser.Failed = true;
+                                    break;
                                 } else {
+                                    mainDiagnostics.Parser_ReportEndOfParse (programCounter);
                                     mainDiagnostics.Semantic_ReportStartOfSemantic (programCounter);
                                     SemanticProgram (cG.SemanticAnalyser);
-                                    mainDiagnostics.Semantic_ReportEndOfSemantic (programCounter);
                                 }
 
                                 if (mainDiagnostics.ErrorCount > 0 || cG.SemanticAnalyser.Failed) {
-                                    // todo mainDiagnostics.CodeGen_EncounteredSemanticError();
+                                    mainDiagnostics.CodeGen_EncounteredSemanticError ();
+                                    break;
                                 } else {
-                                    // todo mainDiagnostics.CodeGen_ReportStartOfCodeGen();
+                                    mainDiagnostics.Semantic_ReportEndOfSemantic (programCounter);
+                                    mainDiagnostics.CodeGen_ReportStartOfCodeGen (programCounter);
                                     CodeGen (cG);
-                                    // todo mainDiagnostics.CodeGen_ReportEndOfCodeGen();
+                                    mainDiagnostics.CodeGen_ReportEndOfCodeGen (programCounter);
                                 }
 
                                 Console.WriteLine ();

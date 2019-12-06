@@ -7,9 +7,15 @@ namespace Illumi_CLI {
         public string[, ] Bytes { get; set; }
         int CurrentRow { get; set; }
         int CurrentCol { get; set; }
+        int HeapRow { get; set; }
+        int HeapCol { get; set; }
+        int PrevHeapRow { get; set; }
+        int PrevHeapCol { get; set; }
         public RuntimeImage () {
             CurrentRow = 0;
             CurrentCol = 0;
+            HeapRow = 31;
+            HeapCol = 7;
             Bytes = new string[32, 8];
             Initialise ("00");
         }
@@ -21,6 +27,40 @@ namespace Illumi_CLI {
 
         public void WriteByte (string newByte) {
             Bytes[CurrentRow, CurrentCol] = newByte;
+            UpdateStaticByte ();
+        }
+        public void WriteByte (string newByte, string address) {
+            int addressInteger = int.Parse (address, NumberStyles.HexNumber);
+            int addressRow = addressInteger / 8;
+            int addressCol = addressInteger % 8;
+            Bytes[addressRow, addressCol] = newByte;
+        }
+        public void WriteHeapByte (string newByte) {
+            Bytes[HeapRow, HeapCol] = newByte;
+            PrevHeapRow = HeapRow;
+            PrevHeapCol = HeapCol;
+            UpdateHeapByte ();
+        }
+
+        public string GetLastHeapAddress () {
+            int currentByte = (PrevHeapRow * 8) + PrevHeapCol;
+            string hexVal = currentByte.ToString ("X2");
+            return $"{hexVal} 00";
+        }
+
+        public string GetCurrentAddress () {
+            int currentByte = (CurrentRow * 8) + CurrentCol;
+            string hexVal = currentByte.ToString ("X2");
+            return $"{hexVal} 00";
+        }
+        public void AllocateBytesInHeap (int numBytes) {
+            for (int i = 0; i < numBytes; i++) {
+                PrevHeapCol = HeapCol;
+                PrevHeapRow = HeapRow;
+                UpdateHeapByte ();
+            }
+        }
+        public void UpdateStaticByte () {
             if (CurrentCol + 1 > 7) {
                 if (CurrentRow + 1 > 31) {
                     // todo Diagnostics.CodeGen_ReportRuntimeImageOverflow();
@@ -33,17 +73,18 @@ namespace Illumi_CLI {
                 CurrentCol++;
             }
         }
-        public void WriteByte (string newByte, string address) {
-            int addressInteger = int.Parse (address, NumberStyles.HexNumber);
-            int addressRow = addressInteger / 8;
-            int addressCol = addressInteger % 8;
-            Bytes[addressRow, addressCol] = newByte;
-        }
-
-        public string GetCurrentAddress () {
-            int currentByte = (CurrentRow * 8) + CurrentCol;
-            string hexVal = currentByte.ToString ("X2");
-            return $"{hexVal} 00";
+        public void UpdateHeapByte () {
+            if (HeapCol - 1 < 0) {
+                if (HeapRow - 1 < 0) {
+                    // todo Diagnostics.CodeGen_ReportRuntimeImageOverflow();
+                    return;
+                } else {
+                    HeapRow--;
+                    HeapCol = 7;
+                }
+            } else {
+                HeapCol--;
+            }
         }
 
         public void BackPatch (TempTableEntry variable, string address) {

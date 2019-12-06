@@ -47,6 +47,8 @@ namespace Illumi_CLI {
         private const string Lexer = "Lexer";
         private const string Parser = "Parser";
         private const string Semantic = "Semantic Analyser";
+        private const string VariableChecker = "Variable Checker";
+        private const string CodeGen = "Code Generator";
         private const string FileReader = "File Reader";
         private const string Tree = "Tree";
         private List<Diagnostic> _diagnostics = new List<Diagnostic> ();
@@ -242,9 +244,12 @@ namespace Illumi_CLI {
         }
         internal void Parser_EncounteredLexError () {
             string type = Error;
+            ErrorCount++;
             string originated = Parser;
             string message = "Lex error, cannot parse. Exiting.";
             ReportDiagnostic (type, originated, message);
+            ErrorCount = 0;
+            WarningCount = 0;
         }
         internal void Parser_ParseEndedWithErrors () {
             string type = Information;
@@ -280,9 +285,12 @@ namespace Illumi_CLI {
         }
         internal void Semantic_EncounteredParseError () {
             string type = Error;
+            ErrorCount++;
             string originated = Semantic;
             string message = "Parse error, cannot analyse. Exiting.";
             ReportDiagnostic (type, originated, message);
+            ErrorCount = 0;
+            WarningCount = 0;
         }
         internal void Semantic_ReportStartOfSemantic (int programCounter) {
             string type = Information;
@@ -352,7 +360,7 @@ namespace Illumi_CLI {
         }
         internal void Semantic_ReportFoundSymbol (string symbol, Scope foundScope) {
             string type = Information;
-            string originated = Semantic;
+            string originated = VariableChecker;
             string message = $"Found symbol [ {symbol} ] in scope [ {foundScope.Level} ]";
             ReportDiagnostic (type, originated, message);
         }
@@ -451,6 +459,29 @@ namespace Illumi_CLI {
             TextSpan span = new TextSpan (variable.Token.LinePosition, variable.Token.Text.Length);
             string message = $"The variable [ {variable.Token.Text} ] was declared but was never initialized or used.";
             ReportDiagnostic (type, span, message, originated, variable.Token.LineNumber);
+        }
+        internal void CodeGen_ReportStartOfCodeGen (int programCounter) {
+            string type = Information;
+            string originated = CodeGen;
+            string message = $"Generating code for program [ {programCounter} ].";
+            ReportDiagnostic (type, originated, message);
+        }
+        internal void CodeGen_ReportEndOfCodeGen (int programCounter) {
+            string type = Information;
+            string originated = CodeGen;
+            string message = $"Finished generating code for program [ {programCounter} ]. Code generation ended with [ {ErrorCount} ] errors and [ {WarningCount} ] warnings.";
+            ReportDiagnostic (type, originated, message);
+            ErrorCount = 0;
+            WarningCount = 0;
+        }
+        internal void CodeGen_EncounteredSemanticError () {
+            string type = Error;
+            ErrorCount++;
+            string originated = CodeGen;
+            string message = "Semantic analysis error, cannot generate bytecode. Exiting.";
+            ReportDiagnostic (type, originated, message);
+            ErrorCount = 0;
+            WarningCount = 0;
         }
     }
 }
