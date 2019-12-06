@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using Microsoft.Win32.SafeHandles;
 namespace Illumi_CLI {
@@ -214,22 +215,12 @@ namespace Illumi_CLI {
             switch (node.Token.Kind) {
                 case TokenKind.IdentifierToken:
                     string[] valueAddress = StaticTemp.GetTempTableEntry (node.Token.Text, node.ReferenceScope).Address.Split (" ");
-                    Image.WriteByte ("AC");
-                    Image.WriteByte (valueAddress[0]);
-                    Image.WriteByte (valueAddress[1]);
-                    Image.WriteByte ("A2");
-                    Image.WriteByte ("02");
-                    Image.WriteByte ("FF");
+                    HandlePrintString (valueAddress);
                     break;
                 case TokenKind.StringToken:
                     InsertStringInHeap (node.Token.Text);
-                    string[] stringAddress = Image.GetLastHeapAddress ().Split (" ");
-                    Image.WriteByte ("AC");
-                    Image.WriteByte (stringAddress[0]);
-                    Image.WriteByte (stringAddress[1]);
-                    Image.WriteByte ("A2");
-                    Image.WriteByte ("02");
-                    Image.WriteByte ("FF");
+                    string stringAddress = Image.GetLastHeapAddress ();
+                    HandlePrintString (stringAddress);
                     break;
                 default:
                     break;
@@ -237,9 +228,16 @@ namespace Illumi_CLI {
         }
         public void HandlePrintString (string startAddress) {
             string[] splitAddress = startAddress.Split (" ");
-            Image.WriteByte ("AC");
+            Image.WriteByte ("A0");
             Image.WriteByte (splitAddress[0]);
-            Image.WriteByte (splitAddress[1]);
+            Image.WriteByte ("A2");
+            Image.WriteByte ("02");
+            Image.WriteByte ("FF");
+        }
+        public void HandlePrintString (string[] pointerAddress) {
+            Image.WriteByte ("AC");
+            Image.WriteByte (pointerAddress[0]);
+            Image.WriteByte (pointerAddress[1]);
             Image.WriteByte ("A2");
             Image.WriteByte ("02");
             Image.WriteByte ("FF");

@@ -48,6 +48,12 @@ namespace Illumi_CLI {
             return $"{hexVal} 00";
         }
 
+        public string GetHeapAddress () {
+            int currentByte = (HeapRow * 8) + HeapCol;
+            string hexVal = currentByte.ToString ("X2");
+            return $"{hexVal} 00";
+        }
+
         public string GetCurrentAddress () {
             int currentByte = (CurrentRow * 8) + CurrentCol;
             string hexVal = currentByte.ToString ("X2");

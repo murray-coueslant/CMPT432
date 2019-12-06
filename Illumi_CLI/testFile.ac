@@ -1,5 +1,6 @@
 {
     string a
-    a = "test"
+    a = "wubba"
+    print("wubba")
     print(a)
 }$
