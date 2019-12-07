@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -16,6 +17,7 @@ namespace Illumi_CLI {
         public string FalseAddress { get; set; }
         public string AdditionAddress { get; set; }
         public string TermAddress { get; set; }
+        public int JumpLength { get; set; }
         public List<int> AdditionTreeStream { get; set; }
         public CodeGenerator (SemanticAnalyser semanticAnalyser, DiagnosticCollection diagnostics, Session session) {
             SemanticAnalyser = semanticAnalyser;
@@ -55,6 +57,7 @@ namespace Illumi_CLI {
             StaticTemp.NewStaticEntry ("term", TermAddress, "pointer", 0);
         }
         public void HandleSubtree (ASTNode node) {
+            string startByte = Image.GetCurrentAddress ();
             if (node.Visited == false) {
                 switch (node.Token.Kind) {
                     case TokenKind.VarDecl:
@@ -66,14 +69,22 @@ namespace Illumi_CLI {
                     case TokenKind.PrintToken:
                         HandlePrint (node);
                         break;
+                    case TokenKind.IfToken:
+                        HandleIfStatement (node);
+                        break;
                     default:
                         break;
                 }
                 node.Visited = true;
             }
+            string endByte = Image.GetCurrentAddress ();
+            int startNum = int.Parse (startByte.Split (" ") [0], NumberStyles.HexNumber);
+            int endNum = int.Parse (endByte.Split (" ") [0], NumberStyles.HexNumber);
+            JumpLength = endNum - startNum;
         }
         public void HandleVarDecl (ASTNode node) {
             Image.WriteByte ("A9");
+            Image.WriteByte ("00");
             string varType = node.Descendants[0].Token.Text;
             string varName = node.Descendants[1].Token.Text;
             int varScope = SemanticAnalyser.VariableChecker.FindSymbol (node.Descendants[1], node.AppearsInScope);
@@ -81,22 +92,8 @@ namespace Illumi_CLI {
             node.Descendants[0].Visited = true;
             node.Descendants[1].Visited = true;
             string[] tempAddressBytes = new string[2];
-            switch (varType) {
-                case "int":
-                case "boolean":
-                    StaticTemp.NewStaticEntry (varName, "00", varType, varScope);
-                    tempAddressBytes = StaticTemp.GetTempTableEntry (varName, varScope).Address.Split (" ");
-                    Image.WriteByte ("00");
-                    break;
-                case "string":
-                    StaticTemp.NewStaticEntry (varName, "00", varType, varScope);
-                    tempAddressBytes = StaticTemp.GetTempTableEntry (varName, varScope).Address.Split (" ");
-                    Image.WriteByte ("00");
-                    break;
-                default:
-                    // todo work out logic for adding strings to the heap and their pointers to the temp table
-                    break;
-            }
+            StaticTemp.NewStaticEntry (varName, "00", varType, varScope);
+            tempAddressBytes = StaticTemp.GetTempTableEntry (varName, varScope).Address.Split (" ");
             Image.WriteByte ("8D");
             Image.WriteByte (tempAddressBytes[0]);
             Image.WriteByte (tempAddressBytes[1]);
@@ -118,6 +115,8 @@ namespace Illumi_CLI {
                     HandleStringAssignment (node, variableScope, tempAddressBytes);
                     break;
             }
+            node.Descendants[0].Visited = true;
+            node.Descendants[1].Visited = true;
         }
         public void HandlePrint (ASTNode node) {
             switch (node.Descendants[0].Token.Kind) {
@@ -135,11 +134,22 @@ namespace Illumi_CLI {
                     HandlePrintBoolean (node.Descendants[0]);
                     break;
                 case TokenKind.StringToken:
-                    // todo again this will need some heap memory that will have to be allocated at the end of compile time
-                    // todo whilst backpatching
                     HandlePrintString (node.Descendants[0]);
                     break;
             }
+            node.Descendants[0].Visited = true;
+        }
+        public void HandleIfStatement (ASTNode node) {
+            // add new entry to jump table
+            // write code for associated block
+            // handle condition with the bne command
+
+            // JumpTableEntry jumpEntry = JumpTable.NewJumpEntry();
+            Image.WriteByte ("D0");
+            // Image.WriteByte (jumpEntry.Address);
+            // HandleSubtree (node.Descendants[1])
+            jumpEntry.Length = JumpLength;
+            JumpLength = 0;
         }
         public void HandlePrintIdentifier (ASTNode node) {
             TempTableEntry staticEntry = StaticTemp.GetTempTableEntry (node.Token.Text, node.ReferenceScope);
@@ -261,6 +271,8 @@ namespace Illumi_CLI {
                 Image.WriteByte (tempAddressBytes[1]);
                 ResetAdditionMemory ();
             }
+            node.Descendants[0].Visited = true;
+            node.Descendants[1].Visited = true;
         }
         public void HandleStringAssignment (ASTNode node, int variableScope, string[] tempAddressBytes) {
             // write string in heap
@@ -272,6 +284,7 @@ namespace Illumi_CLI {
             Image.WriteByte ("8D");
             Image.WriteByte (tempAddressBytes[0]);
             Image.WriteByte (tempAddressBytes[1]);
+            node.Descendants[1].Visited = true;
         }
         public void ResetAdditionMemory () {
             string[] splitAdditionAddress = AdditionAddress.Split (" ");
@@ -348,6 +361,8 @@ namespace Illumi_CLI {
             Image.WriteByte ("8D");
             Image.WriteByte (tempAddressBytes[0]);
             Image.WriteByte (tempAddressBytes[1]);
+            node.Descendants[0].Visited = true;
+            node.Descendants[1].Visited = true;
         }
         public int EvaluateBooleanSubtree (ASTNode node) {
             if (node.Descendants.Count == 0) {
@@ -375,6 +390,8 @@ namespace Illumi_CLI {
             }
         }
         public int HandleEquivalence (ASTNode node) {
+            node.Descendants[0].Visited = true;
+            node.Descendants[1].Visited = true;
             if (EvaluateBooleanSubtree (node.Descendants[0]) == EvaluateBooleanSubtree (node.Descendants[1])) {
                 return 1;
             } else {
@@ -382,6 +399,8 @@ namespace Illumi_CLI {
             }
         }
         public int HandleNotEqual (ASTNode node) {
+            node.Descendants[0].Visited = true;
+            node.Descendants[1].Visited = true;
             if (EvaluateBooleanSubtree (node.Descendants[0]) != EvaluateBooleanSubtree (node.Descendants[1])) {
                 return 1;
             } else {

@@ -178,6 +178,7 @@ namespace Illumi_CLI {
             tree.AddBranchNode (CurrentToken);
             NextToken ();
             HandleBooleanExpr (tree);
+            HandleBlock (tree);
         }
         public void HandleWhileStatement (AbstractSyntaxTree tree) {
             tree.AddBranchNode (CurrentToken);

@@ -3,4 +3,7 @@
     a = "wubba"
     print("wubba")
     print(a)
+    if(a == a){
+        print(a)
+    }
 }$
