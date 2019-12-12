@@ -1,9 +1,12 @@
 {
-    string a
-    a = "wubba"
-    print("wubba")
-    print(a)
-    if(a == a){
+    boolean a
+    a = true
+    string b
+    b = "oof"
+    if(a != false){
         print(a)
     }
+    print(b)
+    print(a)
+    print("done")
 }$

@@ -13,18 +13,20 @@ namespace Illumi_CLI {
         public StringBuilder CodeString { get; set; }
         public RuntimeImage Image { get; set; }
         public TempTable StaticTemp { get; set; }
+        public JumpTable JumpTable { get; set; }
         public string TrueAddress { get; set; }
         public string FalseAddress { get; set; }
         public string AdditionAddress { get; set; }
         public string TermAddress { get; set; }
+        public string ConditionResultAddress { get; set; }
         public int JumpLength { get; set; }
         public List<int> AdditionTreeStream { get; set; }
         public CodeGenerator (SemanticAnalyser semanticAnalyser, DiagnosticCollection diagnostics, Session session) {
             SemanticAnalyser = semanticAnalyser;
             Diagnostics = diagnostics;
             CurrentSession = session;
-            CodeString = new StringBuilder ();
             StaticTemp = new TempTable ();
+            JumpTable = new JumpTable ();
             Image = new RuntimeImage ();
         }
         public void Generate () {
@@ -32,6 +34,7 @@ namespace Illumi_CLI {
             Traverse (SemanticAnalyser.AbstractSyntaxTree.Root, HandleSubtree);
             Image.WriteByte ("00");
             HandleStaticVariables ();
+            HandleJumps ();
             DisplayRuntimeImage ();
         }
         public void DisplayRuntimeImage () {
@@ -55,6 +58,9 @@ namespace Illumi_CLI {
             Image.AllocateBytesInHeap (1);
             TermAddress = Image.GetLastHeapAddress ();
             StaticTemp.NewStaticEntry ("term", TermAddress, "pointer", 0);
+            Image.AllocateBytesInHeap (1);
+            ConditionResultAddress = Image.GetLastHeapAddress ();
+            StaticTemp.NewStaticEntry ("conditional", ConditionResultAddress, "pointer", 0);
         }
         public void HandleSubtree (ASTNode node) {
             string startByte = Image.GetCurrentAddress ();
@@ -71,6 +77,9 @@ namespace Illumi_CLI {
                         break;
                     case TokenKind.IfToken:
                         HandleIfStatement (node);
+                        break;
+                    case TokenKind.Block:
+                        HandleSubtree (node.Descendants[0]);
                         break;
                     default:
                         break;
@@ -140,15 +149,27 @@ namespace Illumi_CLI {
             node.Descendants[0].Visited = true;
         }
         public void HandleIfStatement (ASTNode node) {
+            // handle condition with the bne command
             // add new entry to jump table
             // write code for associated block
-            // handle condition with the bne command
+            string[] splitConditionAddress = ConditionResultAddress.Split (" ");
+            int conditionResult = EvaluateBooleanSubtree (node.Descendants[0]);
+            Image.WriteByte ("A9");
+            Image.WriteByte (conditionResult.ToString ("X2"));
+            Image.WriteByte ("8D");
+            Image.WriteByte (splitConditionAddress[0]);
+            Image.WriteByte (splitConditionAddress[1]);
+            Image.WriteByte ("A2");
+            Image.WriteByte ("01");
+            Image.WriteByte ("EC");
+            Image.WriteByte (splitConditionAddress[0]);
+            Image.WriteByte (splitConditionAddress[1]);
 
-            // JumpTableEntry jumpEntry = JumpTable.NewJumpEntry();
+            JumpTableEntry jumpEntry = JumpTable.NewJumpEntry ();
             Image.WriteByte ("D0");
-            // Image.WriteByte (jumpEntry.Address);
-            // HandleSubtree (node.Descendants[1])
-            jumpEntry.Length = JumpLength;
+            Image.WriteByte (jumpEntry.Name);
+            HandleSubtree (node.Descendants[1]);
+            jumpEntry.JumpLength = JumpLength;
             JumpLength = 0;
         }
         public void HandlePrintIdentifier (ASTNode node) {
@@ -416,6 +437,11 @@ namespace Illumi_CLI {
         public void HandleStaticVariables () {
             foreach (var entry in StaticTemp.Rows) {
                 Image.BackPatch (entry, Image.GetCurrentAddress ());
+            }
+        }
+        public void HandleJumps () {
+            foreach (var entry in JumpTable.Jumps) {
+                Image.BackPatchJump (entry);
             }
         }
         public void Traverse (ASTNode root, Action<ASTNode> visitor) {

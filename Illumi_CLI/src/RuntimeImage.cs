@@ -92,7 +92,6 @@ namespace Illumi_CLI {
                 HeapCol--;
             }
         }
-
         public void BackPatch (TempTableEntry variable, string address) {
             string[] splitAddress = address.Split (" ");
             for (int i = 0; i < Bytes.GetLength (0); i++) {
@@ -118,6 +117,15 @@ namespace Illumi_CLI {
                 this.WriteByte (splitValue[i]);
             }
             variable.BackPatch (address);
+        }
+        public void BackPatchJump (JumpTableEntry jump) {
+            for (int i = 0; i < Bytes.GetLength (0); i++) {
+                for (int j = 0; j < Bytes.GetLength (1); j++) {
+                    if (Bytes[i, j] == jump.Name) {
+                        Bytes[i, j] = jump.JumpLength.ToString ("X2");
+                    }
+                }
+            }
         }
     }
 }
