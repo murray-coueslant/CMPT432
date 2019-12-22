@@ -1,12 +1,11 @@
 {
-    boolean a
-    a = true
-    string b
-    b = "oof"
-    if(a != false){
-        print(a)
+    int a
+    a = 1
+    int b
+    b = 1
+    string c
+    c = "true"
+    if(a == a){
+        print(c)
     }
-    print(b)
-    print(a)
-    print("done")
 }$

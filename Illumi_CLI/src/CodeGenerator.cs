@@ -153,7 +153,7 @@ namespace Illumi_CLI {
             // add new entry to jump table
             // write code for associated block
             string[] splitConditionAddress = ConditionResultAddress.Split (" ");
-            int conditionResult = EvaluateBooleanSubtree (node.Descendants[0]);
+            int conditionResult = (int) EvaluateBooleanSubtree (node.Descendants[0]);
             Image.WriteByte ("A9");
             Image.WriteByte (conditionResult.ToString ("X2"));
             Image.WriteByte ("8D");
@@ -186,7 +186,7 @@ namespace Illumi_CLI {
                     Image.WriteByte ("FF");
                     break;
                 case "boolean":
-                    HandlePrintBoolean (EvaluateBooleanSubtree (node));
+                    HandlePrintBoolean ((int) EvaluateBooleanSubtree (node));
                     break;
                 case "string":
                     HandlePrintString (node);
@@ -215,7 +215,7 @@ namespace Illumi_CLI {
         }
         public void HandlePrintBoolean (ASTNode node) {
             string[] valueAddress;
-            int booleanValue = EvaluateBooleanSubtree (node);
+            int booleanValue = (int) EvaluateBooleanSubtree (node);
             if (booleanValue == 1) {
                 valueAddress = StaticTemp.GetTempTableEntry ("true", 0).Address.Split (" ");
             } else {
@@ -371,7 +371,7 @@ namespace Illumi_CLI {
             }
         }
         public void HandleBooleanAssignment (ASTNode node, int variableScope, string[] tempAddressBytes) {
-            int boolVal = EvaluateBooleanSubtree (node.Descendants[1]);
+            int boolVal = (int) EvaluateBooleanSubtree (node.Descendants[1]);
             StaticTemp.GetTempTableEntry (node.Descendants[0].Token.Text, variableScope).Value = boolVal.ToString ("X2");
             Image.WriteByte ("A9");
             if (boolVal == 1) {
@@ -385,14 +385,14 @@ namespace Illumi_CLI {
             node.Descendants[0].Visited = true;
             node.Descendants[1].Visited = true;
         }
-        public int EvaluateBooleanSubtree (ASTNode node) {
+        public object EvaluateBooleanSubtree (ASTNode node) {
             if (node.Descendants.Count == 0) {
                 if (node.Token.Kind == TokenKind.TrueToken) {
                     return 1;
                 } else if (node.Token.Kind == TokenKind.FalseToken) {
                     return 0;
                 } else if (node.Token.Kind == TokenKind.IdentifierToken) {
-                    return GetBoolVarValue (node, node.AppearsInScope);
+                    return StaticTemp.GetTempTableEntry (node.Token.Text, node.ReferenceScope).Value;
                 } else if (node.Token.Kind == TokenKind.DigitToken) {
                     return int.Parse (node.Token.Text);
                 } else {
@@ -427,12 +427,6 @@ namespace Illumi_CLI {
             } else {
                 return 0;
             }
-        }
-        public int GetBoolVarValue (ASTNode variableNode, Scope variableScope) {
-            int outInteger;
-            int varScope = SemanticAnalyser.VariableChecker.FindSymbol (variableNode, variableScope);
-            int.TryParse (StaticTemp.GetTempTableEntry (variableNode.Token.Text, varScope).Value, out outInteger);
-            return outInteger;
         }
         public void HandleStaticVariables () {
             foreach (var entry in StaticTemp.Rows) {
