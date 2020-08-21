@@ -1,0 +1,865 @@
+{}$
+{{{{{{}}}}}}$
+{{{{{{}}}}}$
+{print("")}$
+{print(a)}$
+{print(2)}$
+{print("a")}$
+{print(false)}$
+{print("inta")}$
+print(a){print(a)}$
+{a=1}$
+{a = 1}$
+{a = 1 + 2 + 3 + 4    +    5}$
+{
+
+    int a
+    a = a
+    string b
+    a = b
+}$
+{int a a=a string b a=b}$
+{{{{{{a=1+2+3+4+5{print(4+a)}}}}}}}$
+{
+    /* what about comments */
+    string b
+}$
+{
+    boolean d
+    d = ("string" != "string")
+}$
+{intfintif=2}$
+{intii=0stringss="hello"booleanbb=(true==(1!=2))if(b==true){while(true!=(b!=(false==(2!=3)))){i=1+iprint(s)}}print("ugly code")}$
+
+/* bad code */
+
+{"two
+lines"}$
+{print("No Caps Mister Bond")}$
+{print("no digits 007")}$
+{int A}$
+{
+    ~!@#%^&*_+{}|:<>?[];',./
+    bool ean d
+}$
+
+/* questionable code */
+
+{"$"}$
+{int a /* unterminated comment }$
+{ a = "unterminated string }$
+{
+    string s
+    s = "this string is /* in */ visible"
+}$
+{intii=0stringss="hello"booleanbb=(true==(1!=2))if(b==true){while(true!=(b!=(false==(2!=3)))){i=1+iprint(s)}}print("ugly code")}$
+{print(007)}$
+{a=12}$
+{
+    int a
+    a = a + 2
+}$
+{
+    s = "strb"
+    print(s)
+    
+    if (a != ) {
+        print("true")
+    }
+}$
+{
+	string 1
+}$
+{
+	print($)
+}$
+{
+	int a
+	int b
+	a = 0
+	b = 0
+	while (a != 3) {
+		print(a)
+		while (b != 3) {
+			print(b)
+			b = 1 + b
+			if (b == 2) {
+				print("there is no spoon")
+			}
+		}
+		b = 0
+		a = 1 + 
+	}
+}$
+{
+    int a
+    a = 1
+    {
+        int a
+        a = 2
+        print(a)
+    }
+    string b
+    b="alan"
+    if(a==1){
+        print(b)
+    }
+    string c
+    c="james"
+    b="blackstone"
+    print(b)
+}$
+{
+    int a
+    a = 0
+    string z
+    z="bond"
+
+    while(a!=9){
+        if(a!=5){
+            print("bond")
+        }
+        {
+            a = 1 + a
+            string b
+            b = "james bond"
+            print(b)
+        }
+    }
+    {}
+    boolean c
+    c = true
+    boolean d
+    d=(true==(true==false))
+    d=(a==b)
+    d=(1==a)
+    d=("string"==1)
+    d=(a != "string")
+    d=("string" != "string")
+    if(d==true){
+        int c
+        c = 1 + d
+        if(c==1){
+            print("ugh")
+        }
+    }
+    while("string"==a){
+        while(1==true){
+            a = 1 + "string"
+        }
+    }
+}$
+{
+    int a
+    a = 1
+    if(a==1{
+        print(while(a==5){})
+    }$
+}
+{
+    int a
+    a=a
+    {
+        int a
+        a=1
+        boolean z
+        string f
+    }
+    int b
+    {
+        {
+            boolean y
+            string p
+            int t
+        }
+        int t
+    }
+    a=b
+}$
+{
+    int a
+    {
+        {
+            {
+                {
+                    {
+                        a=1+2+3+4+5
+                        {
+                            int a
+                            print(4+a)
+                        }
+                    }
+                }
+            }
+        }
+    }
+}$
+{
+    {
+        int b
+        {
+            {
+                {
+                    {
+                        b = 2
+                    }
+                }
+            }
+        }
+    }
+}$
+{
+    int a
+    {
+        {
+            {
+                {
+                    {
+                        a=1+2+3+4+5
+                        {
+                            int a
+                            a=1+2
+                        }
+                    }
+                }
+            }
+        }
+    }
+}$
+{
+    boolean a
+    boolean b
+    if(a){
+        int c
+        c = 9 + a
+    }
+    while(b){
+        int d
+        d = 3 + b
+    }
+}$
+{
+    boolean a
+    boolean b
+    if(a){
+        int c
+        c = 9 + a
+    }
+    while(b){
+        int d
+        d = 3 + b
+    }
+}$
+{
+int a
+b = 4
+}$
+{
+int a
+{
+string a
+a = "this is fine"
+string b
+int b
+}
+boolean a /* this is not fine */
+}$
+{
+    a = b
+    (a == b)
+    (a != b)
+    a = 3 + b
+}$
+{
+   a = (((a != true) == ((false != false) == true)) == false)
+   b = (a == b)
+   if(a==b){
+       print(b)
+   }
+   {
+       print(a)
+   }
+   while(1+2+3+4 == 1){
+       b = a
+       if(a != b){
+           print(a)
+       }
+       print(a)
+   }
+   a = 1 + 2 + 3 + 4
+   print(a)
+   if("string" != "other string"){
+       print("holy shit")
+   }
+   a = "oooooh"
+}$
+{
+  boolean a
+  boolean b
+   a = (((a != true) == ((false != false) == true)) == false)
+   b = (a == b)
+   if(a==b){
+       print(b)
+   }
+   {
+       int a
+       print(a)
+   }
+   while(1+2+3+4 == 1){
+       b = a
+       if(a != b){
+           print(a)
+       }
+       print(a)
+   }
+   a = 1 + 2 + 3 + 4
+   print(a)
+   if("string" != "other string"){
+       print("holy shit")
+   }
+   a = "oooooh"
+}$
+{
+    int a
+    a = 4
+    if(a == 4){
+        boolean a
+        a = false
+        print(a)
+    }
+    print(a)
+}$
+{
+    int a
+    a = 4
+    if(a == 4){
+        boolean a
+        a = false
+        print(a)
+    }
+    print(a)
+}$
+{
+    int a
+    int b
+    a = 1 + 2 + 3 + 4 + b
+}$
+{
+    int a
+    {
+        boolean b 
+        a = 1
+    } 
+    print(b)
+}$
+{   
+    int a
+    boolean b
+    {  
+        string c
+        a = 5
+        b = true
+    }
+    print(b)
+    print(a) 
+}$
+{   
+    boolean a
+    a = (((a != true) == ((false != false) == true)) == false)
+}$
+{
+  boolean a
+  boolean b
+   a = false
+   a = true
+   {
+       a = false
+       b = a
+   }
+}$
+{
+  print("")
+  {}
+  int a
+  a = 0
+  a = 3 + a
+  int b
+  b = 8
+  {
+    {
+      print ("inta is not int a")
+      print (1+2+3+4+5+4+3+2+1)
+      print (a)
+    }
+    int a
+    a = 7
+    string b
+    b = "one string"
+    print(b)
+  }
+}$
+{
+  int a
+  {
+    boolean b
+    {
+      string c
+      {     
+        a = 5
+        b = false
+        c = "inta"
+      }
+      print(c)
+    }
+    print(b)
+  }
+  print(a)
+}$
+{
+    {
+        {
+            {
+                {
+                    {
+                        {
+                            int a
+                            {
+                                print(a)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}$
+{   
+    boolean a
+    a = (((a != true) == ((false != false) == true)) == false)
+}$
+{
+    int a
+    int b
+    a = 1 + 2 + 3 + 4 + b
+}$
+{
+    int a
+    a = 4
+    while(a == 4){
+        boolean a
+        a = false
+        print(a)
+    }
+    print(a)
+}$
+{
+   a = (((a != true) == ((false != false) == true)) == false)
+   b = (a == b)
+   if(a==b){
+       print(b)
+   }
+   {
+       print(a)
+   }
+   while(1+2+3+4 == 1){
+       b = a
+       if(a != b){
+           print(a)
+       }
+       print(a)
+   }
+   a = 1 + 2 + 3 + 4
+   print(a)
+   if("string" != "other string"){
+       print("holy shit")
+   }
+   a = "oooooh"
+}$
+{
+  boolean a
+  boolean b
+   a = (((a != true) == ((false != false) == true)) == false)
+   b = (a == b)
+   if(a==b){
+       print(b)
+   }
+   {
+       int a
+       print(a)
+   }
+   while(1+2+3+4 == 1){
+       b = a
+       if(a != b){
+           print(a)
+       }
+       print(a)
+   }
+   print(a)
+   if("string" != "other string"){
+       print("holy shit")
+   }
+}$
+{
+int a
+b = 4
+}$
+{
+int a
+{
+string a
+a = "this is fine"
+}
+boolean a /* this is not fine */
+}$
+{
+string s
+s = 4 + 3
+}$
+{
+if(4 == false){
+print("this no good")
+}
+if(4 == "hey"){
+print("int to string")
+}
+if(false != "hey"){
+print("bool to string")
+}
+if(4 != 3){
+print("int to int")
+}
+}$
+{
+int a
+a = 4 + false
+}$
+{
+  int a
+  int b
+  a = 3
+  b = 4
+  {
+    string a
+    a = "hey"
+    print(a)
+    print(b)
+  }
+  print(b)
+  string s
+  {
+    boolean b
+    b = false
+  }
+  string r
+  r = "hey"
+  int d
+  print(d)
+  d = 3
+}$
+{
+  int a
+  {
+    boolean b
+    {
+      string c
+      {     
+        a = 5
+        b = false
+      }
+    }
+    print(b)
+  }
+  print(a)
+}$
+{
+  boolean a
+  boolean b
+   a = (((a != true) == ((false != false) == true)) == false)
+   b = (a == b)
+   if(a==b){
+       print(b)
+   }
+   {
+       int a
+       print(a)
+   }
+   while(1+2+3+4 == 1){
+       b = a
+       if(a != b){
+           print(a)
+       }
+       print(a)
+   }
+   print(a)
+   if("string" != "other string"){
+       print("holy shit")
+   }
+}$
+{
+    int a
+    int b
+    a = 1 + 2 + 3 + 4 + b
+}$
+{
+  int a
+  int b
+  a = 3
+  b = 4
+  {
+    string a
+    a = "hey"
+    print(a)
+    print(b)
+  }
+  print(b)
+  string s
+  {
+    boolean b
+    b = false
+  }
+  r = "hey"
+  int d
+  print(d)
+  d = 3
+}$
+{
+  int a
+  int b
+  int c
+  int d
+  int e
+  int f
+  int g
+  int h
+  int i
+  int j
+  int k
+  int l
+  int m
+  int n
+  int o
+  int p
+  int q
+  int r
+  int s
+  int t
+  int u
+  int v
+  int w
+  int x
+  int y
+  int z
+  {
+    int a
+  int b
+  int c
+  int d
+  int e
+  int f
+  int g
+  int h
+  int i
+  int j
+  int k
+  int l
+  int m
+  int n
+  int o
+  int p
+  int q
+  int r
+  int s
+  int t
+  int u
+  int v
+  int w
+  int x
+  int y
+  int z
+  {
+    int a
+  int b
+  int c
+  int d
+  int e
+  int f
+  int g
+  int h
+  int i
+  int j
+  int k
+  int l
+  int m
+  int n
+  int o
+  int p
+  int q
+  int r
+  int s
+  int t
+  int u
+  int v
+  int w
+  int x
+  int y
+  int z
+  {
+    int a
+  int b
+  int c
+  int d
+  int e
+  int f
+  int g
+  int h
+  int i
+  int j
+  int k
+  int l
+  int m
+  int n
+  int o
+  int p
+  int q
+  int r
+  int s
+  int t
+  int u
+  int v
+  int w
+  int x
+  int y
+  int z
+{
+  int a
+  int b
+  int c
+  int d
+  int e
+  int f
+  int g
+  int h
+  int i
+  int j
+  int k
+  int l
+  int m
+  int n
+  int o
+  int p
+  int q
+  int r
+  int s
+  int t
+  int u
+  int v
+  int w
+  int x
+  int y
+  int z
+  {
+    int a
+  int b
+  int c
+  int d
+  int e
+  int f
+  int g
+  int h
+  int i
+  int j
+  int k
+  int l
+  int m
+  int n
+  int o
+  int p
+  int q
+  int r
+  int s
+  int t
+  int u
+  int v
+  int w
+  int x
+  int y
+  int z{
+    {
+      {
+        int a
+  int b
+  int c
+  int d
+  int e
+  int f
+  int g
+  int h
+  int i
+  int j
+  int k
+  int l
+  int m
+  int n
+  int o
+  int p
+  int q
+  int r
+  int s
+  int t
+  int u
+  int v
+  int w
+  int x
+  int y
+  int z
+      }
+    }
+  }
+  }
+}
+  }
+  }
+  }
+}
+{
+   int a
+   a = 1 + 1
+   print(a)
+   print((a == a))
+   print(true)
+   print(false)
+   print((((true != true) == ((false != false) == true)) == false))
+}$
+{
+   {
+       int a
+       a = 7
+       print(a)
+       boolean b
+       b = false
+       print(b)
+       {
+           {
+               int a
+               a = 5
+               print(a)
+               boolean b
+               b = true
+               print(b)
+               print(7 + 3 + 5 + 5)
+           }
+       }
+   }
+}$
+{
+    boolean a
+    a = true
+    boolean b
+    b = true
+    print(a == b)
+}$
+{
+    string a
+    a = "test"
+    print(a)
+}$
